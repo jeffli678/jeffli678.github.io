@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Encountering a Weird Issue Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input n is in the range of 0-64 (both side include).
+The first idea is to use left shift and then minus 1:
+uint64_t getBitMask(size_t n) { uint64_t ret = (1UL &amp;lt;&amp;lt; n) - 1; return ret; } This works well when n is in the range of 0-63." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="/posts/reversing/shl_undefined_behavior/writeup/" />
+
+
+    <title>
+        
+            Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl :: Xusheng&#39;s blog  — Reversing, coding, and Xiagnqi
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl">
+<meta itemprop="description" content="Encountering a Weird Issue Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input n is in the range of 0-64 (both side include).
+The first idea is to use left shift and then minus 1:
+uint64_t getBitMask(size_t n) { uint64_t ret = (1UL &lt;&lt; n) - 1; return ret; } This works well when n is in the range of 0-63.">
+<meta itemprop="datePublished" content="2020-06-20T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-06-20T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="862">
+<meta itemprop="image" content=""/>
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content=""/>
+
+<meta name="twitter:title" content="Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl"/>
+<meta name="twitter:description" content="Encountering a Weird Issue Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input n is in the range of 0-64 (both side include).
+The first idea is to use left shift and then minus 1:
+uint64_t getBitMask(size_t n) { uint64_t ret = (1UL &lt;&lt; n) - 1; return ret; } This works well when n is in the range of 0-63."/>
+
+
+
+
+    <meta property="og:title" content="Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl" />
+<meta property="og:description" content="Encountering a Weird Issue Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input n is in the range of 0-64 (both side include).
+The first idea is to use left shift and then minus 1:
+uint64_t getBitMask(size_t n) { uint64_t ret = (1UL &lt;&lt; n) - 1; return ret; } This works well when n is in the range of 0-63." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/reversing/shl_undefined_behavior/writeup/" />
+<meta property="og:image" content=""/>
+<meta property="article:published_time" content="2020-06-20T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-06-20T00:00:00+00:00" /><meta property="og:site_name" content="Xusheng&#39;s blog" />
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2020-06-20 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">hello friend ng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        5 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="/posts/reversing/shl_undefined_behavior/writeup/">Examining the difference between C program and Assembly &ndash; An Example of &laquo; and shl</a>
+      </h1>
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="encountering-a-weird-issue">Encountering a Weird Issue</h2>
+<p>Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input <code>n</code> is in the range of 0-64 (both side include).</p>
+<p>The first idea is to use left shift and then minus 1:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C">uint64_t <span style="color:#a6e22e">getBitMask</span>(size_t n)
+{
+    uint64_t ret <span style="color:#f92672">=</span> (<span style="color:#ae81ff">1UL</span> <span style="color:#f92672">&lt;&lt;</span> n) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+    <span style="color:#66d9ef">return</span> ret;
+}
+</code></pre></div><p>This works well when n is in the range of 0-63. However, when n is 64, the code returns 0 instead of 0xffffffffffffffff.</p>
+<p>I isolated the problem and created the following minimal PoC:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;inttypes.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()
+{
+    <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> <span style="color:#ae81ff">64</span>;
+    uint64_t ret <span style="color:#f92672">=</span> (<span style="color:#ae81ff">1UL</span> <span style="color:#f92672">&lt;&lt;</span> n) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+    printf(<span style="color:#e6db74">&#34;0x%lx</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, ret);
+}
+</code></pre></div><p>And the command to compile and run it:</p>
+<pre><code> $ gcc -o test test.c
+ $ ./test
+0x0
+</code></pre><p>This result is counter-intuitive since when n is 64, the only bit in 1 should be shifted out and it becomes <code>0 - 1</code>, which should give me 0xffffffffffffffff.</p>
+<p>I have no idea why it behaves like this so I decided to load the compiled binary into BinaryNinja to see what is happening.</p>
+<h2 id="assembly-never-lies">Assembly Never Lies</h2>
+<p><img src="../imgs/1.png" alt=""></p>
+<p>It looks correct to me. Completely confused, I launched gdb and see what is happening. It quickly turns out that after the <code>shl rdx, cl</code> at 0x663, rdx remains 0x1 rather than becoming 0. And 1 - 1 is 0 &ndash; that is why 0x0 is printed.</p>
+<p>Some vague impression of the shl instruction struck me. <code>cl</code> is 64 now, which is also the size of the register being shifted. Does it affect the execution? I navigated to the Intel reference manual and start reading the page that documents the shl instruction. I found this:</p>
+<pre><code>The count operand can be an immediate value or the CL register. The count is masked to 5 bits (or 6 bits if in 64-bit mode and REX.W is used). The count range is limited to 0 to 31 (or 63 if 64-bit mode and REX.W is used).
+</code></pre><p>We are in 64-bit mode here. The documentation states that the bits beyond the lowest 6 are discarded. Now we have 64 (0b1000000) in cl, whose lowest 6 bits are zeros. No wonder rdx remains 1 after the shl &ndash; we are effectively shifting 0 bit.</p>
+<p>Ok, things are sorted out now. But I decided to test how gcc handles this when optimizations are on. Because when we turn on optimization (e.g., -O2), it is very likely the value of <code>ret</code> is calculated by the compiler rather than in runtime. Does gcc also enforce the width limit on the shift count?</p>
+<pre><code> $ gcc -O2 -o test_O2 test.c
+ $ ./test_O2 
+0xffffffffffffffff
+</code></pre><p>Wow, the output is different from the previous one! And the disassembly looks like this:</p>
+<p><img src="../imgs/2.png" alt=""></p>
+<p>The value 0xffffffffffffffff is directly printed. It same gcc -O2 behaves in the same way as I expected &ndash; it ignores the limit on the shift count.</p>
+<p>Well, we now get one source code that gives different result when compiled with <code>-O0</code> and <code>-O2</code>. Is this a gcc bug?</p>
+<p>Nope, it is not. C standard actually defines the behavior as undefined:</p>
+<pre><code>-- An expression is shifted by a negative number or by an amount greater than or equal to the width of the promoted expression (6.5.7).
+</code></pre><p>Since this behavior is undefined, the difference between the <code>-O0</code> and <code>-O2</code> is not a bug.</p>
+<p>Back to the function I need to write, although there might be a way to implement the functionality without a branch, it probably exploits certain implementation of a particular compiler. Which is unreliable and bad for cross-platform and cross-compiler compatibility. I decided to put a <code>if</code> for the case <code>n == 64</code>.</p>
+<h2 id="epilog">Epilog</h2>
+<p>Differences between the C source code and the compiled x86 binary is an well-known issue. This paper comes to my mind first: <a href="https://research.cs.wisc.edu/wpis/papers/wysinwyx.final.pdf">WYSINWYX:What You See Is Not What You eXecute</a>.</p>
+<p>C is quite low level so it has a close relation with the underlying hardware. C standard defines certain behavior as undefined to save the effort of C compiler authors. If the <code>&lt;&lt;</code> operator is defined when the shift count is larger than or equal to the register width, there will be more branches in the compiler code to take care of many edge cases.</p>
+<p>Reading the assembly is probably the best method to resolve similar issues. In fact, during the development I once missed the <code>UL</code> after the constant <code>1</code>. And the code stops working after the n is larger than 32.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()
+{
+    <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> <span style="color:#ae81ff">48</span>;
+    uint64_t ret <span style="color:#f92672">=</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> n) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+    printf(<span style="color:#e6db74">&#34;0x%lx</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, ret);
+}
+</code></pre></div><p>When the above code is compiled with <code>-O0</code>, it prints <code>0xffff</code>. Why? Because 1 is considered a 32-bit integer and gcc decides to use <code>edx</code> (instead of <code>rdx</code>) to hold it.</p>
+<p><img src="../imgs/3.png" alt=""></p>
+<p>Since 48 = 0b110000, and only the lowest 5 bits are involved in the calculation, we are effectively left shifting 16 bits. That is why we get 0xffff as the output.</p>
+<p>Last but not least, what would we get if we compile the above code with <code>-O2</code>? The result is surprising to me at first sight, followed by an aha moment.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        862 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2020-06-20 08:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h">Read other posts</span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+            <span class="button previous">
+              <a href="/posts/reversing/obfuscation/readme/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Solving an Obfuscated Crackme with BinaryNinja and Triton</span>
+              </a>
+            </span>
+          
+
+          
+            <span class="button next">
+              <a href="/posts/reversing/armageddon/solve/">
+                <span class="button__text">Solving an ARM challenge with z3</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2021</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span><span><a href="posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.af435e44374f1e99a669ea8cd5bb9a2fceed80588941a451bfddb66b86a67c9f40b0f417e9543a763f809aa7e9300d7b1d69bf99615810ba02ac70396d50fad5.js" integrity="sha512-r0NeRDdPHpmmaeqM1buaL87tgFiJQaRRv922a4amfJ9AsPQX6VQ6dj&#43;AmqfpMA17HWm/mWFYELoCrHA5bVD61Q=="></script>
+
+
+
+    </body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&amp;rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.
+A Broken Fan I have a fan &amp;ndash; an eight-year-old fan &amp;ndash; that is NOT smart or IoT." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="/posts/reversing/reverse_engineering_and_fixing_a_fan/main/" />
+
+
+    <title>
+        
+            Reverse Engineering and Repairing a Fan :: Xusheng&#39;s blog  — Reversing, coding, and Xiagnqi
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Reverse Engineering and Repairing a Fan">
+<meta itemprop="description" content="Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.
+A Broken Fan I have a fan &ndash; an eight-year-old fan &ndash; that is NOT smart or IoT.">
+<meta itemprop="datePublished" content="2020-04-26T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-04-26T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1758">
+<meta itemprop="image" content=""/>
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content=""/>
+
+<meta name="twitter:title" content="Reverse Engineering and Repairing a Fan"/>
+<meta name="twitter:description" content="Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.
+A Broken Fan I have a fan &ndash; an eight-year-old fan &ndash; that is NOT smart or IoT."/>
+
+
+
+
+    <meta property="og:title" content="Reverse Engineering and Repairing a Fan" />
+<meta property="og:description" content="Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.
+A Broken Fan I have a fan &ndash; an eight-year-old fan &ndash; that is NOT smart or IoT." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/reversing/reverse_engineering_and_fixing_a_fan/main/" />
+<meta property="og:image" content=""/>
+<meta property="article:published_time" content="2020-04-26T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-04-26T00:00:00+00:00" /><meta property="og:site_name" content="Xusheng&#39;s blog" />
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2020-04-26 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">hello friend ng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        9 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="/posts/reversing/reverse_engineering_and_fixing_a_fan/main/">Reverse Engineering and Repairing a Fan</a>
+      </h1>
+
+      
+
+      
+
+      <div class="post-content">
+        <p>Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.</p>
+<h2 id="a-broken-fan">A Broken Fan</h2>
+<p>I have a fan &ndash; an eight-year-old fan &ndash; that is NOT smart or IoT. It is just a simple fan. One day it fell from the table to the ground and stopped working. <em>RIP</em>. It accompanied me for several summers and I love it. I decided to take it apart and see what is indeed broken, before saying farewell to my friend.</p>
+<p>I know little about electronics, but a fan should not be too complex. It looks like this after I opened it:</p>
+<p><img src="../imgs/img-1.jpg" alt=""></p>
+<p>We can see the fan blades, the power cord, the timer, and the ON/OFF switch in it. It looks all in good shape despite the impact. How should I start reversing it?</p>
+<p>I quickly notice there is a small metal cylinder that is moving freely in the fan closure. Normally we do not have such small moving parts in a fan (it will clash with the blade easily). It is probably broken apart from the fan due to the impact. It is a reasonable guess. But how could I prove it or refute it?</p>
+<p><img src="../imgs/img-2.jpg" alt=""></p>
+<p>I decided to see other parts of the fan. The logic is, if the cylinder breaks apart from somewhere, there should be a trace of it. I then spotted a previously unnoticed part. It is a plastic box and there is a sharp irregular edge on it, which is a sign of a broken part. I have no idea what the box is and it does not look critical to the fan&rsquo;s functionality, since I already identified the timer and the switch, etc.</p>
+<h2 id="making-the-fan-alive-again">Making the Fan Alive Again!</h2>
+<p>Upon closer inspection of the plastic box, I see two wires going into it and the wires are connected to small metal blades. One weird thing is the blades are <strong>NOT</strong> connected. And they are likely to remain unconnected during the operation of the fan. What is this?</p>
+<p>Now it becomes interesting: I have examined most parts of the fan, and found stuff that worth investigating. I need to connect the dots. Some creativity, as well as luck, are needed here. I stared at the plastic box and the cylinder for a while, and I suddenly <strong>have a hypothesis</strong>. If I put this metal cylinder inside the plastic box, the blades will be connected. Could it be the reason that the fan stopped working?</p>
+<p><img src="../imgs/img-3.jpg" alt=""></p>
+<p>I did a quick test: I put the cylinder inside it and turned the switch on. Wow, it works! The fan is alive again!</p>
+<h2 id="why-is-there-a-plastic-box-and-a-metal-cylinder">Why is there a Plastic Box and a Metal Cylinder?</h2>
+<p>Not all of the mysteries are solved yet. I am still puzzled by this plastic box and the metal cylinder. What is the purpose of having them? What did they look like before the fall?</p>
+<p>Now it comes to the fundamental part of reverse engineering: <strong>understanding how the system works</strong>. The fan works but it is quite weird: this plastic box can be removed and we just connect the two wires directly. There must be a reason to have it.</p>
+<p>There are two ways to reason about it in such a situation. The first way is to think of what could go wrong if we do not have it. Like why we need to check whether the divisor is zero before we divide. However, as mentioned above, nothing seems wrong without this box. This method does not work here. It must be serving <strong>certain purpose yet unknown</strong> to us. This is quite a typical scenario in reverse engineering.</p>
+<p>The other way is to imagine different inputs to the system (the fan), and predict the possible status or outcomes of the system. Then we deduce the purpose of it. This is harder to do because we need to generate lots of inputs and examine many possible status or outcomes. And it is not guaranteed to succeed! It could be purposed for a situation we could never think of, so we would never know why it is here.</p>
+<p>Let us start with it. The cylinder currently connects the two metal blades. What would stop it from doing so? Not too hard, right? If it leaves the current position and goes up, the blades are disconnected. However, due to gravity, it will not move up by itself. Can we come up with a case where the gravity does not moderate this cylinder? Well, if this fan is used in the space station then the cylinder can move freely. But it is not the case here. It is a consumer product. What could be another case where the effect of gravity is gone or altered?</p>
+<p><strong>WHEN IT FALLS!</strong></p>
+<p>When the fan falls, the gravity will no longer drag the cylinder toward the position that connects the two blades. The result is, the cylinder moves, leaving the two blads disconnected, and the fan stops working. Now we have a reasonable explanation for the plastic part and the metal cylinder: it is a <strong>fall-protection mechanism</strong>!</p>
+<h2 id="connecting-the-dots">Connecting the Dots</h2>
+<p>Note the cylinder can not only move vertically, but it can also move horizontally. It can leave the plastic box and never (easily) get back. In fact, this is probably the cause of the fan&rsquo;s failure. We still miss something.</p>
+<p>I did not guess it, though some readers could already guessed it. I examined the fan again and found another plastic piece in it. It looks like a lid for the plastic box. If there is a lid, then the cylinder will not leave the plasitc box. And in case of the fan falls, once it is erected again, the cylinder will go back to its original position and connect the blades again.</p>
+<p>All the dots are eventually connected. The metal cylinder was confined in a plastic box. It serves as a fall protection mechanism. However, the fan fell from a high desk and the impact was so strong that the cylinder broke the plastic box apart. (We can see the lid was somehow connected to the box before it broke.) It is unable to go back to its original position again and the fan stopped working.</p>
+<p>I have to admit this is quite simple yet effective. If I were to implement such functionality, what comes to my mind first is gyroscopes and a program, which is both complex and expensive. Through reverse enginnering,  I learned the same thing can be achieved like this.</p>
+<p>It eventyally comes to the last step in reverse engineering. We need to repair the fan. For this particular one, it is not hard to repair. We first put the cylinder inside the box, then put the lid on top of the box, and then use some tape to secure it. It looks like this after it is repaired:</p>
+<p><img src="../imgs/img-4.jpg" alt=""></p>
+<h2 id="relating-to-reverse-engineering">Relating to Reverse Engineering</h2>
+<p>I admit this example of reverse engineering the fall-protection mechanism and repairing the fan is trivial. However, it does show some important steps in reverse engineering. Let me explain.</p>
+<p>In the first step, I opened the fan to see its internal. This is analogous to analyzing a binary statically. I did some preliminary analysis on the fan, like identifying the core components. In reverse engineering, we do this too. Typically we would have a quick look at the binary to get some information about it. Like what platform it runs on and what API functions it calls.</p>
+<p>Then I spotted a metal cylinder that moves freely. This is called (by me) a <strong>pivot</strong>. A binary program can be huge and we cannot blindly reverse it entirely. We need to focus on something. It could be a string, an API function, or a constant value (in crypto function).</p>
+<p>From the cylinder, I investigated the fan and came up with a possible <strong>hypothesis</strong> for it. I tested it by putting the cylinder back and turn the fan on. Then the hypothesis is confirmed. This loop is quite common in real-world reverse engineering. For example, there is a function that we are not sure about. We could study it and get several possible guesses for it. Then we confirm or refute them. What I did is most close to <strong>debugging</strong>, where I launch the fan and see if it works. I am lucky since my first hypothesis is correct. In reversing this loop could repeat several times before one understands a complex function.</p>
+<p>Now it comes to the hard part. I did not immediately understand why there are such a plastic box and a cylinder. This is also common in reverse engineering. We encounter lots of things that we cannot properly understand or guess their meaning. The approach I took can be understood as a <strong>symbolic execution</strong> of the fan. I tried to reason about what could happen to the fan in a different scenario. While doing this, <strong>constriant solving</strong> is quite helpful as it gave me several cases of why the cylinder could move. Symbolic execution and constraint solving are intermediate topics in reverse engineering. They could look like <em>magic</em> in many cases.</p>
+<p>After I get a comprehensive understanding of the fan, I need to repair it. In reverse engineering, most likely we do not need to repair anything (well, in certain cases we need to fix a bug in the binary, but that is rare). We need to re-implement it, either as code or documentation.</p>
+<p>The above can be summarized in the following chart:</p>
+<table>
+<thead>
+<tr>
+<th>Repairing a fan</th>
+<th>Reverse Enginnering</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>take the fan apart</td>
+<td>static analysis</td>
+</tr>
+<tr>
+<td>spot the cylinder</td>
+<td>find a pivot</td>
+</tr>
+<tr>
+<td>guess the cylinder can connect the circuit</td>
+<td>have a hypothesis</td>
+</tr>
+<tr>
+<td>put the cylinder back and turn the fan on</td>
+<td>test the hypothesis (debugging)</td>
+</tr>
+<tr>
+<td>reason about the plastic box&rsquo;s functionality</td>
+<td>symbolic execution &amp; constraint solving</td>
+</tr>
+<tr>
+<td>understand it is fall protection mechanism</td>
+<td>understand the functionality of code</td>
+</tr>
+<tr>
+<td>repair the fan</td>
+<td>reimplement as code or documentation</td>
+</tr>
+</tbody>
+</table>
+<p>Of course, this analogy is not meant to be complete or always accurate. For example, debugging is only one of the ways to test the hypothesis. And we do not explicitly use symbolic execution and constraint solving every time we reverse. An interesting fact is, when we reason about a piece of code, we probably symbolically executed it many times <strong>in our mind</strong> without using any external tools like Triton or angr.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        1758 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2020-04-26 08:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h">Read other posts</span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+            <span class="button previous">
+              <a href="/posts/reversing/client_houseplant_ctf_2020/solve/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Solving a Reversing Challenge with Mitmproxy and OCR</span>
+              </a>
+            </span>
+          
+
+          
+            <span class="button next">
+              <a href="/posts/xiangqi/2018-05-06-endgame-20/">
+                <span class="button__text">排局-20</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2021</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span><span><a href="posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.af435e44374f1e99a669ea8cd5bb9a2fceed80588941a451bfddb66b86a67c9f40b0f417e9543a763f809aa7e9300d7b1d69bf99615810ba02ac70396d50fad5.js" integrity="sha512-r0NeRDdPHpmmaeqM1buaL87tgFiJQaRRv922a4amfJ9AsPQX6VQ6dj&#43;AmqfpMA17HWm/mWFYELoCrHA5bVD61Q=="></script>
+
+
+
+    </body>
+</html>

@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/posts/my-first-post/</loc>
+    <loc>/posts/my_new_blog/</loc>
     <lastmod>2021-02-11T18:46:24+08:00</lastmod>
   </url>
   
@@ -25,6 +25,66 @@
   <url>
     <loc>/</loc>
     <lastmod>2021-02-11T18:46:24+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</loc>
+    <lastmod>2020-12-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/ocaml_crackmes/readme/</loc>
+    <lastmod>2020-12-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/reverseme3/readme/</loc>
+    <lastmod>2020-11-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/elf_format/readme/</loc>
+    <lastmod>2020-08-30T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/x86/readme/</loc>
+    <lastmod>2020-08-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/automating-gdb/readme/</loc>
+    <lastmod>2020-07-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/obfuscation/readme/</loc>
+    <lastmod>2020-07-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/shl_undefined_behavior/writeup/</loc>
+    <lastmod>2020-06-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/armageddon/solve/</loc>
+    <lastmod>2020-06-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/quarkslab_android_crackme/main/</loc>
+    <lastmod>2020-05-30T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/client_houseplant_ctf_2020/solve/</loc>
+    <lastmod>2020-04-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</loc>
+    <lastmod>2020-04-26T00:00:00+00:00</lastmod>
   </url>
   
   <url>

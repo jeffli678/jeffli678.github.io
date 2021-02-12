@@ -13,12 +13,13 @@
     
     
     <item>
-      <title>My First Post</title>
-      <link>/posts/my-first-post/</link>
+      <title>My New Blog is Ready!</title>
+      <link>/posts/my_new_blog/</link>
       <pubDate>Thu, 11 Feb 2021 18:46:24 +0800</pubDate>
       
-      <guid>/posts/my-first-post/</guid>
-      <description></description>
+      <guid>/posts/my_new_blog/</guid>
+      <description>I spent some time with Hugo and now my blog is hosted on GitHub. Feel free to visit it at xusheng.dev!
+I will write about reversing, coding, Xiangqi, and other stuff.</description>
     </item>
     
   </channel>

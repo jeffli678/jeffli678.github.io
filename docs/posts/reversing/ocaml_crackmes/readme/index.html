@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Earlier this year, my friend Towel uploaded two OCaml crackmes to crackmes.one. One of them is Baby OCaml, and the other one is called Teenager OCaml. Well, interesting names!
+This is not the first time Towel came up with OCaml crackmes. Qt Scanner, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="/posts/reversing/ocaml_crackmes/readme/" />
+
+
+    <title>
+        
+            Solving Two OCaml Crackmes Without Knowing Much about OCaml :: Xusheng&#39;s blog  — Reversing, coding, and Xiagnqi
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Solving Two OCaml Crackmes Without Knowing Much about OCaml">
+<meta itemprop="description" content="Earlier this year, my friend Towel uploaded two OCaml crackmes to crackmes.one. One of them is Baby OCaml, and the other one is called Teenager OCaml. Well, interesting names!
+This is not the first time Towel came up with OCaml crackmes. Qt Scanner, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3.">
+<meta itemprop="datePublished" content="2020-12-13T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-12-13T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1975">
+<meta itemprop="image" content=""/>
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content=""/>
+
+<meta name="twitter:title" content="Solving Two OCaml Crackmes Without Knowing Much about OCaml"/>
+<meta name="twitter:description" content="Earlier this year, my friend Towel uploaded two OCaml crackmes to crackmes.one. One of them is Baby OCaml, and the other one is called Teenager OCaml. Well, interesting names!
+This is not the first time Towel came up with OCaml crackmes. Qt Scanner, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3."/>
+
+
+
+
+    <meta property="og:title" content="Solving Two OCaml Crackmes Without Knowing Much about OCaml" />
+<meta property="og:description" content="Earlier this year, my friend Towel uploaded two OCaml crackmes to crackmes.one. One of them is Baby OCaml, and the other one is called Teenager OCaml. Well, interesting names!
+This is not the first time Towel came up with OCaml crackmes. Qt Scanner, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/reversing/ocaml_crackmes/readme/" />
+<meta property="og:image" content=""/>
+<meta property="article:published_time" content="2020-12-13T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-12-13T00:00:00+00:00" /><meta property="og:site_name" content="Xusheng&#39;s blog" />
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2020-12-13 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">hello friend ng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        10 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="/posts/reversing/ocaml_crackmes/readme/">Solving Two OCaml Crackmes Without Knowing Much about OCaml</a>
+      </h1>
+
+      
+
+      
+
+      <div class="post-content">
+        <p>Earlier this year, my friend <a href="https://crackmes.one/user/Towel">Towel</a> uploaded two OCaml crackmes to crackmes.one. One of them is <a href="https://crackmes.one/crackme/5f600af333c5d4357b3b01d6"><code>Baby OCaml</code></a>, and the other one is called <a href="https://crackmes.one/crackme/5f600b9933c5d4357b3b01d7"><code>Teenager OCaml</code></a>. Well, interesting names!</p>
+<p>This is not the first time Towel came up with OCaml crackmes. <a href="https://crackmes.one/crackme/5ec1b82133c5d449d91ae539"><code>Qt Scanner</code></a>, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3. Nevertheless, we cannot hide from challenges forever, so I decided to try it last week. And the outcome is good, I managed to solve them without digging deep into the OCaml runtime.</p>
+<h2 id="baby-ocaml">Baby OCaml</h2>
+<p>OCaml is an interpretive language, but it can be compiled to native code. This is in contrast to Python/PyInstaller, where the script is just packaged into the generated binary and we can restore the original source of it. The OCaml compiler generates native code based on the source code, and the source is not present within the generated binary. Worse still, when we deal with new programming languages, e.g., OCaml, Go, Rust, we are likely to encounter some novel things we do not expect. For example, Rust has a very different way of passing parameters and return values of a function. We need to first get familiar with it, then start reversing the actual code logic.</p>
+<p>The Baby binary is 2.0 MB in size, which is HUGE for a crackme. The OCaml runtime will occupy lots of space in it, so we need to find the code that we are interested in. Opening the binary in BinaryNinja reveals that it is a statically linked binary:</p>
+<p><img src="../imgs/1.png" alt=""></p>
+<p>OK, so even libc functions are not easy to find. But the entry point looks so familiar to me that I can still recognize the <code>call 0x470980</code> at 0x401c48 is <code>libc_start_main</code>, and <code>sub_401770</code> at 0x401c41 is the <code>main</code> function. However, the <code>main</code> function is mostly initializing the OCaml runtime, and I cannot find the actual entry point to the code.</p>
+<p>Then I decided to run the binary and see if I can get any clue from it:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Bash" data-lang="Bash">$ ./baby 
+-<span style="color:#f92672">=</span> Montrehack <span style="color:#f92672">=</span>-
+   Baby OCaml
+
+<span style="color:#f92672">[</span>!<span style="color:#f92672">]</span> Nope, try again.
+</code></pre></div><p>Ok, it does not ask for input, so the input should probably be supplied as a command line argument. I tried to find the strings it prints but failed. Well, the strings must be encrypted or otherwise obfuscated. Now I cannot quickly find the logic that checks the input, so again this is a dead end.</p>
+<p>I tried to reverse the binary for a half-day but cannot make a breakthrough. The call stack is deep and lots of function pointers are used. I was lost and put the binary aside for a while until one day Towel poked me to try his challenges. I told him that I cannot even solve the baby one, thanks to the string obfuscation. We chatted about the challenges a little bit, and I decided to give it a try again.</p>
+<p>This time, I have to admit, that I am super lucky. I browsed the string list and spotted something unusual in the first few:</p>
+<p><img src="../imgs/2.png" alt=""></p>
+<p>Looks readable, right? I navigated to the location and the code seems to be comparing strings:</p>
+<p><img src="../imgs/3.png" alt=""></p>
+<p>I am pretty sure the code is checking whether the ASCII string at <code>rax</code> is <code>Getting_Warmed_Up</code>. Note, the last char, <code>'p'</code>, with an ASCII value 0x70, is checked against 0x600000000000070. Well, due to little-endian, this will be effectively checking the lowest byte in the qword, but I have no idea what the 0x60 means. So OCaml runtime does have some weird things that are quite unusual.</p>
+<p>Anyways, I solved the challenge:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Bash" data-lang="Bash">$ ./baby Getting_Warmed_Up
+-<span style="color:#f92672">=</span> Montrehack <span style="color:#f92672">=</span>-
+   Baby OCaml
+
+<span style="color:#f92672">[</span>+<span style="color:#f92672">]</span> Success!
+
+FLAG-c34bc2bd73fdb06799061a8e76f62664
+</code></pre></div><h2 id="tennager-ocaml">Tennager OCaml</h2>
+<p>Although I did not solve the last challenge decently, I cannot wait to start working on the Teenager one. This binary is 1.9 MB in size. So, yeah, the size is mostly static libraries + OCaml runtime, and the size of the actual logic is almost negligible within it.</p>
+<p>This time it does not use string obfuscation so I can easily locate the place where the binary asks for input:</p>
+<p><img src="../imgs/4.png" alt=""></p>
+<p>The control flow seems quite obvious, in the first node it asks for input, there there are two checks, and we must get to the lower left node to pass the check. I was pretty relieved when I saw this since there aren&rsquo;t many functions in this graph. However, it turns out I am naive and too optimistic about it.</p>
+<p>The first thing that I cannot understand is&hellip;. the first check.</p>
+<p><img src="../imgs/5.png" alt=""></p>
+<p>At 0x403168, <code>rbx</code> must be 0x2b, from which we can deduce that <code>rbx</code> must be 0x15 at 0x403163. And tracing back, it becomes weird. From debugging I noticed at 0x40314b, <code>rax</code> actually holds the ASCII string of the input. What could be located at <code>rax-0x8</code>? Well, I am not sure, but it is highly likely to be something related to the string&rsquo;s length. However, reading the code I cannot make any sense of it. I tried inputs with different lengths and the value does not change according to the input length.</p>
+<p>Furthermore, at 0x40315b there is a <code>movzx rdi, byte [rax+rbx]</code>. We know <code>rax</code> is the string, if this is one of the input char, then this check is very strange. The length will be checked against one particular char, and the result must be 0x15.</p>
+<p>Luckily, I debugged the code more and find after code at 0x403160, <code>rbx</code> always holds the length of the input. So this one is checking whether the string length is 0x15. The OCaml is yet unsolved, but I managed to get some information out of it.</p>
+<p>Now, there are only three functions ahead, but I cannot trace the execution easily. The code uses lots of function pointers and I quickly get lost. A patient reverser would study the OCaml compiler to figure out how the code is generated, but I still have one thing to try: hardware breakpoint on the input string.</p>
+<p>The plan is simple, we now know the string is held in <code>rax</code> at 0x40314b, then we can set a hardware breakpoint on it and see who accesses it. If everything goes well, we can find the code that reads the input, which is very likely to be also the checking logic code.</p>
+<p>I set a breakpoint at 0x40317f, and supplied the input string &ldquo;111111111111111111111&rdquo; (which is just &lsquo;1&rsquo; * 0x15). It hits! Not bad, at least we are correct on the length check. The pwndbg shows <code>rax</code> does point to the input string:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Bash" data-lang="Bash">RAX  0x7ffff7ff9b90 ◂— <span style="color:#e6db74">&#39;111111111111111111111&#39;</span>
+</code></pre></div><p>Then I set a hardware read breakpoint:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Bash" data-lang="Bash">pwndbg&gt; rwatch *0x7ffff7ff9b95
+Hardware read watchpoint 3: *0x7ffff7ff9b95
+</code></pre></div><p>Note, the string starts at 0x7ffff7ff9b95, but I set a breakpoint at 0x7ffff7ff9b95, which is the 6th char of the input. This is a personal habit since there could potentially be more places that access the first char than we are interested in. On the other hand, the code that reads a char in the middle is more likely to be interesting and worth checking out.</p>
+<p>The hardware breakpoint is hit at 0x402c07, and the instruction above it is reading the 6th char of the input:</p>
+<p><img src="../imgs/6.png" alt=""></p>
+<p>This function (sub_4024f0) looks like:</p>
+<p><img src="../imgs/8.png" alt=""></p>
+<p>So it is very likely that the function is checking very char one by one. This function has no xref to it at all, so I probably will not be able to find it easily, if I do not use hardware breakpoint. Inspecting the stack gives me the actual caller, 0x402410, and I have to say it is not easy to find the actual callee without debugging. The good news is if I were to reverse OCaml in the future, I know where to look at and with the help of debugging, I can hopefully find the callee and sort out the execution flow.</p>
+<p><img src="../imgs/9.png" alt=""></p>
+<p>I notice if the check passes, the return value is set to 0xa7. Remember the check at 0x4031e6? 0xd9f is quite a strange value, but it could be related to the 0xa7 here.</p>
+<p><img src="../imgs/7.png" alt=""></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#f92672">&gt;&gt;&gt;</span> hex(<span style="color:#ae81ff">0xd9f</span><span style="color:#f92672">/</span><span style="color:#ae81ff">0x15</span>)
+<span style="color:#e6db74">&#39;0xa6&#39;</span>
+</code></pre></div><p>So, there is some code, which I have not discovered, that minus 1 from the return value and then sum everything up. Now we know the check for each char, and it should not be hard to dump the constraints and solve it with z3.</p>
+<p>I am lazy and do not wish to manually transcript the constraints and z3 syntax. However, angr does not easily work with it, thanks to the OCaml runtime, which angr does not understand. So I need to combine the power of BinaryNinja API to simplify the binary and enable angr to work with it.</p>
+<h2 id="solving-with-binaryninja-and-angr">Solving with BinaryNinja and Angr</h2>
+<p><img src="../imgs/10.png" alt=""></p>
+<p>If we look at the basic block at 0x402d4c, there are two inputs to it: 1) the ASCII string in <code>rax</code>, 2) the value of <code>rbx</code> set at 0x402d24. We also need to extract the char index from the instruction at 0x402d4c (0x3 for in this screenshot). To get the initial value of <code>rbx</code>, we do not need to search for the instruction at 0x402d24. Instead, we can use the possible value set of <code>rbx</code> to get it. To enable angr, we also need to get the target address of the true/false branch of the conditional at 0x402d64.</p>
+<h3 id="getting-truefalse-branch-address">Getting True/False Branch Address</h3>
+<p>To get the good/bad branch, we first get the <code>outgoing_edges</code> of a basic block and check the <code>edge.type</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python">bbl <span style="color:#f92672">=</span> bv<span style="color:#f92672">.</span>get_basic_blocks_at(addr)[<span style="color:#ae81ff">0</span>]
+edges <span style="color:#f92672">=</span> bbl<span style="color:#f92672">.</span>outgoing_edges
+<span style="color:#66d9ef">for</span> edge <span style="color:#f92672">in</span> edges:
+    <span style="color:#66d9ef">if</span> edge<span style="color:#f92672">.</span>type <span style="color:#f92672">==</span> BranchType<span style="color:#f92672">.</span>TrueBranch:
+        good_addr <span style="color:#f92672">=</span> edge<span style="color:#f92672">.</span>target<span style="color:#f92672">.</span>start
+    <span style="color:#66d9ef">elif</span> edge<span style="color:#f92672">.</span>type <span style="color:#f92672">==</span> BranchType<span style="color:#f92672">.</span>FalseBranch:
+        bad_addr <span style="color:#f92672">=</span> edge<span style="color:#f92672">.</span>target<span style="color:#f92672">.</span>start
+</code></pre></div><h3 id="parsing-llil-and-getting-char-index">Parsing LLIL and Getting Char Index</h3>
+<p>For each constraint, we need to know the index of the char being checked. For example, for instruction <code>movzx rax, byte [rax+0x3]</code>, we need to get 0x3 from it. This requires us to walk the LLIL instruction and find its value.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">find_llil_basic_block</span>(llil_basic_blocks, addr):
+    <span style="color:#66d9ef">for</span> llil_bbl <span style="color:#f92672">in</span> llil_basic_blocks:
+        <span style="color:#66d9ef">if</span> llil_bbl[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>address <span style="color:#f92672">==</span> addr:
+            <span style="color:#66d9ef">return</span> llil_bbl
+
+func <span style="color:#f92672">=</span> bv<span style="color:#f92672">.</span>get_functions_containing(addr)[<span style="color:#ae81ff">0</span>]
+llil_basic_blocks <span style="color:#f92672">=</span> list(func<span style="color:#f92672">.</span>llil_basic_blocks)
+llil_bbl <span style="color:#f92672">=</span> find_llil_basic_block(llil_basic_blocks, addr)
+src <span style="color:#f92672">=</span> llil_bbl[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>operands[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>operands[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>operands[<span style="color:#ae81ff">0</span>]
+
+char_idx <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+<span style="color:#66d9ef">if</span> src<span style="color:#f92672">.</span>operation <span style="color:#f92672">==</span> LowLevelILOperation<span style="color:#f92672">.</span>LLIL_ADD:
+    char_idx <span style="color:#f92672">=</span> src<span style="color:#f92672">.</span>operands[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>value<span style="color:#f92672">.</span>value
+</code></pre></div><p>Note, the above code might not be very reader-friendly, e.g., <code>src = llil_bbl[0].operands[1].operands[0].operands[0]</code>. This is because LLIL is essentially a tree, and we are travelling down it.</p>
+<h3 id="getting-the-possible-value-of-rbx">Getting the Possible Value of rbx</h3>
+<p>To get the possible value of rbx when the execution enters the basic block, we need to use the <code>get_possible_reg_values</code> API.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python">rbx_value <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+value_set <span style="color:#f92672">=</span> llil_bbl[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>get_possible_reg_values(<span style="color:#e6db74">&#39;rbx&#39;</span>)
+<span style="color:#66d9ef">if</span> value_set<span style="color:#f92672">.</span>type <span style="color:#f92672">==</span> RegisterValueType<span style="color:#f92672">.</span>ConstantValue:
+    rbx_value <span style="color:#f92672">=</span> value_set<span style="color:#f92672">.</span>value
+    rbx_value <span style="color:#f92672">&amp;=</span> <span style="color:#ae81ff">0xffffffffffffffff</span>
+</code></pre></div><p>Note, not all of the check uses rbx. For them, the <code>value_set.type</code> will be <code>UnderterminedValue</code>, and rbx_value will remain 0x0. This has no side effect on solving.</p>
+<h3 id="angr-time">Angr Time</h3>
+<p>The last step is to solve it with angr:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">angr_solve</span>(addr, good_addr, bad_addr, char_idx, rbx_value):
+    proj <span style="color:#f92672">=</span> angr<span style="color:#f92672">.</span>Project(<span style="color:#e6db74">&#39;./teenager&#39;</span>)
+    state <span style="color:#f92672">=</span> proj<span style="color:#f92672">.</span>factory<span style="color:#f92672">.</span>entry_state(addr <span style="color:#f92672">=</span> addr)
+    <span style="color:#75715e"># suppose the input string (ASCII) is stored at 0xaa000000</span>
+    input_addr <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xaa000000</span>
+    state<span style="color:#f92672">.</span>regs<span style="color:#f92672">.</span>rax <span style="color:#f92672">=</span> input_addr
+    state<span style="color:#f92672">.</span>regs<span style="color:#f92672">.</span>rbx <span style="color:#f92672">=</span> rbx_value
+    flag <span style="color:#f92672">=</span> state<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>BVS(<span style="color:#e6db74">&#39;flag&#39;</span>, <span style="color:#ae81ff">8</span>)
+    state<span style="color:#f92672">.</span>memory<span style="color:#f92672">.</span>store(input_addr <span style="color:#f92672">+</span> char_idx, flag)
+    simgr <span style="color:#f92672">=</span> proj<span style="color:#f92672">.</span>factory<span style="color:#f92672">.</span>simgr(state)
+    simgr<span style="color:#f92672">.</span>explore(find <span style="color:#f92672">=</span> good_addr, avoid <span style="color:#f92672">=</span> [bad_addr])
+    <span style="color:#66d9ef">if</span> simgr<span style="color:#f92672">.</span>found:
+        solution_state <span style="color:#f92672">=</span> simgr<span style="color:#f92672">.</span>found[<span style="color:#ae81ff">0</span>]
+        char_solution <span style="color:#f92672">=</span> solution_state<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>eval(flag, cast_to <span style="color:#f92672">=</span> bytes)
+        <span style="color:#66d9ef">return</span> True, char_solution
+    <span style="color:#66d9ef">else</span>:
+        False, None
+</code></pre></div><p>Note, the above script is not super robust, since we really expect the solving to succeed.</p>
+<p>We still need to manually collect the 0x15 address of the basic blocks. Although it is possible to automatically collect them, I feel the time to make it work will be longer than just select and copy 0x15 addresses.</p>
+<p>The script returns <code>0CamL_Ints_Ar3_W4rped</code>, and feeding it to the challenge gives me:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Bash" data-lang="Bash">$ ./teenager 
+-<span style="color:#f92672">=</span> Montrehack <span style="color:#f92672">=</span>-
+   Teenager
+
+Enter Password: 0CamL_Ints_Ar3_W4rped
+
+<span style="color:#f92672">[</span>+<span style="color:#f92672">]</span> Success!
+FLAG-221fddd2bbf810be10d156b060b0eda5
+</code></pre></div><p>This reminds me of the description of the challenge:</p>
+<pre><code>A slightly harder OCaml challenge to get practice with OCaml integer representations.
+</code></pre><p>So, it seems that I solved without knowing anything about OCaml integer representation.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        1975 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2020-12-13 08:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h">Read other posts</span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+            <span class="button previous">
+              <a href="/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/">
+                <span class="button__icon">←</span>
+                <span class="button__text">How to Avoid Writing a Bad Crackme</span>
+              </a>
+            </span>
+          
+
+          
+            <span class="button next">
+              <a href="/posts/reversing/reverseme3/readme/">
+                <span class="button__text">Deciphering a Windows Anti-debugging Challenge</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2021</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span><span><a href="posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.af435e44374f1e99a669ea8cd5bb9a2fceed80588941a451bfddb66b86a67c9f40b0f417e9543a763f809aa7e9300d7b1d69bf99615810ba02ac70396d50fad5.js" integrity="sha512-r0NeRDdPHpmmaeqM1buaL87tgFiJQaRRv922a4amfJ9AsPQX6VQ6dj&#43;AmqfpMA17HWm/mWFYELoCrHA5bVD61Q=="></script>
+
+
+
+    </body>
+</html>

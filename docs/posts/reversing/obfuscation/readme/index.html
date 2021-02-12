@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="The last week&amp;rsquo;s challenge was created by Dennis Yurichev. It is also hosted on crackmes.one. The challenge is compiled by a modified Tiny C Compiler (TCC) which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.
+First Impression The target (keygenme4.exe) is a PE. The entry point looks like this:
+There are several things which we can notice easily:" />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="/posts/reversing/obfuscation/readme/" />
+
+
+    <title>
+        
+            Solving an Obfuscated Crackme with BinaryNinja and Triton :: Xusheng&#39;s blog  — Reversing, coding, and Xiagnqi
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Solving an Obfuscated Crackme with BinaryNinja and Triton">
+<meta itemprop="description" content="The last week&rsquo;s challenge was created by Dennis Yurichev. It is also hosted on crackmes.one. The challenge is compiled by a modified Tiny C Compiler (TCC) which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.
+First Impression The target (keygenme4.exe) is a PE. The entry point looks like this:
+There are several things which we can notice easily:">
+<meta itemprop="datePublished" content="2020-07-02T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-07-02T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="3687">
+<meta itemprop="image" content=""/>
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content=""/>
+
+<meta name="twitter:title" content="Solving an Obfuscated Crackme with BinaryNinja and Triton"/>
+<meta name="twitter:description" content="The last week&rsquo;s challenge was created by Dennis Yurichev. It is also hosted on crackmes.one. The challenge is compiled by a modified Tiny C Compiler (TCC) which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.
+First Impression The target (keygenme4.exe) is a PE. The entry point looks like this:
+There are several things which we can notice easily:"/>
+
+
+
+
+    <meta property="og:title" content="Solving an Obfuscated Crackme with BinaryNinja and Triton" />
+<meta property="og:description" content="The last week&rsquo;s challenge was created by Dennis Yurichev. It is also hosted on crackmes.one. The challenge is compiled by a modified Tiny C Compiler (TCC) which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.
+First Impression The target (keygenme4.exe) is a PE. The entry point looks like this:
+There are several things which we can notice easily:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/reversing/obfuscation/readme/" />
+<meta property="og:image" content=""/>
+<meta property="article:published_time" content="2020-07-02T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-07-02T00:00:00+00:00" /><meta property="og:site_name" content="Xusheng&#39;s blog" />
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2020-07-02 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">hello friend ng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        18 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="/posts/reversing/obfuscation/readme/">Solving an Obfuscated Crackme with BinaryNinja and Triton</a>
+      </h1>
+
+      
+
+      
+
+      <div class="post-content">
+        <p>The last week&rsquo;s <a href="https://yurichev.com/blog/58/">challenge</a> was created by <a href="https://yurichev.com/">Dennis Yurichev</a>. It is also hosted on <a href="https://crackmes.one/crackme/5ab77f6233c5d40ad448c9e4">crackmes.one</a>. The challenge is compiled by a modified <a href="https://bellard.org/tcc/">Tiny C Compiler (TCC)</a> which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.</p>
+<h2 id="first-impression">First Impression</h2>
+<p>The target (<a href="../keygenme4.exe">keygenme4.exe</a>) is a PE. The entry point looks like this:</p>
+<p><img src="../imgs/1.png" alt=""></p>
+<p>There are several things which we can notice easily:</p>
+<ol>
+<li>The basic block is quite long.</li>
+<li>It has excessive amounts of continuous arithmetic operations.</li>
+</ol>
+<ol>
+<li>is quite common for obfuscated code. Several obfuscation techniques inflate the code and make it hard to read. 2. is unique to this obfuscator. If we look at the following instructions closely, we notice it is first loading a constant into <code>eax</code>, does a series of arithmetic operations on it, and saving it to a variable.</li>
+</ol>
+<pre><code>0041af0a  mov     eax, dword [data_41c1b4]
+0041af10  shr     eax, 0x0
+0041af13  shr     eax, 0x1
+0041af16  xor     eax, 0xa8f3a9ca
+0041af1c  shl     eax, 0x7
+0041af1f  sub     eax, 0x5a041880
+0041af25  mov     dword [ebp-0x14 {var_18}], eax
+</code></pre><p>After we check the dword value at data_41c1b4, we can emulate the above code snippet and find out the final value of <code>eax</code>. It turns out to be 0. So the code is equivalent to:</p>
+<pre><code>0041af25  mov     dword [ebp-0x14 {var_18}], 0x0
+</code></pre><p><code>data_41c1b4</code> is a global variable. When we click on it, we can see all its cross-references. After browsing the list we find that the value is read a lot of time, but it is never written to.</p>
+<p><img src="../imgs/9.png" alt=""></p>
+<p>This means the value never changes. And sequence of instructions like the above one can be simplified to just one constant load.</p>
+<p>We will call this <code>convoluted constant load</code> later on. Not bad, we break one of the obfuscation! Well, not yet. We just understand how it works and solves it manually. But we need to solve them automatically. <code>Automation</code> is an important topic in deobfuscation. Often the obfuscation is not hard to understand, but solving them can be much harder. We will discuss how to tackle it later.</p>
+<h2 id="hunting-for-other-obfuscation-techniques">Hunting for Other Obfuscation Techniques</h2>
+<p>As we explore the binary, we can find the following obfuscation techniques.</p>
+<h3 id="obfuscated-calls">Obfuscated Calls</h3>
+<p><img src="../imgs/2.png" alt=""></p>
+<p>0x41c0fa is the string to be printed by <code>printf</code>, which is nothing special. The next four instructions do the interesting stuff:</p>
+<pre><code>00416db8  call    $+5 {var_c}  {data_416dbd}
+00416dbd  pop     eax {var_c}
+00416dbe  add     eax, 0xa  {sub_416dc7}
+00416dc1  push    eax {var_c}  {sub_416dc7}
+</code></pre><p>After the <code>call $+5</code>, the <code>eip</code> becomes 0x416dbd. Meanwhile, the return address is pushed onto the top of the stack. Note the return address is also 0x416dbd. The following <code>pop, add, push</code> sequence would change the return address to <code>sub_416dc7</code> (which is also calculated by BinaryNinja).</p>
+<p>Now it executes <code>jmp printf</code>. Note this is a <code>jmp</code> so it does not push a return address onto the stack. <code>sub_416dc7</code> is still on the top of the stack. The string to be printed is right below it. In other words, this creates a fake call stack and it manipulates the return address so the code will continue execution from a different place (rather than the code below the printf).</p>
+<p>printf has no magic and it just prints the string. When the execution returns from the printf, the return address sub_416dc7 is popped from the stack and executed. In other words, the above code is equivalent to:</p>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<p><img src="../imgs/3.png" alt=""></p>
+<p>This is not hard to deal with since the pattern is quite obvious. We will cover how to solve it later.</p>
+<h3 id="opaque-predicate">Opaque Predicate</h3>
+<p><img src="../imgs/6.png" alt=""></p>
+<p>Another abnormal thing we notice is the code has an excessive amount of branches. If we look at the code closely, we can see something like this:</p>
+<pre><code>00401248  sub     edx, edx  {0x883d6589}  {0x883d6589}
+0040124a  jne     0x40120a  {0x0}
+</code></pre><p>Thanks to the <code>sub edx, edx</code>, the zero flag is always set thus the jne never jumps. This is more obvious if we switch to the Low-Level IL (LLIL):</p>
+<p><img src="../imgs/7.png" alt=""></p>
+<p>In other words, the branch is fake and the execution always gets to 0x40124c. We call this an <code>opaque predicate</code>.</p>
+<p>Opaque predicate is a well-known obfuscation technique that slows down reversers. When we reverse a piece of code, we often first get a grasp of the behavior of the code by looking at its layout (branches, loops, etc). Even beginners know to look for the critical branch that decides whether the code will print a &ldquo;congratulation&rdquo; or &ldquo;sorry&rdquo;.</p>
+<p>Opaque predicate can be removed statically &ndash; since they are opaque and one branch is always taken. However, in real-world, we can use some mathematical fact that is hard to be solved by a program. For example, for any integer <code>x</code>, this is always true:</p>
+<pre><code>x * (x + 1) * (x + 2) == 0 (mod 6)
+</code></pre><p>If we know the set of opaque predicates the obfuscator use, then we can do a pattern matching. Otherwise, we might need to use z3 to prove it. The good news is, in this particular binary, the opaque predicates are quite easy to deal with.</p>
+<h3 id="junk-code-insertion">Junk Code Insertion</h3>
+<p>Inserting junk code is another popular obfuscation technique. Check out the following code:</p>
+<p><img src="../imgs/5.png" alt=""></p>
+<p>It is pretty messy &ndash; which is a sign of useless code. And we see the register <code>edx</code> is overwritten before it is used. By &ldquo;used&rdquo; I mean it is not written to the memory or used to calculate other values.</p>
+<p>Junk code insertion is very easy to implement, and not always easy to solve. There is no silver bullet for it, though optimization is the general method to deal with it. Yes, optimization not only helps compiler generate faster code, it also helps remove unnecessary code. For the interested readers, this <a href="https://github.com/JonathanSalwan/Tigress_protection">script</a> uses LLVM to remove the Trigress VM.</p>
+<p>However, in this writeup, we will take a different approach. We will leverage some property of the code generated by TCC and solve it by backward taint analysis.</p>
+<h2 id="writing-a-deobfuscator">Writing a deobfuscator</h2>
+<p>Before I discuss the details of the deobfuscator, I would like to first address the availability of the obfuscator source code. We all know TCC is open-source. And Dennis provided the <a href="http://conus.info/stuff/tcc-obfuscate/tcc-0.9.25-diff">patch file</a>. So we can look at how the obfuscated binary is generated. This is of course a good thing since we can learn from the obfuscator. And I do recommend that everyone read it since it can show a relatively simple and lightweight way of implementing an obfuscating compiler.</p>
+<p>However, this also introduces a problem: in the real-world, we typically do not have the source code for the obfuscator. So we should avoid using too many details from it. Though I still use some &ndash; but I try to limit them as few as possible.</p>
+<p>Writing a deobfuscator is harder than understanding the obfuscation. I was once hesitant to start tackling this since I know it is going to take a few days. And now when I look at the code I have written, I still remember the hardship that I encountered. But I have succeeded! This is something that I am proud of.</p>
+<p>We probably cannot cover every detail of the deobfuscator. It is only 500 LoC but discussing every bit (as well as the reasoning behind it) is beyond the scope of this writeup. But I will cover the major highlights.</p>
+<h3 id="planning">Planning</h3>
+<p>Writing a good deobfuscator needs some planning before actual coding. The first thing we need to consider is tooling. Binary analysis requires lots of tools to proceed. How do we get the disassembly? What is the processing pipeline?</p>
+<p>In this writeup, I use BinaryNinja as the primary tool. It has a powerful Python API so it is quite easy to access the disassembled functions, basic blocks, assembly lines, etc. Later I also used Triton for backward taint analysis, which allows me to remove junk code quite effectively.</p>
+<p>The goal is simple: produce deobfuscated code. Note, however, one hurdle here is we do not have the ground truth for the obfuscated binary. As a result, we need to write the code, see its result in action, and make modifications and adjustments accordingly. When I deal with the opaque predicate, once my assumption was too wide and the deobfuscated code is empty. Then I have to go back and examine every branch the tool patched out and see which one is wrong (and should not be wiped out). One thing I did is to write a simple test C program, produce both the original binary and an obfuscated binary, and then test my tool on it. This allows me to fix several bugs faster.</p>
+<p>Automation is the result we want. However, we also need to make some compromise on this. Ideally, our program should take the binary as input and produce a deobfuscated one. However, I found there are too many corner cases so I decided that my tool will process one basic block a time. This allows me to verify if the result is correct. Later on, I enhanced it to process a function a time  &ndash; just iterate over the basic blocks in a function and process them one by one. Even this sometimes causes problem and I have to go back to process basic blocks one by one. The good part is my script is pretty robust that almost never needs any manual fixes.</p>
+<h3 id="the-skeleton-of-a-binaryninja-plugin">The Skeleton of a BinaryNinja Plugin</h3>
+<p>BinaryNinja allows a plugin to register a callback on an address.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python">PluginCommand<span style="color:#f92672">.</span>register_for_address(<span style="color:#e6db74">&#34;Deobfuscate&#34;</span>,
+                                   <span style="color:#e6db74">&#34;Remove tcc&#34;</span>,
+                                   bootstrap)
+</code></pre></div><p><code>bootstrap</code> is the function that gets called every time we click the <code>Deobfuscate</code> context menu. It is just a wrapper around the <code>simplify_bbl_handler</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">simplify_bbl_handler</span>(bv, addr):
+    bbl <span style="color:#f92672">=</span> bv<span style="color:#f92672">.</span>get_basic_blocks_at(addr)[<span style="color:#ae81ff">0</span>]
+    instrs_to_include <span style="color:#f92672">=</span> simplify_bbl(bv, bbl)
+    bv<span style="color:#f92672">.</span>begin_undo_actions()
+    nop_excluded_instrs(bv, bbl, instrs_to_include)
+    solve_load_bbl(bv, bbl)
+    bv<span style="color:#f92672">.</span>commit_undo_actions()
+</code></pre></div><p>We get the basic block at the current address by <code>bv.get_basic_blocks_at()</code>. Then we start the real deobfuscating. Note we also add undo actions which is quite handy during development &ndash; since we need to frequently change the code and see its result.</p>
+<h3 id="solving-convoluted-constant-load">Solving Convoluted Constant Load</h3>
+<p>The convoluted constant load is the first obfuscation technique we discussed. And it is used a lot across the binary. It is not hard to solve since its operations are simple. The problem is we need to locate it in the binary &ndash; where it starts and where it ends. This is trivial for a human reverser, but it is not easy for a program.</p>
+<p>The implementation is in the function <code>solve_load_bbl()</code> in the <a href="solution/de-obfuscate/de-obfuscate.py">script</a>. The code is long so I cannot show it here. It does some pattern matching. It looks for consecutive arithmetic operations (<code>'add|sub|shl|shr|xor'</code>) on registers <code>['eax', 'ebx', 'ecx', 'edx']</code>. This might not be the <code>best</code> solution, but it works. We have to make some compromise since it is very hard to write the best code for a deobfuscator, which deals with messy things.</p>
+<p>After discovering the pattern, it emulates the operations:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">solve_load_ops</span>(bv, ops):
+    val <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#66d9ef">for</span> opcode, operand <span style="color:#f92672">in</span> ops:
+        <span style="color:#66d9ef">if</span> opcode <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;mov&#39;</span>:
+            addr <span style="color:#f92672">=</span> int(operand, <span style="color:#ae81ff">16</span>)
+            val_bytes <span style="color:#f92672">=</span> bv<span style="color:#f92672">.</span>read(addr, <span style="color:#ae81ff">4</span>)
+            val <span style="color:#f92672">=</span> struct<span style="color:#f92672">.</span>unpack(<span style="color:#e6db74">&#39;&lt;I&#39;</span>, val_bytes)[<span style="color:#ae81ff">0</span>]
+            <span style="color:#66d9ef">print</span>(hex(val))
+        <span style="color:#66d9ef">elif</span> opcode <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;add&#39;</span>:
+            val <span style="color:#f92672">=</span> (val <span style="color:#f92672">+</span> int(operand, <span style="color:#ae81ff">16</span>)) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xffffffff</span>
+        <span style="color:#66d9ef">elif</span> opcode <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;sub&#39;</span>:
+            val <span style="color:#f92672">=</span> (val <span style="color:#f92672">-</span> int(operand, <span style="color:#ae81ff">16</span>)) <span style="color:#f92672">%</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">32</span>)
+        <span style="color:#66d9ef">elif</span> opcode <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;xor&#39;</span>:
+            val <span style="color:#f92672">=</span> val <span style="color:#f92672">^</span> int(operand, <span style="color:#ae81ff">16</span>)
+        <span style="color:#66d9ef">elif</span> opcode <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;shl&#39;</span>:
+            val <span style="color:#f92672">=</span> val <span style="color:#f92672">&lt;&lt;</span> int(operand, <span style="color:#ae81ff">16</span>)
+            val <span style="color:#f92672">&amp;=</span> <span style="color:#ae81ff">0xffffffff</span>
+        <span style="color:#66d9ef">elif</span> opcode <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;shr&#39;</span>:
+            val <span style="color:#f92672">=</span> val <span style="color:#f92672">&gt;&gt;</span> int(operand, <span style="color:#ae81ff">16</span>)
+        <span style="color:#66d9ef">else</span>:
+            <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;unknown operation: </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> opcode)
+
+    <span style="color:#66d9ef">return</span> val
+</code></pre></div><p>After we calculate the final load value, we need to patch the code, which is super convenient in BinaryNinja.</p>
+<h3 id="solving-obfuscated-calls">Solving Obfuscated Calls</h3>
+<p>The obfuscated call needs to be restored. Note the obfuscated code has <code>jmp printf</code> in it, but we need to change it to <code>call printf</code>. And then add a <code>jmp</code> to the next function.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">solve_push_jmp</span>(bv, func):
+
+    <span style="color:#66d9ef">for</span> bbl <span style="color:#f92672">in</span> func<span style="color:#f92672">.</span>basic_blocks:
+        <span style="color:#66d9ef">if</span> bbl<span style="color:#f92672">.</span>instruction_count <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">5</span>:
+            <span style="color:#66d9ef">continue</span>
+        
+        disassembly_text <span style="color:#f92672">=</span> bbl<span style="color:#f92672">.</span>get_disassembly_text()
+        <span style="color:#66d9ef">if</span> str(disassembly_text[<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>])<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;call    $+5&#39;</span>) <span style="color:#f92672">and</span> \
+            str(disassembly_text[<span style="color:#f92672">-</span><span style="color:#ae81ff">4</span>])<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;pop     eax&#39;</span>) <span style="color:#f92672">and</span> \
+            str(disassembly_text[<span style="color:#f92672">-</span><span style="color:#ae81ff">3</span>])<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;add     eax, 0xa&#39;</span>) <span style="color:#f92672">and</span> \
+            str(disassembly_text[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>])<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;push    eax&#39;</span>) <span style="color:#f92672">and</span> \
+            str(disassembly_text[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;jmp&#39;</span>):
+
+            patch_addr <span style="color:#f92672">=</span> disassembly_text[<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>]<span style="color:#f92672">.</span>address
+            <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;push_jump at: 0x</span><span style="color:#e6db74">%x</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> patch_addr)
+
+            jmp_addr <span style="color:#f92672">=</span> disassembly_text[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>address
+            callee_offset_bytes <span style="color:#f92672">=</span> bv<span style="color:#f92672">.</span>read(jmp_addr <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">4</span>)
+            caller_offset <span style="color:#f92672">=</span> struct<span style="color:#f92672">.</span>unpack(<span style="color:#e6db74">&#39;&lt;i&#39;</span>, callee_offset_bytes)[<span style="color:#ae81ff">0</span>]
+            callee_addr <span style="color:#f92672">=</span> jmp_addr <span style="color:#f92672">+</span> caller_offset <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>
+
+            dis <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;call 0x</span><span style="color:#e6db74">%x</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> callee_addr
+            inst_bytes <span style="color:#f92672">=</span> arch<span style="color:#f92672">.</span>assemble(dis, patch_addr)
+            bv<span style="color:#f92672">.</span>write(patch_addr, inst_bytes)
+            
+            <span style="color:#75715e"># this sequence is 15 byte long</span>
+            return_addr <span style="color:#f92672">=</span> patch_addr <span style="color:#f92672">+</span> <span style="color:#ae81ff">15</span>
+            jmp_addr <span style="color:#f92672">=</span> patch_addr <span style="color:#f92672">+</span> len(inst_bytes)
+            dis_jmp <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;jmp 0x</span><span style="color:#e6db74">%x</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> return_addr
+
+            inst_bytes <span style="color:#f92672">=</span> arch<span style="color:#f92672">.</span>assemble(dis_jmp, jmp_addr)
+            bv<span style="color:#f92672">.</span>write(jmp_addr, inst_bytes)
+</code></pre></div><p>We need to do some math to calculate the <code>callee_addr</code>, <code>return_addr</code>, and <code>jmp_addr</code>. Once we finish this the control flow is much better since we now know which functions get called.</p>
+<h3 id="solving-opaque-predicate">Solving Opaque Predicate</h3>
+<p>BinaryNinja already has a <a href="https://binary.ninja/2017/10/01/automated-opaque-predicate-removal.html">plugin</a> for patching opaque predicates. It relies on the lifted LLIL to see if the flags used in the conditional jump can be deduced from the preceding code, and patch it if so.</p>
+<p>However, it does not suit my need because it does not take care of the convoluted constant load. Have a look at the following code:</p>
+<pre><code>00401172  mov     eax, dword [data_41c000]
+00401178  mov     ecx, dword [data_41c1ac]
+0040117e  xor     ecx, 0x32744b9b
+00401184  shl     ecx, 0x2
+00401187  shl     ecx, 0x4
+0040118a  sub     ecx, 0x63fa1799
+00401190  shr     ecx, 0x2
+00401193  xor     ecx, 0x6a18d496
+00401199  sub     ecx, 0x756243af
+0040119f  cmp     eax, ecx
+004011a1  jge     0x401516
+</code></pre><p>The <code>eax</code> is loaded directly from the memory, and <code>ecx</code> is also a constant. So the result of the comparison is deterministic. However, LLIL does not squash these arithmetic operations so it does not know this is an opaque predicate.</p>
+<p>So I wrote my opaque predicate patcher. Here I read the source code of the obfuscator and found out that it only inject two types of opaque predicates: the first one is the <code>sub-and-jump</code> and the second is <code>xor-and-jump</code>. Both are quite easy to find. Then I just search for sub/xor instruction, whose two operands are the same, and it is followed by a conditional jump. If found, I patch it accordingly.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">is_opaque_predicate</span>(instr):
+
+    tokens <span style="color:#f92672">=</span> instr<span style="color:#f92672">.</span>tokens
+    <span style="color:#66d9ef">if</span> tokens[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>text <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;xor&#39;</span> <span style="color:#f92672">and</span> tokens[<span style="color:#ae81ff">2</span>]<span style="color:#f92672">.</span>text <span style="color:#f92672">==</span> tokens[<span style="color:#ae81ff">4</span>]<span style="color:#f92672">.</span>text:
+        <span style="color:#66d9ef">return</span> True
+    <span style="color:#66d9ef">if</span> tokens[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>text <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;sub&#39;</span> <span style="color:#f92672">and</span> tokens[<span style="color:#ae81ff">2</span>]<span style="color:#f92672">.</span>text <span style="color:#f92672">==</span> tokens[<span style="color:#ae81ff">4</span>]<span style="color:#f92672">.</span>text:
+        <span style="color:#66d9ef">return</span> True   
+    <span style="color:#66d9ef">return</span> False
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">solve_opaque_predicate</span>(bv, func):
+
+    <span style="color:#66d9ef">for</span> bbl <span style="color:#f92672">in</span> func<span style="color:#f92672">.</span>basic_blocks:
+
+        <span style="color:#75715e"># jne to self</span>
+        <span style="color:#66d9ef">if</span> bbl<span style="color:#f92672">.</span>instruction_count <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>:
+            instr <span style="color:#f92672">=</span> bbl<span style="color:#f92672">.</span>get_disassembly_text()[<span style="color:#ae81ff">0</span>]
+            <span style="color:#66d9ef">if</span> instr<span style="color:#f92672">.</span>tokens[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>text<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;jne&#39;</span>):
+                bv<span style="color:#f92672">.</span>never_branch(instr<span style="color:#f92672">.</span>address)  
+            <span style="color:#66d9ef">continue</span>
+
+        instrs <span style="color:#f92672">=</span> bbl<span style="color:#f92672">.</span>get_disassembly_text()
+
+        <span style="color:#66d9ef">try</span>:
+            instr1, instr2 <span style="color:#f92672">=</span> instrs[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span> :]
+        <span style="color:#66d9ef">except</span>:
+            <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;error at: 0x</span><span style="color:#e6db74">%x</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> bbl<span style="color:#f92672">.</span>start)
+
+        <span style="color:#66d9ef">if</span> is_opaque_predicate(instr1):
+            <span style="color:#66d9ef">if</span> should_patch_to_always_branch(instr2):
+                log_info(<span style="color:#e6db74">&#39;always branch at: 0x</span><span style="color:#e6db74">%x</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> instr2<span style="color:#f92672">.</span>address)
+                bv<span style="color:#f92672">.</span>always_branch(instr2<span style="color:#f92672">.</span>address)
+            <span style="color:#66d9ef">elif</span> should_patch_to_never_branch(instr2):
+                log_info(<span style="color:#e6db74">&#39;never branch at: 0x</span><span style="color:#e6db74">%x</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> instr2<span style="color:#f92672">.</span>address)
+                bv<span style="color:#f92672">.</span>never_branch(instr2<span style="color:#f92672">.</span>address)
+</code></pre></div><p>A careful reader should already find that I made a mistake here. On the one hand, after I read the source code I find there are only two types of opaque predicates; on the other hand, I think the conditional shown above (<code>0040119f  cmp     eax, ecx; 004011a1  jge     0x401516</code>) is also opaque. The problem is this is a <code>cmp</code> followed by <code>jge</code>, which is not opaque at all!</p>
+<p>The problem is the <code>00401172  mov     eax, dword [data_41c000]</code>. This is not a convoluted constant load; it is just a regular variable load! The value of <code>dword [data_41c000]</code> could change and this is a meaningful branch. After I realized this, I went back to change the code that solves the constant load: it has to have two operations at least.</p>
+<h3 id="solving-junk-code">Solving Junk Code</h3>
+<p>Junk code removal is the hardest part of this binary. It is not the most prominent technique used in it, but it does require a significant amount of work to solve. Junk code is easy to recognize for human reverser: it often contains a lot of meaningless/weird combinations of instructions. But this does not help a program to recognize them.</p>
+<p>As I mentioned, simplification is probably the <code>right</code> way to do it. But it also requires a huge amount of work. I looked at the generated assembly and found one property of TCC can help us solve it more easily. This involves compiler theories but I will keep it as simple as possible.</p>
+<p>TCC is <code>tiny</code> so it does not do a lot of optimization on the generated code. The <a href="https://lists.gnu.org/archive/html/tinycc-devel/2006-09/msg00028.html">email list</a> writes:</p>
+<pre><code>TinyCC compiles every statement on its own. After every line of code,
+values in registers are written back to the stack. And even if the next
+line uses the variables that can still be found in registers, they are
+read again from the stack.
+</code></pre><p>This means, for TCC emitted code, if a value is calculated (and held in register) but not written back to the memory, then it is to be discarded. Though we do not necessarily see the register holding the value being over-written. This allows us to remove junk code on a basic block level rather than a function level, which is a lot easier to implement.</p>
+<p>Note, however, the above statement is not true for other compilers, e.g., gcc. Gcc generates code that uses a register to hold the loop counter <code>i</code>. The value is never written back to the memory inside the loop. For code like that, it is harder to deduce if a value is used later or not.</p>
+<p>The idea of the simplification is to pick all the useful instructions from a basic block. We start from instructions that write to the memory. And we do backward taint analysis on all of them to get a set of instructions that affect the final value written to the memory. We do this repeatedly until no new instructions are added. Then we get all the useful instructions. Finally, we remove all the useless instructions (junk code).</p>
+<p>The code is in <code>simplify_bbl()</code>. It is quite long so I do not post it here. <a href="https://triton.quarkslab.com/">Triton</a> does the taint analysis. The recursion part is the most difficult to write.</p>
+<p>This method will be voided if the obfuscator writes the junk value into the memory. However, it is also harder to implement since the obfuscator authors need to find a safe place to write to.</p>
+<p>One question puzzles me for a long time until I read the source of the obfuscator. How does the junk code inserter make sure that it does not accidentally destroy some useful register value? For example, when it writes to <code>edx</code>, is it sure that <code>edx</code> does not hold any value that is used later? The answer is, TCC uses value stack (vstack) to keep track of values. And the obfuscator avoids writing to any registers in the vstack. The relevant code is:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">is_reg_in_vstack</span> (<span style="color:#66d9ef">int</span> r)
+{
+    SValue <span style="color:#f92672">*</span>p;
+
+    <span style="color:#66d9ef">for</span>(p<span style="color:#f92672">=</span>vstack; p<span style="color:#f92672">&lt;=</span>vtop; p<span style="color:#f92672">++</span>)
+        <span style="color:#66d9ef">if</span> (r<span style="color:#f92672">==</span>((p<span style="color:#f92672">-&gt;</span>r)<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xFF</span>))
+            <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+};
+</code></pre></div><h3 id="nop-ing-out-useless-instructions">Nop-ing Out Useless Instructions</h3>
+<p>We almost succeed! We have handled all the obfuscation techniques. The last step is to remove those junk code (as well as some residue of other obfuscations). We can simply <code>nop</code> them, but then it creates looooong nop slides which make the code hard to read. Moving the remaining code to make it compact is non-trivial. It affects relocation, inline data, etc. Later, I learned (thx Jordan!) that switching to LLIL automatically removes these nops, as shown below:</p>
+<p><img src="../imgs/10.png" alt=""></p>
+<p>However, when I approach the problem by myself, I found this is seldom discussed in deobfuscation literature so I came up with my own solution.</p>
+<p>We still first patch the junk code with <code>nop</code>. Since a <code>jmp</code> is only 5 bytes long, if there is a nop-slide that is longer than 5 bytes, we create a <code>jmp</code> that directly jumps to the end of the nop slide. The logic is implemented in <code>nop_excluded_instrs()</code>. The result does not look perfect, but it is already much more readable:</p>
+<p><img src="../imgs/8.png" alt=""></p>
+<p>It first checks if argv[1] is 0. If so, it prints an error message. If not, it calls <code>strlen</code> on it and jumps to another function, which I named <code>check</code>.</p>
+<h2 id="analyzing-the-algorithm">Analyzing the algorithm</h2>
+<p>Finally, we get a clean binary that can be analyzed. The algorithm itself is not trivial and it requires some patience. It is probably a level 3 crackme if no obfuscation is applied. Though we will only cover the most important pieces of it.</p>
+<p>Interestingly, the deobfuscated binary still has other obfuscations. The most prominent one is the buffer is processed in 16 functions. Each function takes care of 8 bytes of the buffer. the functions are functionally identical but it is not organized into a loop. The first function will call the second, the second will call the third, etc.</p>
+<p>The key must be 128 bytes long. The buffer is first decrypted using a CBC mode XOR. The key is 16 DWORDs calculated dynamically. We do not care about how the key is calculated; we just need to dump it once the programs calculated it.</p>
+<p>The decrypted buffer contains the serial number, user name, enabled feature sets, and expiration date. At the end of it, there is a checksum value. The checksum is calculated at sub_415353. One has to be familiar with the calculation of crc32 to understand this function. This is calculating a crc32 of the input buffer using magic value 0xedb88320 (see address 0x415747).</p>
+<p>Finally, we arrived at the keygen script:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#f92672">import</span> struct 
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">crc32</span>(s, init_val <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, final_xor <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>):
+
+    poly <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xedb88320</span>
+    crc <span style="color:#f92672">=</span> init_val
+    <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> s:
+        <span style="color:#66d9ef">if</span> type(c) <span style="color:#f92672">==</span> str:
+            asc <span style="color:#f92672">=</span> ord(c)
+        <span style="color:#66d9ef">else</span>:
+            asc <span style="color:#f92672">=</span> c
+
+        asc <span style="color:#f92672">^=</span> <span style="color:#ae81ff">0xffffffff</span>
+        crc <span style="color:#f92672">^=</span> asc
+
+        <span style="color:#66d9ef">for</span> _ <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">8</span>):
+            eax <span style="color:#f92672">=</span> crc <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">1</span>
+            var_c_1 <span style="color:#f92672">=</span> (<span style="color:#f92672">-</span>eax) <span style="color:#f92672">%</span> <span style="color:#ae81ff">0xffffffff</span>
+
+            var_8 <span style="color:#f92672">=</span> crc <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">1</span>
+            var_c_1 <span style="color:#f92672">&amp;=</span> poly
+
+            crc <span style="color:#f92672">=</span> var_8 <span style="color:#f92672">^</span> var_c_1
+
+        crc <span style="color:#f92672">^=</span> <span style="color:#ae81ff">0xffffffff</span>
+
+    crc <span style="color:#f92672">^=</span> final_xor   
+    <span style="color:#66d9ef">return</span> crc  
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">transform_back</span>(buffer):
+
+    rngs_vals <span style="color:#f92672">=</span> [
+        <span style="color:#ae81ff">0x10D88067</span>, 
+        <span style="color:#ae81ff">0xBC16D3D5</span>, 
+        <span style="color:#ae81ff">0xE7039A64</span>, 
+        <span style="color:#ae81ff">0x39EC8A6D</span>, 
+        <span style="color:#ae81ff">0xFF09B4BF</span>, 
+        <span style="color:#ae81ff">0xF828DB76</span>, 
+        <span style="color:#ae81ff">0x8BE40C8E</span>, 
+        <span style="color:#ae81ff">0xF7AA583E</span>, 
+        <span style="color:#ae81ff">0x60858E23</span>, 
+        <span style="color:#ae81ff">0xE487F5A3</span>, 
+        <span style="color:#ae81ff">0x39A57B89</span>, 
+        <span style="color:#ae81ff">0xB006573E</span>, 
+        <span style="color:#ae81ff">0x79609807</span>, 
+        <span style="color:#ae81ff">0x620AD108</span>, 
+        <span style="color:#ae81ff">0x5CD86398</span>, 
+        <span style="color:#ae81ff">0x6CA94B51</span>
+    ]
+    var_0x8c <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+
+    ints <span style="color:#f92672">=</span> struct<span style="color:#f92672">.</span>unpack(<span style="color:#e6db74">&#39;&lt;&#39;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;I&#39;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">16</span>, buffer)
+    restored_ints <span style="color:#f92672">=</span> []
+
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">16</span>):
+        restored_int <span style="color:#f92672">=</span> ints[i] <span style="color:#f92672">^</span> rngs_vals[i] <span style="color:#f92672">^</span> var_0x8c
+        restored_ints<span style="color:#f92672">.</span>append(restored_int)
+        var_0x8c <span style="color:#f92672">=</span> restored_int
+
+    <span style="color:#66d9ef">return</span> restored_ints
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">main</span>():
+
+    name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;jeff&#39;</span>
+    sn <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x12348765</span>
+    feature <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x123</span>
+    expire_year <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x2981</span>
+    expire_month <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x34</span>
+    expire_date <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x12</span>
+
+    buffer <span style="color:#f92672">=</span> name <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">*</span> (<span style="color:#ae81ff">32</span> <span style="color:#f92672">-</span> len(name))
+    buffer <span style="color:#f92672">+=</span> struct<span style="color:#f92672">.</span>pack(<span style="color:#e6db74">&#39;&lt;I&#39;</span>, sn)
+    buffer <span style="color:#f92672">+=</span> struct<span style="color:#f92672">.</span>pack(<span style="color:#e6db74">&#39;&lt;I&#39;</span>, feature)
+    buffer <span style="color:#f92672">+=</span> struct<span style="color:#f92672">.</span>pack(<span style="color:#e6db74">&#39;&lt;H&#39;</span>, expire_year)
+    buffer <span style="color:#f92672">+=</span> struct<span style="color:#f92672">.</span>pack(<span style="color:#e6db74">&#39;&lt;B&#39;</span>, expire_month)
+    buffer <span style="color:#f92672">+=</span> struct<span style="color:#f92672">.</span>pack(<span style="color:#e6db74">&#39;&lt;B&#39;</span>, expire_date)
+
+    buffer <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">16</span>
+
+    crc <span style="color:#f92672">=</span> crc32(buffer)
+    buffer <span style="color:#f92672">+=</span> struct<span style="color:#f92672">.</span>pack(<span style="color:#e6db74">&#39;&lt;I&#39;</span>, crc)
+    <span style="color:#66d9ef">print</span>(buffer<span style="color:#f92672">.</span>encode(<span style="color:#e6db74">&#39;hex&#39;</span>))
+
+    restored_int <span style="color:#f92672">=</span> transform_back(buffer)
+
+    key <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>
+    <span style="color:#66d9ef">for</span> val <span style="color:#f92672">in</span> restored_int:
+        key <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#39;</span><span style="color:#e6db74">%08x</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> val
+    
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;key: &#39;</span>)
+    <span style="color:#66d9ef">print</span>(key)
+
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+    main()
+</code></pre></div><!-- raw HTML omitted -->
+<p>An example run looks like this:</p>
+<pre><code>&gt;keygenme4.exe 76bee50dcaa836d82dabacbc144726d1eb4e926e13664918988245966f281da81d9914eef91ee06ed28fb2666289e5581be97d5f79e3ac57253bcfcf254ff9d4
+Yonkie's keygenme#4 &lt;dennis@conus.info&gt;
+licensed name=jeff
+sn=12348765
+featureset=0123
+expiration=12342981
+</code></pre>
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        3687 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2020-07-02 08:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h">Read other posts</span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+            <span class="button previous">
+              <a href="/posts/reversing/automating-gdb/readme/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Solving a Recursive Crackme by Automating GDB</span>
+              </a>
+            </span>
+          
+
+          
+            <span class="button next">
+              <a href="/posts/reversing/shl_undefined_behavior/writeup/">
+                <span class="button__text">Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2021</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span><span><a href="posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.af435e44374f1e99a669ea8cd5bb9a2fceed80588941a451bfddb66b86a67c9f40b0f417e9543a763f809aa7e9300d7b1d69bf99615810ba02ac70396d50fad5.js" integrity="sha512-r0NeRDdPHpmmaeqM1buaL87tgFiJQaRRv922a4amfJ9AsPQX6VQ6dj&#43;AmqfpMA17HWm/mWFYELoCrHA5bVD61Q=="></script>
+
+
+
+    </body>
+</html>

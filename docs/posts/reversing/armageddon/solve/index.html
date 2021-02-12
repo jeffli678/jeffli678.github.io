@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="First Impression The last week&amp;rsquo;s challenge is hosted at https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b. It is authored by Towel and it is a real challenge in UMDCTF 2019.
+Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is armageddon. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="/posts/reversing/armageddon/solve/" />
+
+
+    <title>
+        
+            Solving an ARM challenge with z3 :: Xusheng&#39;s blog  — Reversing, coding, and Xiagnqi
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Solving an ARM challenge with z3">
+<meta itemprop="description" content="First Impression The last week&rsquo;s challenge is hosted at https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b. It is authored by Towel and it is a real challenge in UMDCTF 2019.
+Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is armageddon. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember.">
+<meta itemprop="datePublished" content="2020-06-18T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-06-18T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1731">
+<meta itemprop="image" content=""/>
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content=""/>
+
+<meta name="twitter:title" content="Solving an ARM challenge with z3"/>
+<meta name="twitter:description" content="First Impression The last week&rsquo;s challenge is hosted at https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b. It is authored by Towel and it is a real challenge in UMDCTF 2019.
+Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is armageddon. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember."/>
+
+
+
+
+    <meta property="og:title" content="Solving an ARM challenge with z3" />
+<meta property="og:description" content="First Impression The last week&rsquo;s challenge is hosted at https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b. It is authored by Towel and it is a real challenge in UMDCTF 2019.
+Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is armageddon. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/reversing/armageddon/solve/" />
+<meta property="og:image" content=""/>
+<meta property="article:published_time" content="2020-06-18T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-06-18T00:00:00+00:00" /><meta property="og:site_name" content="Xusheng&#39;s blog" />
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2020-06-18 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">hello friend ng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        9 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="/posts/reversing/armageddon/solve/">Solving an ARM challenge with z3</a>
+      </h1>
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="first-impression">First Impression</h2>
+<p>The last week&rsquo;s challenge is hosted at <a href="https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b">https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b</a>. It is authored by Towel and it is a real challenge in UMDCTF 2019.</p>
+<p>Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is <code>armageddon</code>. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember.</p>
+<p>BinaryNinja has no problem recognizing the <code>__libc_start_main</code> and I can get to <code>main</code> easily. The first thing I find is that <code>main</code> is a <strong>long</strong> function.</p>
+<p><img src="../imgs/2.png" alt=""></p>
+<p>Well, a long function is not necessarily hard to analyze. It probably leverages certain obfuscation and/or its code is pretty repetitive. I started browsing the code from the beginning.</p>
+<p><img src="../imgs/1.png" alt=""></p>
+<p>It first prints a welcoming message and then asks the user to type the input. After that, it calls <code>scanf</code> with <code>&quot;%41s&quot;</code> which reads at most 41 chars from the terminal. Not bad, we now know it accepts a string as the input and we know the maximum length of it.</p>
+<p>We also notice that the basic blocks are split into quite short ones. This is probably an obfuscation technique. Nevetheless BinaryNinja kind of automatically accounts for it so we are not bothered by it. If a disassembler does not correctly inline the blocks after the jump (<code>b</code>), it could be harder to analyze.</p>
+<p>After reading the input, the code becomes repetitive: each time, a function is called with the user input as its only parameter. The pattern is repeated until near the bottom of the function, where a loop is found. The loop could be decrypting the flag based on the correct user input. And the checks on the input is obviously inside these called functions.</p>
+<p>I followed the first check function and it looks like this:</p>
+<p><img src="../imgs/3.png" alt=""></p>
+<p>Near the bottom of the function we see the comparison and if the comparison is not equal, an error message is printed. After analyzing the algorithm, I find the constraint is:</p>
+<pre><code>passwd[1] * passwd[0x27] * passwd[0x15] + passwd[0x11] + passwd[0x13] * passwd[0x1e] == 0xdb11e
+</code></pre><p>I browsed several other check functions and they all look similar. Now it becomes obvious: There are a series of constraints and the correct input must satisfy all of them.</p>
+<h2 id="round-one-failure-of-angr">Round One: Failure of angr</h2>
+<p>This challenge is very suitable for tools like <code>angr</code> or <code>z3</code>. In fact angr also uses z3 as its constraint solving backend. However, angr can automatically extract constraints from the binary, which could save a lot of time for reversers. So I decided to first give angr a try.</p>
+<p>The code is not hard to write &ndash; especially they all look similar for different binaries.</p>
+<p>Code for <a href="../angr-solve.py">angr-solve.py</a></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#f92672">import</span> angr
+<span style="color:#f92672">import</span> claripy
+
+proj <span style="color:#f92672">=</span> angr<span style="color:#f92672">.</span>Project(<span style="color:#e6db74">&#39;./armageddon&#39;</span>)
+<span style="color:#66d9ef">print</span>(hex(proj<span style="color:#f92672">.</span>entry))
+start_address <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x14a88</span>
+state <span style="color:#f92672">=</span> proj<span style="color:#f92672">.</span>factory<span style="color:#f92672">.</span>entry_state(addr <span style="color:#f92672">=</span> start_address)
+
+input_addr <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xaa000000</span>
+r11 <span style="color:#f92672">=</span> input_addr <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x34</span>
+state<span style="color:#f92672">.</span>regs<span style="color:#f92672">.</span>r11 <span style="color:#f92672">=</span> r11
+
+n <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+flag <span style="color:#f92672">=</span> state<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>BVS(<span style="color:#e6db74">&#39;flag&#39;</span>, n <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span>)
+state<span style="color:#f92672">.</span>memory<span style="color:#f92672">.</span>store(input_addr, flag)
+
+simgr <span style="color:#f92672">=</span> proj<span style="color:#f92672">.</span>factory<span style="color:#f92672">.</span>simgr(state)
+good <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x1504c</span>
+simgr<span style="color:#f92672">.</span>explore(find <span style="color:#f92672">=</span> good,
+        avoid <span style="color:#f92672">=</span> [
+            <span style="color:#ae81ff">0x10674</span>,
+            <span style="color:#ae81ff">0x107c8</span>,
+            <span style="color:#ae81ff">0x109ac</span>,
+            <span style="color:#ae81ff">0x10b6c</span>,
+            <span style="color:#ae81ff">0x10cf0</span>,
+            <span style="color:#ae81ff">0x10ea4</span>,
+            <span style="color:#ae81ff">0x11010</span>,
+            <span style="color:#ae81ff">0x11190</span>,
+            <span style="color:#ae81ff">0x11308</span>,
+            <span style="color:#ae81ff">0x114a4</span>,
+            <span style="color:#ae81ff">0x116a8</span>,
+            <span style="color:#ae81ff">0x1185c</span>,
+            <span style="color:#ae81ff">0x119c8</span>,
+            <span style="color:#ae81ff">0x11b84</span>,
+            <span style="color:#ae81ff">0x11d38</span>,
+            <span style="color:#ae81ff">0x11f10</span>,
+            <span style="color:#ae81ff">0x120c4</span>,
+            <span style="color:#ae81ff">0x122e4</span>,
+            <span style="color:#ae81ff">0x124c8</span>,
+            <span style="color:#ae81ff">0x1264c</span>,
+            <span style="color:#ae81ff">0x12800</span>,
+            <span style="color:#ae81ff">0x12948</span>,
+            <span style="color:#ae81ff">0x12b1c</span>,
+            <span style="color:#ae81ff">0x12d30</span>,
+            <span style="color:#ae81ff">0x12e9c</span>,
+            <span style="color:#ae81ff">0x13070</span>,
+            <span style="color:#ae81ff">0x13248</span>,
+            <span style="color:#ae81ff">0x133e0</span>,
+            <span style="color:#ae81ff">0x135f0</span>,
+            <span style="color:#ae81ff">0x137d4</span>,
+            <span style="color:#ae81ff">0x13970</span>,
+            <span style="color:#ae81ff">0x13b50</span>,
+            <span style="color:#ae81ff">0x13cbc</span>,
+            <span style="color:#ae81ff">0x13e6c</span>,
+            <span style="color:#ae81ff">0x14014</span>,
+            <span style="color:#ae81ff">0x141c8</span>,
+            <span style="color:#ae81ff">0x1434c</span>,
+            <span style="color:#ae81ff">0x144c4</span>,
+            <span style="color:#ae81ff">0x14648</span>,
+            <span style="color:#ae81ff">0x1485c</span>,
+            <span style="color:#ae81ff">0x149a0</span>
+        ]
+        ) 
+
+<span style="color:#66d9ef">if</span> simgr<span style="color:#f92672">.</span>found:
+    solution_state <span style="color:#f92672">=</span> simgr<span style="color:#f92672">.</span>found[<span style="color:#ae81ff">0</span>]
+    input1 <span style="color:#f92672">=</span> solution_state<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>eval(flag, cast_to <span style="color:#f92672">=</span> bytes)
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;flag: &#39;</span>, input1)
+<span style="color:#66d9ef">else</span>:
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;Cound not find flag&#39;</span>)
+
+</code></pre></div><p>We tell angr where is the input, and specify a good address to reach, as well as an (optional) list of addresses to avoid. Those addresses to be avoided are those printing error messages.</p>
+<p>This, in theory, should work. However, after running for several minutes angr tells me there is no solution. This is a little bit surprising as I assume as long as there is a solution, angr either returns it or keeps running. There could be multiple reasons for it, e.g., a bug in angr, or the constraints are not properly lifted, etc. We could output the constraints that angr is solving and troubleshot what went wrong. But please allow me to save it as future work.</p>
+<h2 id="round-two-conquering-it-with-z3">Round Two: Conquering it with z3</h2>
+<p>The next option is to convert the constraints into Python syntax and solve it with z3. The transcribing is arduous work and prone to error. It is better done in an automated or semi-automated way.</p>
+<p>I opened the challenge binary in Ghidra and found that the decompilation is generally good:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">FUN_000104fc</span>(<span style="color:#66d9ef">int</span> param_1)
+
+{
+  <span style="color:#66d9ef">if</span> ((uint)<span style="color:#f92672">*</span>(byte <span style="color:#f92672">*</span>)(param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span>
+      (uint)<span style="color:#f92672">*</span>(byte <span style="color:#f92672">*</span>)(param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x27</span>) <span style="color:#f92672">*</span> (uint)<span style="color:#f92672">*</span>(byte <span style="color:#f92672">*</span>)(param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x15</span>) <span style="color:#f92672">+</span>
+      (uint)<span style="color:#f92672">*</span>(byte <span style="color:#f92672">*</span>)(param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x11</span>) <span style="color:#f92672">+</span>
+      (uint)<span style="color:#f92672">*</span>(byte <span style="color:#f92672">*</span>)(param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x13</span>) <span style="color:#f92672">*</span> (uint)<span style="color:#f92672">*</span>(byte <span style="color:#f92672">*</span>)(param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1e</span>) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0xdb11e</span>) {
+    puts(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">[!] Code did not validate! :(</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+                    <span style="color:#75715e">/* WARNING: Subroutine does not return */</span>
+    exit(<span style="color:#ae81ff">0</span>);
+  }
+  <span style="color:#66d9ef">return</span> param_1;
+}
+</code></pre></div><p>Then I copy-and-pasted all the constraints into a temp script and converted it into Python syntax. Note this work is still quite repetitive, so I decided to convert the code with a regular expression.</p>
+<p>I did it in VS Code. I searched for</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python">\(uint\)\<span style="color:#f92672">*</span>\(byte \<span style="color:#f92672">*</span>\)\(param_1 \<span style="color:#f92672">+</span> ((<span style="color:#ae81ff">0</span>x)<span style="color:#960050;background-color:#1e0010">?</span>[<span style="color:#ae81ff">0</span><span style="color:#f92672">-</span><span style="color:#ae81ff">9</span>a<span style="color:#f92672">-</span>f]<span style="color:#f92672">+</span>)\)
+</code></pre></div><p>and replaced them with</p>
+<pre><code>passwd[$1]
+</code></pre><p>Basically, this will convert <code>(uint)*(byte *)(param_1 + 1)</code> to <code>passwd[1]</code>. There are still manual works needed, like removing the <code>if</code>, etc. But those are not hard to do.</p>
+<p>Eventually, the solving script looks like this <a href="../z3_solve.py">(z3_solve.py)</a>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#f92672">from</span> z3 <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+
+n <span style="color:#f92672">=</span> <span style="color:#ae81ff">41</span>
+passwd <span style="color:#f92672">=</span> [BitVec(<span style="color:#e6db74">&#39;s_</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> i, <span style="color:#ae81ff">32</span>)  <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(n)]
+
+s <span style="color:#f92672">=</span> Solver()
+<span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(n):
+    s<span style="color:#f92672">.</span>add(passwd[i] <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0x21</span>)
+    s<span style="color:#f92672">.</span>add(passwd[i] <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">127</span>)
+
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x27</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x15</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x11</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x13</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x1e</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xdb11e</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">0x25</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x13</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0xc</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0xc0c</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x1f</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x21</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0xd</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x14</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x11</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xebd1d</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">7</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x24</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0xf</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x1d</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x22</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x18e5</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">0x15</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x1b</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0xf</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x11</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x2e3b</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">0xf</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x25</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">8</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">5</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">6</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x19a5</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">0x23</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x1d</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x14</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x1a</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xc4</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">7</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x20</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x1f</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0xb</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x45ca</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">0x1d</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x18</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x24</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x25</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xac3fb</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">8</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x10</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xc</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x28</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xf</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xd0</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">0x23</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x11</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x0</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xb</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xc</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">7</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x26</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x172e48</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">0x1a</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xd</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">8</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">5</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x10b8</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x11</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x24</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x14</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x160</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">0x1a</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x15</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x12</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x1b</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x19</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x8a2</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">0x22</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xe</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">5</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x21</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x23</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x1bd8</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">5</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">8</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x26</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x19</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x15</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x23</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x2ca6988</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">8</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">8</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x15</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0xc</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x24</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x2430</span>)
+s<span style="color:#f92672">.</span>add((((passwd[<span style="color:#ae81ff">0x23</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">2</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">7</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">9</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x12</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x27</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x2de</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">5</span>] <span style="color:#f92672">*</span> (passwd[<span style="color:#ae81ff">0x11</span>] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">6</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x14</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x22</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x17</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x11d5</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">0x22</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xb</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xb</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0xd</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x2aba</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">0x22</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xb</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xb</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0xd</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x2aba</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">0x1b</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x12</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0xf</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x20</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">9</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x2668</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">0x15</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xe</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x1d</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x1400</span>)
+s<span style="color:#f92672">.</span>add((((passwd[<span style="color:#ae81ff">9</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">9</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">10</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xd</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x24</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x14</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x19ac</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">0xc</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x22</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">4</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x14</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x17</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x16</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0xafa0c</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">4</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">5</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">10</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x1b</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xb4</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">0xf</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x1c</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x25</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x18</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x12</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x0</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0xd06e8</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">4</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x23</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x19</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x15</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x18</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x14</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x1f8</span>)
+s<span style="color:#f92672">.</span>add((((passwd[<span style="color:#ae81ff">0x19</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">10</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xf</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x1c</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x21</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x3e</span>)
+s<span style="color:#f92672">.</span>add((((passwd[<span style="color:#ae81ff">6</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x19</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">2</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x19</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x12</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x1c</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x1eb9</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">0xb</span>] <span style="color:#f92672">*</span> (passwd[<span style="color:#ae81ff">5</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x22</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x16</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xc</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x22</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x121b93</span>)
+s<span style="color:#f92672">.</span>add((((passwd[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xe</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x26</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xd</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x80</span>)
+s<span style="color:#f92672">.</span>add((((passwd[<span style="color:#ae81ff">0x1e</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x15</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x11</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x17</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">5</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x21</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x1afd</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">7</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xe</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x11</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x21</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xdf</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">8</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">3</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">10</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">10</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x626e2</span>)
+s<span style="color:#f92672">.</span>add(((passwd[<span style="color:#ae81ff">0x25</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">7</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x13</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xc</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xb</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x12f</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">8</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x14</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x20</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xf</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x167a</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">0x11</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">4</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x1d</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x12</span>] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x11ca</span>)
+s<span style="color:#f92672">.</span>add((passwd[<span style="color:#ae81ff">0xd</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x16</span>] <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">10</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x23</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x32e9</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">0xd</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0xb</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x1d</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x13</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xec9</span>)
+s<span style="color:#f92672">.</span>add((((passwd[<span style="color:#ae81ff">0x19</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x26</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0xf</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0xb</span>]) <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x20</span>]) <span style="color:#f92672">-</span> passwd[<span style="color:#ae81ff">0x15</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">0x22</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x2a</span>)
+s<span style="color:#f92672">.</span>add(passwd[<span style="color:#ae81ff">6</span>] <span style="color:#f92672">*</span> passwd[<span style="color:#ae81ff">9</span>] <span style="color:#f92672">+</span> passwd[<span style="color:#ae81ff">0x23</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xedd</span>)
+
+<span style="color:#66d9ef">if</span> s<span style="color:#f92672">.</span>check() <span style="color:#f92672">==</span> sat:
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;solved!&#39;</span>)
+    m <span style="color:#f92672">=</span> s<span style="color:#f92672">.</span>model()
+    flag <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(n):
+        c <span style="color:#f92672">=</span> m[passwd[i]]<span style="color:#f92672">.</span>as_long()
+        flag <span style="color:#f92672">+=</span> chr(c)
+    <span style="color:#66d9ef">print</span>(flag)
+<span style="color:#66d9ef">else</span>:
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;failed&#39;</span>)
+</code></pre></div><p>One thing to mention here is although the individual chars of passwd are only 8 bits wide, we declare them to be 32-bit wide. Otherwise, it could cause a problem to the <code>==</code> at the end of the line. Obviously, we have to add the constraint <code>passwd[i] &gt;= 0x21</code> and <code>passwd[i] &lt;= 127</code>, to actually enforce they are printable ASCII chars.</p>
+<p>Running this immediately returns the flag:</p>
+<pre><code>UMDCTF-{ARM_1s_s0_SATisfying_7y8fdlsjebn}
+</code></pre><h2 id="epilog">Epilog</h2>
+<p>Despite z3 returns a result and it looks quite convincing, there are still some code below the last constraint. Typically, in CTF, this means the correct input that passes the constraints is NOT the actual flag; rather the input is used to decrypt the flag to be submitted. However, the above code is already in a good flag format. This confuses me so I decide to run the binary to see what happens. There is an excellent tool for this situation: the process level emulator &ndash; <a href="https://www.qiling.io/"><code>Qiling</code></a>.</p>
+<p>Qiling is an emulator based on Unicorn. It is simpler than Qemu since it only emulates the process that we are interested in. So there is no need to set up a bulky OS to run it. The code is extremely simple <a href="../qiling_emulate.py">(qiling_emulate.py)</a>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#f92672">from</span> qiling <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+    ql <span style="color:#f92672">=</span> Qiling([<span style="color:#e6db74">&#34;./armageddon&#34;</span>], <span style="color:#e6db74">&#34;QILING_INSTALL_PATH/examples/rootfs/arm_linux&#34;</span>)
+    ql<span style="color:#f92672">.</span>run()
+</code></pre></div><p>Since major system calls are implemented by Qiling, the program executes properly. Below is an excerpt of the output:</p>
+<pre><code>write(1,27008,16) = 0
+[+] write() CONTENT: bytearray(b'[+] Enter Code: ')
+[+] Enter Code: UMDCTF-{ARM_1s_s0_SATisfying_7y8fdlsjebn}
+read(0, 0x29010, 0x2000) = 42
+write(1,27008,1) = 0
+[+] write() CONTENT: bytearray(b'\n')
+
+write(1,27008,33) = 0
+[+] write() CONTENT: bytearray(b'[+] Code validated successfully!\n')
+[+] Code validated successfully!
+write(1,27008,1) = 0
+[+] write() CONTENT: bytearray(b'\n')
+
+[!] 0xf7ca9be8: syscall number = 0x8c(140) not implemented
+exit_group(0)
+</code></pre><p>So after we supply the correct code, it simply prints <code>Code validated successfully!\n</code>.</p>
+<p>LoL! I forget that it does not tell us the code is correct yet. Well, not bad, since playing with Qiling is quite painless.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        1731 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2020-06-18 08:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h">Read other posts</span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+            <span class="button previous">
+              <a href="/posts/reversing/shl_undefined_behavior/writeup/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl</span>
+              </a>
+            </span>
+          
+
+          
+            <span class="button next">
+              <a href="/posts/reversing/quarkslab_android_crackme/main/">
+                <span class="button__text">Debugging and Solving an Android Challenge</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2021</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span><span><a href="posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.af435e44374f1e99a669ea8cd5bb9a2fceed80588941a451bfddb66b86a67c9f40b0f417e9543a763f809aa7e9300d7b1d69bf99615810ba02ac70396d50fad5.js" integrity="sha512-r0NeRDdPHpmmaeqM1buaL87tgFiJQaRRv922a4amfJ9AsPQX6VQ6dj&#43;AmqfpMA17HWm/mWFYELoCrHA5bVD61Q=="></script>
+
+
+
+    </body>
+</html>

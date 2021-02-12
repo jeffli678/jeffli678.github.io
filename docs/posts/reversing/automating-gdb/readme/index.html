@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="The last week&amp;rsquo;s challenge is called Recursion. From the name we already expect to do some automation &amp;ndash; manually solving stuff recursively is not a wise idea.
+First Impression The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &amp;ldquo;Paste From&amp;rdquo; -&amp;gt; &amp;ldquo;Base64&amp;rdquo;." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="/posts/reversing/automating-gdb/readme/" />
+
+
+    <title>
+        
+            Solving a Recursive Crackme by Automating GDB :: Xusheng&#39;s blog  — Reversing, coding, and Xiagnqi
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Solving a Recursive Crackme by Automating GDB">
+<meta itemprop="description" content="The last week&rsquo;s challenge is called Recursion. From the name we already expect to do some automation &ndash; manually solving stuff recursively is not a wise idea.
+First Impression The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &ldquo;Paste From&rdquo; -&gt; &ldquo;Base64&rdquo;.">
+<meta itemprop="datePublished" content="2020-07-27T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-07-27T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1579">
+<meta itemprop="image" content=""/>
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content=""/>
+
+<meta name="twitter:title" content="Solving a Recursive Crackme by Automating GDB"/>
+<meta name="twitter:description" content="The last week&rsquo;s challenge is called Recursion. From the name we already expect to do some automation &ndash; manually solving stuff recursively is not a wise idea.
+First Impression The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &ldquo;Paste From&rdquo; -&gt; &ldquo;Base64&rdquo;."/>
+
+
+
+
+    <meta property="og:title" content="Solving a Recursive Crackme by Automating GDB" />
+<meta property="og:description" content="The last week&rsquo;s challenge is called Recursion. From the name we already expect to do some automation &ndash; manually solving stuff recursively is not a wise idea.
+First Impression The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &ldquo;Paste From&rdquo; -&gt; &ldquo;Base64&rdquo;." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/reversing/automating-gdb/readme/" />
+<meta property="og:image" content=""/>
+<meta property="article:published_time" content="2020-07-27T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-07-27T00:00:00+00:00" /><meta property="og:site_name" content="Xusheng&#39;s blog" />
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2020-07-27 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">hello friend ng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        8 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="/posts/reversing/automating-gdb/readme/">Solving a Recursive Crackme by Automating GDB</a>
+      </h1>
+
+      
+
+      
+
+      <div class="post-content">
+        <p>The last week&rsquo;s challenge is called <a href="https://0x00sec.org/t/reverseme-recursion/21802"><code>Recursion</code></a>. From the name we already expect to do some automation &ndash; manually solving stuff recursively is not a wise idea.</p>
+<h2 id="first-impression">First Impression</h2>
+<p>The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &ldquo;Paste From&rdquo; -&gt; &ldquo;Base64&rdquo;. Then you are done!</p>
+<p><img src="../imgs/1.png" alt=""></p>
+<p>We get a 14.5 kB ELF file. There is some mild obfuscation in the start of the <code>main</code>, which does not pose a serious challenge. In the middle of the <code>main</code> we see the program is reading input and checking length:</p>
+<p><img src="../imgs/2.png" alt=""></p>
+<p>The first thing I notice is that the input must be exactly 0x50 chars, which is quite unusual. Not it reads at most 0x50 chars and checks if the chars read are at least 0x50 chars, which means it must be 0x50 chars.</p>
+<p>Besides, after the length check, we see it calls <code>mmap</code>. For reversing challenges, once we see a <code>mmap</code> in it, probably there is a self-modifying code.</p>
+<p><img src="../imgs/3.png" alt=""></p>
+<p>Moving downward we see that the program copies a 0xae4-byte buffer into the newly allocated buffer, and then calls it. A strange thing here is the user input is moved into register <code>r12</code>. Typically, no compilers will use register <code>r12</code> to pass function argument, so this code might be hand-crafted.</p>
+<p>After the <code>call rdx</code>, the program tells if the flag is correct based on the return value. Now the next step is obvious, we need to define a function on that code buffer and see what it has.</p>
+<h2 id="decryption-routine">Decryption routine</h2>
+<p><img src="../imgs/4.png" alt=""></p>
+<p>The function looks like this. The loop decrypts another buffer at <code>data_20ab</code>, whose size is 0xa59. The decryption is just xor with 0x9f. Note the code_size variable sits right after this function, and right before the next data buffer to be decrypted. Meanwhile, the loop calculates a checksum of the next data buffer, and compare it with the dword at register <code>r12</code>. What is it? It is the user input! So the user input must match the checksum value.</p>
+<p>If the checksum matches, the program continues to execute the second newly decrypted buffer. Here, we can use Binary Ninja&rsquo;s transformation to transform the data in place, after which we define a function at the start of it.</p>
+<p><img src="../imgs/5.png" alt=""></p>
+<p>The newly defined function looks like this:</p>
+<p><img src="../imgs/6.png" alt=""></p>
+<p>It looks almost the same as the previous one, except for some small mutations. The xor key is different and it is 0xb6 this time. The buffer size is 0x9ce this time, which is smaller than the previous one. And that indicates we are probably recursively decrypting this buffer and each time we only decrypt the first part of it, which forms a function.</p>
+<p>I tried to repeat the process a few times and it just repeats. RECURSION. That is probably a good reason for the name.</p>
+<p>The first way to solve this is to solve it statically. We only need to get the xor key and the buffer size, to decrypt the buffer and calculate the checksum. However, due to the mutation, it is not that easy to get it correct. It is, though, definitely possible, but not optimal. So I come up with a dynamic approach.</p>
+<h2 id="using-hardware-breakpoints-and-automating-gdb">Using Hardware Breakpoints and Automating GDB</h2>
+<p>I did not rewrite the checksum algorithm by myself, despite it is super simple. Even if it is super complex and I cannot reverse/rewrite it, I can still solve this challenge. Why?</p>
+<p>Because we can wait at the line where the dword from the user input is compared with the correct checksum. Particularly, it is the <code>cmp esi, edi</code> line. the register <code>esi</code> holds our input, which, during debugging, is trash. Register <code>edi</code> holds the correct checksum. If we set a breakpoint here and examine the value of <code>edi</code>, we directly get the correct checksum.</p>
+<p>However, this approach cannot easily scale to the entire challenge. The problem here is we do not know where to set the next breakpoint before we decrypt the code. However, manually decrypting the code is arduous and error-prone, so we would better automate the solution.</p>
+<p>Note the address of the user input buffer is moved into r12 and never changed. If one checksum matches, the program executes <code>add r12, 0x4</code> to move to the next dword. So we can use a hardware breakpoint to catch the program when it reads the buffer <code>r12</code>, and read the value of <code>edi</code>. Then we remove the current hardware breakpoint, set a new one on the next address, and wait for the program to break again.</p>
+<p>Automating GDB is easier said than done. I have known it is possible for a long time, though I have never done it before. After duckduckgo-ing a little bit, I found there are two ways to do it. The first one is to implement a GDB command in Python; the second way is to use pygdbmi to interact with GDB&rsquo;s machine interface.</p>
+<p>Both methods allow us to execute gdb commands as if we directly use GDB, and get the output from GDB afterward. However, I found the pygdbmi approach is much harder to use for the current purpose. First of all, it runs GDB headlessly. So if there is an error in the script, it is hard to find it. Conversely, if we take the first approach, since we register ourselves as a new command (<code>solve</code> in particular) after we run the stuff we are still in GDB. We can see the commands we executed and see the outputs from GDB, which allows painless debugging. Also, despite the name machine interface, it does not automatically parse the string output from GDB. For example, if we examine the value of <code>rdi</code> by executing</p>
+<p><code>p/x $rdi</code></p>
+<p>The GDB returns something like:</p>
+<p><code>$1 = 0x555555557e90</code></p>
+<p>I would expect the pygdbmi to parse the value for me. However, it does nothing for this and directly returns the string output. We get the very same thing in the first approach. So obviously it is the better way to do it.</p>
+<p>Note that I am not saying gdbmi is not good. It is used by various projects, e.g., gdbgui, which is a browser-based GDB frontend. If you have not tried it, I strongly recommend you to experiment with it. It is just using gdbmi will require more development work and it is not suitable for reversing challenge, where we care more about getting things rolling faster.</p>
+<p>Ok, so much for the comparison. It is time to get to the code. The code is not fancy &ndash; it just requires some effort to write it correctly.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#f92672">import</span> gdb
+<span style="color:#f92672">import</span> struct
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_reg_value</span>(response):
+    response <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>split()[<span style="color:#ae81ff">2</span>]
+    value <span style="color:#f92672">=</span> int(response, <span style="color:#ae81ff">16</span>)
+    <span style="color:#66d9ef">return</span> value
+    
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Solve</span>(gdb<span style="color:#f92672">.</span>Command):
+    <span style="color:#66d9ef">def</span> __init__(self):
+        <span style="color:#75715e"># This registers our class as &#34;solve&#34;</span>
+        super(Solve, self)<span style="color:#f92672">.</span>__init__(<span style="color:#e6db74">&#34;solve&#34;</span>, gdb<span style="color:#f92672">.</span>COMMAND_DATA)
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">invoke</span>(self, arg, from_tty):
+        <span style="color:#75715e"># When we call &#34;solve&#34; from gdb, this is the method</span>
+        <span style="color:#75715e"># that will be called.</span>
+
+        dummy_input <span style="color:#f92672">=</span> open(<span style="color:#e6db74">&#39;input.txt&#39;</span>, <span style="color:#e6db74">&#39;wb&#39;</span>)
+        dummy_input<span style="color:#f92672">.</span>write(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;1&#39;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x50</span>)
+        dummy_input<span style="color:#f92672">.</span>close()
+
+        solution <span style="color:#f92672">=</span> bytes()
+
+        inferiors <span style="color:#f92672">=</span> gdb<span style="color:#f92672">.</span>inferiors()
+        inferior <span style="color:#f92672">=</span> inferiors[<span style="color:#ae81ff">0</span>]
+        gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;del&#39;</span>)
+        gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;file crackme.elf&#39;</span>)
+        gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;set breakpoint pending on&#39;</span>)
+        gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;b __libc_start_main&#39;</span>)
+        gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;r &lt; input.txt&#39;</span>)
+        response <span style="color:#f92672">=</span> gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;p/x $rdi&#39;</span>, to_string <span style="color:#f92672">=</span> True)
+        main_addr <span style="color:#f92672">=</span> get_reg_value(response)
+        main_addr_raw <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x1229</span>
+        <span style="color:#66d9ef">print</span>(main_addr)
+        base <span style="color:#f92672">=</span> main_addr <span style="color:#f92672">-</span> main_addr_raw
+
+        gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;b *</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> (base <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1399</span>))
+        gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;c&#39;</span>)
+
+        response <span style="color:#f92672">=</span> gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;p/x $rax&#39;</span>, to_string <span style="color:#f92672">=</span> True)
+        input_addr <span style="color:#f92672">=</span> get_reg_value(response)
+        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;input_addr&#39;</span>, hex(input_addr))
+        
+        i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+        <span style="color:#66d9ef">while</span> True:
+            <span style="color:#66d9ef">try</span>:
+                gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;del&#39;</span>)
+                gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;rwatch *</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> (input_addr <span style="color:#f92672">+</span> i <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span>))
+                gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;c&#39;</span>)
+
+                response <span style="color:#f92672">=</span> gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;p/x $edi&#39;</span>, to_string <span style="color:#f92672">=</span> True)
+                checksum <span style="color:#f92672">=</span> get_reg_value(response)
+                <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;checksum&#39;</span>, hex(checksum))
+                solution <span style="color:#f92672">+=</span> struct<span style="color:#f92672">.</span>pack(<span style="color:#e6db74">&#39;&lt;I&#39;</span>, checksum)
+                
+                gdb<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#39;set $rsi = </span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> checksum)
+                i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+            <span style="color:#66d9ef">except</span>:
+                <span style="color:#66d9ef">break</span>
+
+        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;=&#39;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">50</span>)
+        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;the flag is:&#39;</span>)
+        <span style="color:#66d9ef">print</span>(solution)
+        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;len:&#39;</span>, len(solution))
+
+        output <span style="color:#f92672">=</span> open(<span style="color:#e6db74">&#39;solution.txt&#39;</span>, <span style="color:#e6db74">&#39;wb&#39;</span>)
+        output<span style="color:#f92672">.</span>write(solution)
+        output<span style="color:#f92672">.</span>close()
+
+
+<span style="color:#75715e"># This registers our class to the gdb runtime at &#34;source&#34; time.</span>
+Solve()
+</code></pre></div><p>To use it,</p>
+<ol>
+<li>run gdb</li>
+<li>inside gdb, run <code>source gdb_solve.py</code></li>
+<li>inside gdb, run <code>solve</code></li>
+<li>after it runs, it should print the solution and also write it to solution.txt</li>
+<li>verify it by <code>cat solution.txt | ./crackme.elf</code></li>
+</ol>
+<p>Which is quite simple, isn&rsquo;t it? Maybe the command <code>rwatch</code> is new, which sets hardware read/write breakpoints.</p>
+<p>The correct flag contains non-printable chars, which is not surprising, as it is unlikely the checksum of the code happens to be a printable string. Unless the maker put some effort to make it that way.</p>
+<p>In the above script, there is one thing to point out. We run</p>
+<p><code>set breakpoint pending on</code></p>
+<p>before</p>
+<p><code>b __libc_start_main</code>.</p>
+<p>This is because, if we do not do it, the attempt to set a breakpoint on <code>__libc_start_main</code> will produce an error. And it only happens before we run the binary. So in other words, if we first run the binary in GDB for at least once, and then directly set a breakpoint on <code>__libc_start_main</code>, it will succeed. That is because GDB has seen that function once, and it knows to wait for it. However, since we are automating GDB, every time it bootstraps cleanly and it does not know there exists a <code>__libc_start_main</code>, hence the error. I am not familiar enough with the GDB source code so I cannot speculate why it happens, but probably there are some reasons behind it. Anyway, <code>set breakpoint pending on</code> is the correct way to deal with it.</p>
+<p>The author also released his/her own <a href="https://0x00sec.org/t/reverseme-recursion/21802/4?u=xusheng">writeup</a>, which needs to be decrypted by the correct flag. I suggest you to have a look at it, espcially the mutation part.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        1579 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2020-07-27 08:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h">Read other posts</span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+            <span class="button previous">
+              <a href="/posts/reversing/x86/readme/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Making and solving a Reversing Challenge Based-on x86 ISA Encoding</span>
+              </a>
+            </span>
+          
+
+          
+            <span class="button next">
+              <a href="/posts/reversing/obfuscation/readme/">
+                <span class="button__text">Solving an Obfuscated Crackme with BinaryNinja and Triton</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2021</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span><span><a href="posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.af435e44374f1e99a669ea8cd5bb9a2fceed80588941a451bfddb66b86a67c9f40b0f417e9543a763f809aa7e9300d7b1d69bf99615810ba02ac70396d50fad5.js" integrity="sha512-r0NeRDdPHpmmaeqM1buaL87tgFiJQaRRv922a4amfJ9AsPQX6VQ6dj&#43;AmqfpMA17HWm/mWFYELoCrHA5bVD61Q=="></script>
+
+
+
+    </body>
+</html>

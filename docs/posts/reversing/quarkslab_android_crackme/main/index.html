@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.
+First Impression The challenge is created by Quarkslab. The crackme-telegram.apk is ~25MB in size which is larger than a typical crackme." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="/posts/reversing/quarkslab_android_crackme/main/" />
+
+
+    <title>
+        
+            Debugging and Solving an Android Challenge :: Xusheng&#39;s blog  — Reversing, coding, and Xiagnqi
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Debugging and Solving an Android Challenge">
+<meta itemprop="description" content="Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.
+First Impression The challenge is created by Quarkslab. The crackme-telegram.apk is ~25MB in size which is larger than a typical crackme.">
+<meta itemprop="datePublished" content="2020-05-30T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-05-30T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="2769">
+<meta itemprop="image" content=""/>
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content=""/>
+
+<meta name="twitter:title" content="Debugging and Solving an Android Challenge"/>
+<meta name="twitter:description" content="Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.
+First Impression The challenge is created by Quarkslab. The crackme-telegram.apk is ~25MB in size which is larger than a typical crackme."/>
+
+
+
+
+    <meta property="og:title" content="Debugging and Solving an Android Challenge" />
+<meta property="og:description" content="Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.
+First Impression The challenge is created by Quarkslab. The crackme-telegram.apk is ~25MB in size which is larger than a typical crackme." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/reversing/quarkslab_android_crackme/main/" />
+<meta property="og:image" content=""/>
+<meta property="article:published_time" content="2020-05-30T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-05-30T00:00:00+00:00" /><meta property="og:site_name" content="Xusheng&#39;s blog" />
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2020-05-30 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">hello friend ng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        13 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="/posts/reversing/quarkslab_android_crackme/main/">Debugging and Solving an Android Challenge</a>
+      </h1>
+
+      
+
+      
+
+      <div class="post-content">
+        <p>Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.</p>
+<h2 id="first-impression">First Impression</h2>
+<p>The <a href="https://blog.quarkslab.com/android-challenge.html">challenge</a> is created by Quarkslab. The <strong>crackme-telegram.apk</strong> is ~25MB in size which is larger than a typical crackme. One of the challenges in real-world reverse engineering is the huge size of the binary. There are too many possible places to hide the crucial code so even finding it is non-trivial in the first place.</p>
+<p>Unzipping the apk gives us a folder that has <strong>classes.dex</strong> and sub-folder <strong>lib</strong> in it. The code for an Android app can be either in the .dex file or the native libraries. the .dex file is typically produced from Java whereas the native libraries are mostly complied from C/C++. And they require different reverse engineering skills. Nevertheless, here I want to share a heuristic: <strong>if an android crackme has native libraries, almost certainly the important code sits in these  libs.</strong> Well, this is not 100% reliable and the situation could change since I publish this, but it works very well for now.</p>
+<h2 id="creating-an-avd-and-running-the-app">Creating an AVD and Running the App</h2>
+<p>I do not have an Android phone or tablet so I need to run it in an emulator. There are many available Android emulators. In this writeup, I will use the official <a href="https://developer.android.com/studio/">Android Studio</a>. This crackme comes with both Arm and x86 versions of the native library, so we can run it in an x86 AVD (Android Virtual Device). Otherwise, I would have to use the Arm CPU AVD, which also works but runs slow on my Intel CPU.</p>
+<p>Creating an AVD should be quite straightforward following this <a href="https://developer.android.com/studio/run/managing-avds">document</a>. I got one with API 28 and x86 CPU. Once we launch the app, it prompts us to register with a phone number:</p>
+<p><img src="../imgs/wrong.png" alt=""></p>
+<p>If we randomly input a phone number, we will be greeted by an error message. So this is already the main crackme. We need to find a special phone number (along with the country code) that is accepted by the app.</p>
+<h2 id="finding-the-code">Finding the Code</h2>
+<p>As always, we need to first locate the code which does the verification. One clue is the error message itself: <strong>Wrong number! Try again</strong>. This string can be found in the libtmessages.29.so. However, there are no Xrefs to it. Now there are several possibilities: 1. the string will be used but the code is obfuscated so my disassembler does not find a reference to it; 2. the string is not used and the code is somewhere else. I continued to search in class.dex, libtmessages.28.so, and also used <a href="https://ibotpeaches.github.io/Apktool/">Apktool</a> to unpack the resources.arsc. Nothing else can be found.</p>
+<p>I do not want to create the illusion that I <strong>systematically</strong> find the verification function. Actually, I took some detous here. I reversed the class.dex and libtmessages.28.so for a while without success before I tried the libtmessages.29.so. This is indeed quite common in reverse engineering. Going back to the libtmessages.29.so, I had a look at the JNI_OnLoad() which has some related stuff but does not have the verification function. I checked the functions before and after the JNI_OnLoad() to see if there are any interesting functions. The logic is compilers tend to arrange the functions close to each other in the source code also adjacent to the generated binary. So there is a chance the important function is near the JNI_OnLoad().</p>
+<p>I spotted the <strong>data_6871</strong> that sits right after the function. It starts with 0x5b81, which looks like code for me.</p>
+<p><img src="../imgs/data.png" alt=""></p>
+<p>Then I defined a function here and it is real code. It seems innocent at first look, but I quickly noticed that it is preparing a constant string on the stack:</p>
+<p><img src="../imgs/analyze_me.png" alt=""></p>
+<pre><code>Are you trying to analyze me?
+</code></pre><p>It looks like a message related to anti-debugging &ndash; we might see this while debugging the app. Remember we are not yet sure whether this is related to the verification, so it is worthy to debug it now and see if this function is called.</p>
+<h2 id="setting-up-debugging">Setting up Debugging</h2>
+<p>Simply put, debugging an android app is a remote debugging scene. We run the <strong>gdbserver</strong> on the phone (either an emulator or a real one) and attach it to the target process. And then we launch <strong>gdb</strong> on our computer and connect to the remote target. After that, there is no difference between debugging locally and remotely.</p>
+<p>An android app may run inside a Dalvik VM. However, the VM is just a regular process and can be debugged like any other processes. Furthermore, the native libraries are directed loaded into the process memory space so we can also debug that.</p>
+<p>We first need to download the <a href="https://developer.android.com/ndk/">Android NDK</a> since we need the prebuilt gdbserver in it. The NDK is large and we do not need other things in it (for debugging purpose). However, it is better than randomly searching on the Internet for it &ndash; it may not work properly inside the AVD.</p>
+<p>The gdbserver can be found in the <code>android-ndk-r21b/prebuilt/android-x86/gdbserver</code>. Note I have a x86 AVD so I need the x86 version of it. First I push it to the device:</p>
+<pre><code>$ adb push ./android-ndk-r21b/prebuilt/android-x86/gdbserver /system/bin/
+</code></pre><p>After that, I launch the app on the device. Then On my computer, I spawn an adb shell by running:</p>
+<pre><code>$ adb shell
+</code></pre><p>The app is called <strong>telegram</strong> so I run the following command to find the PID of the target process by running:</p>
+<pre><code># ps -A | grep telegram                                                                   
+u0_a80        4165  7934 1562976 153292 ep_poll      e9897b59 S org.telegram.messenger
+</code></pre><p>Note: I use <code>$</code> for any command to be executed in the host shell and <code>#</code> for anything inside the adb shell.</p>
+<p>The PID of our target is 4165. The command to attach gdbserver to the process is:</p>
+<pre><code># gdbserver --attach host:port PID
+</code></pre><p>In my case, I use:</p>
+<pre><code># gdbserver --attach localhost:12345 4165
+</code></pre><p>Now the gdbserver will attach to the process with PID 4165 and listen on port 12345 for remote connection. Meanwhile, the app will hang.</p>
+<p>We need to set up a port forwarding before connecting to it. This is because the gdbserver is listening on the port 12345 of the device, not our host computer.</p>
+<pre><code>$ adb forward tcp:12345 tcp:12345
+</code></pre><p>This will forward the port 12345 on the host to the port 12345 on the device.</p>
+<p>Now launch gdb on the computer and attach to it:</p>
+<pre><code>pwndbg&gt; target remote localhost:12345
+</code></pre><p>If everything works fine gdb should be printing a lot of information about the remote target. This might take a while and eventually, it should stop and ask for your input. The prompt starts with <code>pwndbg&gt;</code> because I installed the pwngdb enhancement, which makes gdb more usable.</p>
+<p>The next thing to figure out is the base address of the loaded libtmessages.29.so.</p>
+<pre><code>pwndbg&gt; info sharedlibrary
+From        To          Syms Read   Shared Object Library
+// many lines omitted
+0xc9b69000  0xc9b6eaf7  Yes (*)     target:/data/app/org.telegram.messenger-o_d807FF7eGAXMhf5s3qqQ==/oat/x86/base.odex
+0xc9406570  0xc9406830  Yes (*)     target:/data/app/org.telegram.messenger-o_d807FF7eGAXMhf5s3qqQ==/lib/x86/libtmessages.29.so
+0xc8896400  0xc8f70f71  Yes (*)     target:/data/app/org.telegram.messenger-o_d807FF7eGAXMhf5s3qqQ==/lib/x86/libtmessages.28.so
+0xc7d329b0  0xc7d36ea5  Yes (*)     target:/vendor/lib/hw/gralloc.ranchu.so
+(*): Shared library is missing debugging information.
+</code></pre><p>We can see the address of libtmessages.29.so is 0xc9406570. Interestingly, the address reported by <strong>info sharedblibrary</strong> is the address of the <strong>.text</strong> section, which is not very convenient for rebasing. But it is fine since we can calculate it manually.</p>
+<p>In BinaryNinja we can see the start of the .text is at 0x5570, while the start of the function is at 0x6871. We now the offset of the remains the same, so the actual address to set the breakpoint is:</p>
+<pre><code>&gt;&gt;&gt; hex(0xc9406570 + (0x6871 - 0x5570))
+'0xc9407871'
+</code></pre><p>. Then we rebase it in BinaryNinja and we now the address of that.</p>
+<pre><code>pwndbg&gt; b *0xc9407871
+Breakpoint 1 at 0xc9407871
+pwndbg&gt; c
+Continuing.
+</code></pre><p>Now, give a random phone number and hit enter on the phone. And the breakpoint hits! We find the verification function!</p>
+<h2 id="solving-the-country-code">Solving the Country Code</h2>
+<p>The function is medium-sized and we need to have a big picture of it before plunging into lines of assemblies. Near the bottom of the function, we see the string &ldquo;Wrong number&rdquo; being created in a buffer:</p>
+<p><img src="../imgs/wrong_number.png" alt=""></p>
+<p>So we need to avoid this basic block. Scrolling up a little bit and we find two checks must be satisfied:</p>
+<p><img src="../imgs/key.png" alt=""></p>
+<p>These are testing if the lowest bit is set. However, if we go further upward we can find that both <strong>check_1</strong> and <strong>check_2</strong> are booleans and they represent whether a check is satisfied. For check_1, we have the following block:</p>
+<p><img src="../imgs/country_code.png" alt=""></p>
+<p>We see a string input is passed into function <strong>std::__ndk1::stoul</strong> and converted to an integer using base 10. Then <strong>7 * int + 9</strong> is calculated and the result is fed into function <strong>__umoddi3</strong>. I have seen <strong>__umoddi3</strong> before so I quickly figure out the divisor is 0x25. In fact, <strong>__umoddi3</strong> calculates 64-bit unsigned modulus. This is a 32-bit binary so it has to use two registers to hold 64bit values. The <strong>edx</strong> pushed onto the stack is the higher 32 bits of the dividend; the <strong>eax</strong> is the lower 32bits. If I have not seen it, I can also figure it out by debugging the code and observe the input and output for it. The modulus is returned as <strong>edx:eax</strong> too.</p>
+<p>We want variable <strong>check_1</strong> to be 1, so we must set it at 0x6a60. To ensure the <strong>ZF</strong> is set when it gets to 0x6a60, the eax must be 0x17 and the edx must be 0. This means the modulus must be equal to 0x17.</p>
+<p>A quick debugging veries the input string is the country code we input. So the constaint here is:</p>
+<pre><code>(7 * country_code + 9) % 0x25 == 0x17
+</code></pre><p>A simple script to print the accepted coutry_code is as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">for</span> coutry_code <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">999</span>):
+    <span style="color:#66d9ef">if</span>  (<span style="color:#ae81ff">7</span> <span style="color:#f92672">*</span> coutry_code <span style="color:#f92672">+</span> <span style="color:#ae81ff">9</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">0x25</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x17</span>:
+        <span style="color:#66d9ef">print</span>(coutry_code)
+</code></pre></div><p>We know there are many values that satisfy the above equation, but only one among them is a valid country code. It is +39, which is the code for Italy.</p>
+<h2 id="solving-the-phone-number">Solving the Phone Number</h2>
+<p>Below the country code check, we can find the check for the phone number. At 0x6c6f it calls into another medium-sized function, which is probably the check function. It looks like this:</p>
+<p><img src="../imgs/phone_func.png" alt=""></p>
+<p>It is not immediately obvious what this function does. Though from the first few basic blocks we can observe the <strong>std::string</strong> being used and the valid length is probably 0x16. Remember the correct phone number is not necessarily a phone number at <strong>al</strong> and it does not have to have a length that looks like a phone number (e.g., 10 digits for the U.S.).</p>
+<p>To approach a function like this, there are two methods. The first way is to check how is the return value calculated and back-slice it and do taint-analysis in the brain. From the previous analysis we now this function should return 1 in <strong>eax</strong>. We can go back from the last instruction that touches <strong>eax</strong> and see what is the way to set it to 1.</p>
+<p>Besides, we see there is a loop in the lower-right side of the mini graph. Loops can give us a lot of information about what is happening. My way to reverse a loop is to identify the iteration variable (similar to <strong>i</strong> in C code), and see what is the initial value, final value, and stride. Or more generally speaking, what is the exit condition and what is the update rule. This lets us know how many times this loop is going to be executed.</p>
+<p>Then we should get into the loop body and analyze it. This lets us know what is done in one iteration. These two combined tell us what the loop is doing as a whole.</p>
+<p>It is hard to include every step I took to reverse this loop, but let me describe the major steps.
+First thing first, there are many ways to exit this loop, but the exit at 0x7325 is the only place where the return value of this function can be 1. Above it, we see <strong>cmp ecx, esi</strong>, which is probably comparing the iterator with the final value. But which one is the iterator?</p>
+<p><img src="../imgs/loop.png" alt=""></p>
+<p>In many cases, we can figure out by looking at the code, but for this one, I am not so sure. Never mind, we can debug it. I set a breakpoint at 0x7323 and send an input with length 0x16 (if the length is wrong, the execution never enters the loop). In the first iteration <strong>ecx</strong> is 0 and <strong>esi</strong> is 0x16; in the second iteration <strong>ecx</strong> is 2 and <strong>esi</strong> is 0x16.</p>
+<p>So, it looks like ecx is <strong>i</strong> and esi is the final value 0x16. Going up a little bit and at 0x7306 we see the i is incremented by 2 each time. So this loop probably processes two bytes of the input one time.</p>
+<p>Now it is time to analyze one iteration. We want the code at <strong>0x732d</strong> to set al, then <strong>edi</strong> must not be 0. At <strong>0x7300</strong> there is a <strong>and</strong>, so ecx must not be 0. <strong>ecx</strong> is updated at 0x72d8, where we have a <strong>cmp</strong> before it. So to have 1 as the return value for the function, this <strong>cmp</strong> must be equal. Then we move further upward to see what is <strong>al</strong> and <strong>byte [esp+0x36]</strong>.</p>
+<p><img src="../imgs/loop_body.png" alt=""></p>
+<p>It turns out the al is the result of another <strong>std::__ndk1::stoul</strong>. The base is still 10 and the input is the two chars (for every iteration) from the input string. The other operand is a little bit complex. During debugging, I find that at 0x7283, the <strong>eax</strong> points to a string</p>
+<pre><code>org.telegram.messenger
+</code></pre><p>It is the name of the app. I did not bother backtrace how it gets to here but this is an interesting finding: it is probably used in the algorithm. At 0x7295, it takes the ith char of the above string. At 0x729d, the char (ASCII value) is xor-ed with a variable we do not understand yet.</p>
+<p>Then we see a <strong>division by multiplication</strong>. This is an optimization technique used by compilers to speed up divisions. Division instructions (e.g., <strong>idiv</strong>) are super slow to execute so the compilers calculate it differently. Even though we ended up with more instructions, the code executes faster. For more details on this topic, please refer to: <a href="https://stackoverflow.com/questions/30790184/perform-integer-division-using-multiplication">ref 1</a> or <a href="https://gmplib.org/~tege/divcnst-pldi94.pdf">ref 2</a>.</p>
+<p>It is not hard to recognize the divisor from the assembly after we know how it works. Furthermore, if the division is used to calculate a modulus, it is easier to recognize. For example, if the code calculates <strong>eax % n</strong>, it will do the following two things:</p>
+<pre><code>quotient = eax / n
+modulus = eax - quotient * n
+</code></pre><p>The &ldquo;divide by n&rdquo; part might not be immediately obvious, but the &ldquo;multiply by n&rdquo; part is super easy.</p>
+<pre><code>000072a3  movsx   ecx, byte [esp+0x36 {var_3a_1}]
+000072a8  mov     eax, ecx
+000072aa  mov     edx, 0x51eb851f
+000072af  imul    edx
+000072b1  mov     eax, edx
+000072b3  shr     eax, 0x1f
+000072b6  shr     edx, 0x5
+000072b9  add     edx, eax
+000072bb  imul    eax, edx, 0x64
+000072be  sub     ecx, eax
+000072c0  mov     byte [esp+0x36 {xored_val % 0x64}], cl
+</code></pre><p>At 0x72bb we see a <strong>imul    eax, edx, 0x64</strong> followed by a <strong>sub     ecx, eax</strong>. Obviously, this is calculating the modules and divisor is 0x64. So this whole thing is calculating <strong>ecx % 0x64</strong>.</p>
+<p>For many other divisor values, the multiplication will be further optimized. Like if the divisor is 9, it will become something like <strong>mov edx, eax; shl edx, 3; add edx, eax</strong>. But the &ldquo;shift left and add&rdquo; trick is still more obvious than the division.</p>
+<p>Now the only missing piece is the mysterious variable referenced at address 0x7299. Notice it is initialized to 0 before entering the loop and update at 0x72c9 according to the result of the transformation in each iteration. In fact, this is similar to the <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation">Cipher block chaining (CBC)</a> in block ciphers, where an initilization vector is provided and updated on every block.</p>
+<p>We can now reconstruct the algorithm as the following pseudo-code:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">check</span>(input_string):
+    <span style="color:#66d9ef">if</span> len(input_string) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0x16</span>:
+        <span style="color:#66d9ef">return</span> False
+
+    s <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;org.telegram.messenger&#39;</span>
+    IV <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+    check_ok <span style="color:#f92672">=</span> True
+    <span style="color:#66d9ef">for</span> i, two_char <span style="color:#f92672">in</span> yield_two_char_every_time(input_string):
+        val <span style="color:#f92672">=</span> int(two_char, <span style="color:#ae81ff">10</span>)
+        IV <span style="color:#f92672">=</span> (IV <span style="color:#f92672">^</span> i <span style="color:#f92672">^</span> asc(s[i])) <span style="color:#f92672">%</span> <span style="color:#ae81ff">0x64</span>
+        <span style="color:#66d9ef">if</span> val <span style="color:#f92672">!=</span> IV:
+            check_ok <span style="color:#f92672">=</span> False
+            <span style="color:#66d9ef">break</span>
+    <span style="color:#66d9ef">return</span> check_ok
+</code></pre></div><p>Which can be solved by the following script:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python">s <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;org.telegram.messenger&#39;</span>
+val <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+flag <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>
+<span style="color:#66d9ef">while</span> i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0x16</span>:
+    c <span style="color:#f92672">=</span> s[i]
+    asc <span style="color:#f92672">=</span> val <span style="color:#f92672">^</span> i <span style="color:#f92672">^</span> ord(c)
+    asc <span style="color:#f92672">%=</span> <span style="color:#ae81ff">0x64</span>
+    val <span style="color:#f92672">=</span> asc
+    flag <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#39;</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> asc
+    i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">2</span>
+
+<span style="color:#66d9ef">print</span>(flag)
+<span style="color:#75715e"># the flag is:</span>
+<span style="color:#75715e"># 1110222419205493626651</span>
+</code></pre></div>
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        2769 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2020-05-30 08:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h">Read other posts</span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+            <span class="button previous">
+              <a href="/posts/reversing/armageddon/solve/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Solving an ARM challenge with z3</span>
+              </a>
+            </span>
+          
+
+          
+            <span class="button next">
+              <a href="/posts/reversing/client_houseplant_ctf_2020/solve/">
+                <span class="button__text">Solving a Reversing Challenge with Mitmproxy and OCR</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2021</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span><span><a href="posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.af435e44374f1e99a669ea8cd5bb9a2fceed80588941a451bfddb66b86a67c9f40b0f417e9543a763f809aa7e9300d7b1d69bf99615810ba02ac70396d50fad5.js" integrity="sha512-r0NeRDdPHpmmaeqM1buaL87tgFiJQaRRv922a4amfJ9AsPQX6VQ6dj&#43;AmqfpMA17HWm/mWFYELoCrHA5bVD61Q=="></script>
+
+
+
+    </body>
+</html>

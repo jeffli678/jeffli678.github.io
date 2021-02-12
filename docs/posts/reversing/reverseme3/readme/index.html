@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.
+This time I am writing about the challenge ReverseMe3 from jochen_. The challenge can be found on crackmes.one. The password to unzip is &amp;ldquo;crackmes." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="/posts/reversing/reverseme3/readme/" />
+
+
+    <title>
+        
+            Deciphering a Windows Anti-debugging Challenge :: Xusheng&#39;s blog  — Reversing, coding, and Xiagnqi
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Deciphering a Windows Anti-debugging Challenge">
+<meta itemprop="description" content="It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.
+This time I am writing about the challenge ReverseMe3 from jochen_. The challenge can be found on crackmes.one. The password to unzip is &ldquo;crackmes.">
+<meta itemprop="datePublished" content="2020-11-29T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-11-29T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="4741">
+<meta itemprop="image" content=""/>
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content=""/>
+
+<meta name="twitter:title" content="Deciphering a Windows Anti-debugging Challenge"/>
+<meta name="twitter:description" content="It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.
+This time I am writing about the challenge ReverseMe3 from jochen_. The challenge can be found on crackmes.one. The password to unzip is &ldquo;crackmes."/>
+
+
+
+
+    <meta property="og:title" content="Deciphering a Windows Anti-debugging Challenge" />
+<meta property="og:description" content="It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.
+This time I am writing about the challenge ReverseMe3 from jochen_. The challenge can be found on crackmes.one. The password to unzip is &ldquo;crackmes." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/reversing/reverseme3/readme/" />
+<meta property="og:image" content=""/>
+<meta property="article:published_time" content="2020-11-29T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-11-29T00:00:00+00:00" /><meta property="og:site_name" content="Xusheng&#39;s blog" />
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2020-11-29 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">hello friend ng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        23 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="/posts/reversing/reverseme3/readme/">Deciphering a Windows Anti-debugging Challenge</a>
+      </h1>
+
+      
+
+      
+
+      <div class="post-content">
+        <p>It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.</p>
+<p>This time I am writing about the challenge <code>ReverseMe3</code> from <code>jochen_</code>. The challenge can be found on <a href="https://crackmes.one/crackme/5fb1642933c5d424269a1850">crackmes.one</a>. The password to unzip is &ldquo;crackmes.one&rdquo;.</p>
+<p>The description given on the challenge page says the program will show a message box when it not running under a debugger. And the goal is to make it also show the message box when it is running under a debugger. Basically, to circumvent the anti-debugging techniques.</p>
+<p>Interestingly, the author mentions the program only runs properly on <code>3 latest builds of Windows 10. 1909 2004 and 20H2</code>. And if we were to conquer it inside a VM, we have to bypass one more check. So maybe the program uses some new feature that is introduced in the latest versions? Or it might be relying on low-level/un-documented features that only work on these versions. I do not have a VM that has the proper Windows build version, so I decide to solve it statically.</p>
+<p>As always, I will not only explain how to solve it correctly &ndash; I will try to mention many of my thought processes as well as some detours that I have took. I believe this is more interesting to read than a flawless straight-sail.</p>
+<h2 id="first-impression">First Impression</h2>
+<p>The challenge binary <code>ReverseMe3.EXE</code> is only 2.6 KB, relatively small. Loading it into BinaryNinja quickly reveals something unusual:</p>
+<p><img src="../imgs/1.png" alt=""></p>
+<p>It first sets <code>eax</code> to 0x40, <code>bswap</code> it, and then calls <code>cpuid</code>. the <code>bswap</code> will make eax <code>0x40000000</code>, and according to my memory that does not return anything useful for <code>cpuid</code>. However, at <code>0x40101d</code>, the return value in <code>ecx</code> is moved into <code>eax</code>, which is then used to decrypt the code starting from <code>0x401030</code>. The code to be decrypted is 0x258 bytes long. Code at <code>00401030</code> immediately follows the decryption loop, and of course, it cannot be properly disassembled since it is still encrypted.</p>
+<p>From what I see now the challenge is probably hand-written. I like hand-written challenges since it can be denser in terms of tricks and traps, which is the fun of reverse engineering.</p>
+<p>Note the decryption only uses one byte from the return value of <code>cpuid</code>, so it is possible to try all 256 possibilities, disassemble the decrypted code and see which one can be disassembled properly. The same technique is used in one of the crackmes in the book &ldquo;Reversing: Secrets of Reverse Engineering&rdquo;.</p>
+<h2 id="cpuid">CPUID</h2>
+<p>But we do not have to do the hard work, at least for now. We can see what <code>cpuid</code> is returning and decrypt the code with the correct return value. However, as stated in the challenge description, this challenge does not run properly in a VM. And we know that <code>cpuid</code> sometimes returns different values inside/outside the VM. So if we actually run the program, we probably get a wrong return value.</p>
+<p>Anyways, let us have a look at of the documentation about <code>cpuid</code>. In fact, <code>eax</code> register determines the type of information that will be returned by the <code>cpuid</code>. For example, if <code>eax</code> is zero upon the execution, <code>cpuid</code> will return the maximum valid input value for basic CPUID information. Besides, a value that is larger than 0x80000000 will request extended CPUID information. However, these do not help us since the input is 0x40000000.</p>
+<p>In the doc, anything between 0x40000000 - 0x4FFFFFFF is descibed as:</p>
+<pre><code>Invalid. No existing or future CPU will return processor identification or feature information if the initial EAX value is in the range 40000000H to 4FFFFFFFH.
+</code></pre><p>I was tempted to think the return value will be undefined, or even a certain kind of fault will be triggered. However, we see clearly from the code that not only the <code>cpuid</code> should execute properly, its return value should be stable.</p>
+<p>Upon closer inspection of the documentation, I find that:</p>
+<pre><code>If a value is entered for CPUID.EAX is higher than the maximum input value for basic or extended function for that processor then the data for the highest basic information leaf is returned.
+</code></pre><p>I am not sure 0x40000000 is greater than 0x80000000 &ndash; maybe they do a signed comparison. Anyways, we know what is going to happen: <code>the data for the highest basic information leaf is returned.</code></p>
+<p>Now that we still need to find the concrete return value. I do have a Windows VM, but that gives me 0x56 in <code>cl</code>, which after the decryption, gives me garbage rather than valid code. I am not planning to install an actual Windows machine to solve this challenge, so what should I do now?</p>
+<p>I soon realize, for things like <code>cpuid</code>, it does not matter what OS I run. I am currently on Linux, but the value returned should be the same. I launched <a href="https://github.com/yrp604/rappel"><code>rappel</code></a>, an assembly REPL tool.</p>
+<pre><code>&gt; mov eax, 0x40000000
+&gt; cpuid
+rax=00000000000008fc rbx=00000000000012c0 rcx=0000000000000064
+rdx=0000000000000000 rsi=0000000000000000 rdi=0000000000000000
+rip=0000000000400003 rsp=0000000000000033 rbp=0000000000000000
+ r8=0000000000000000  r9=0000000000000000 r10=0000000000000000
+r11=0000000000000000 r12=0000000000000000 r13=0000000000000000
+r14=0000000000000000 r15=0000000000000000
+[cf=0, zf=0, of=0, sf=0, pf=0, af=0, df=0]
+cs=002b  ss=0000  ds=0000  es=0000  fs=0000  gs=0000            efl=00000202
+</code></pre><p>The return value of <code>ecx</code> is 0x64. Is this reliable? Will it always return the same value on different machines? I tried to find the maximum index of the basic information by calling <code>cpuid</code> when eax is set to 0:</p>
+<pre><code>&gt; mov eax, 0
+&gt; cpuid
+rax=0000000000000016 rbx=00000000756e6547 rcx=000000006c65746e
+rdx=0000000049656e69 rsi=0000000000000000 rdi=0000000000000000
+rip=0000000000400003 rsp=0000000000000033 rbp=0000000000000000
+ r8=0000000000000000  r9=0000000000000000 r10=0000000000000000
+r11=0000000000000000 r12=0000000000000000 r13=0000000000000000
+r14=0000000000000000 r15=0000000000000000
+[cf=0, zf=0, of=0, sf=0, pf=0, af=0, df=0]
+cs=002b  ss=0000  ds=0000  es=0000  fs=0000  gs=0000            efl=00000202
+</code></pre><p>We can see the return value of eax 9s 0x16, which means the maximum basic information is 0x16. Then I set <code>eax</code> to 0x16 and call <code>cpuid</code> again:</p>
+<pre><code>&gt; mov eax, 0x16
+&gt; cpuid
+rax=00000000000008fc rbx=00000000000012c0 rcx=0000000000000064
+rdx=0000000000000000 rsi=0000000000000000 rdi=0000000000000000
+rip=0000000000400003 rsp=0000000000000033 rbp=0000000000000000
+ r8=0000000000000000  r9=0000000000000000 r10=0000000000000000
+r11=0000000000000000 r12=0000000000000000 r13=0000000000000000
+r14=0000000000000000 r15=0000000000000000
+[cf=0, zf=0, of=0, sf=0, pf=0, af=0, df=0]
+cs=002b  ss=0000  ds=0000  es=0000  fs=0000  gs=0000            efl=00000202
+</code></pre><p>Not bad, the same output is returned. So I am pretty confident calling <code>cpuid</code> with eax set to 0x40000000 has the same effect as calling it with 0x16. Looking for the value 0x16 in the table in Intel docs tells me that it returns <code>Processor Frequency Information Leaf</code>. For register <code>ecx</code>, it says &ldquo;Bits 15 - 00: Bus (Reference) Frequency (in MHz).&rdquo;</p>
+<p>I am not sure whether this information is all the same on different machines since such bus frequency could vary in different cases. Please feel free to get in touch with me if you have any ideas about this! Anyways, if I do install a Windows machine and execute the program, I should get the same output. I proceeded with the value and used it to decrypt the 0x258 bytes of encrypted code, starting at 0x401030. BinaryNinja makes it super easy to transform the code, and the output looks valid:</p>
+<p><img src="../imgs/2.png" alt=""></p>
+<p>Before we proceed to analyze the decrypted code, I would like to see what is returned on a VM. I used a similar assembly REPL tool, <a href="https://github.com/zerosum0x0/WinREPL">WinREPL</a>, to checkout the result on Windows:</p>
+<pre><code>&gt;&gt;&gt; mov eax, 0x40000000
+&gt;&gt;&gt; cpuid
+assembled (2 bytes): 0f a2
+rax: 0000000040000006 rbx: 00000000786f4256 rcx: 00000000786f4256 rdx: 00000000786f4256
+r8 : 0000000000000000 r9 : 0000000000000000 r10: 0000000000000000 r11: 0000000000000000
+r12: 0000000000000000 r13: 0000000000000000 r14: 0000000000000000 r15: 0000000000000000
+rsi: 0000000000000000 rdi: 0000000000000000
+rip: 0000023ca56f000e rsp: 000000478b2fef00 rbp: 0000000000000000
+flags: 00000200  CF: 0  PF: 0  AF: 0  ZF: 0  SF: 0  DF: 0  OF: 0
+</code></pre><p>When we run <code>cpuid</code> with <code>eax</code> set to 0x40000000, the return value in ecx is actually the string &ldquo;VBox&rdquo;. I am not entirely sure which basic information it is trying to return, so I set <code>eax</code> to 0 to find out:</p>
+<pre><code>&gt;&gt;&gt; mov eax, 0
+&gt;&gt;&gt; cpuid
+assembled (2 bytes): 0f a2
+rax: 0000000000000016 rbx: 00000000756e6547 rcx: 000000006c65746e rdx: 0000000049656e69
+r8 : 0000000000000000 r9 : 0000000000000000 r10: 0000000000000000 r11: 0000000000000000
+r12: 0000000000000000 r13: 0000000000000000 r14: 0000000000000000 r15: 0000000000000000
+rsi: 0000000000000000 rdi: 0000000000000000
+rip: 0000023ca56f0007 rsp: 000000478b2fef00 rbp: 0000000000000000
+flags: 00000200  CF: 0  PF: 0  AF: 0  ZF: 0  SF: 0  DF: 0  OF: 0
+</code></pre><p>Not bad, it returns the same value when running on a real machine, 0x16. However, when I run <code>cpuid</code> with <code>eax</code> set to 0x16, I get the surprising output:</p>
+<pre><code>&gt;&gt;&gt; mov eax, 0x16
+&gt;&gt;&gt; cpuid
+assembled (2 bytes): 0f a2
+rax: 0000000000000000 rbx: 0000000000000000 rcx: 0000000000000000 rdx: 0000000000000000
+r8 : 0000000000000000 r9 : 0000000000000000 r10: 0000000000000000 r11: 0000000000000000
+r12: 0000000000000000 r13: 0000000000000000 r14: 0000000000000000 r15: 0000000000000000
+rsi: 0000000000000000 rdi: 0000000000000000
+rip: 0000023ca56f0015 rsp: 000000478b2fef00 rbp: 0000000000000000
+flags: 00000200  CF: 0  PF: 0  AF: 0  ZF: 0  SF: 0  DF: 0  OF: 0
+</code></pre><p>Then return values are all zero, and they are different from those returned when we set <code>eax</code> to 0x40000000. To sum up, the output is wrong in two senses: 1). when we set <code>eax</code> to 0x16, it does not return a valid CPUID information; 2). when we set <code>eax</code> to 0x40000000, it does not give the same output as if we were running <code>cpuid</code> with <code>eax</code> set to the maximum index of basic information, in this case, 0x16. So these two are subtle differences between a real machine and a VM, which can be used as VM detection as well.</p>
+<h2 id="native-syscall-on-windows">Native Syscall on Windows</h2>
+<p>Now it is time to analyze the decrypted code. Looking at the image above, we notice it first calls <code>NTCreateThread</code> to create a thread, whose entry is at 0x4010ce. And it then makes two system calls using the <code>syscall</code> instruction. Note the thread entry 0x4010ce is right below the code that makes syscalls, and the two syscalls do not seem to transfer the control to any other places, so it is very likely they are not doing something special.</p>
+<p>But we still need to figure out what the two syscalls are doing. I did not see any challenges using <code>syscall</code> on Windows, mostly because the system call index is opaque on Windows, and they can be different across different system versions. Oh, this could be the reason why the author says it only works on specific versions of Windows &ndash; it relies on the specific index of certain system calls.</p>
+<p>There are many ways to dump the system call on a Windows system. However, since my Windows VM is having a wrong build version, the system call index I can get is also probably NOT the same as the author expects. So I searched online for a bit and found something already organized the information into a nice searchable table at <a href="https://j00ru.vexillium.org/syscalls/nt/64/">https://j00ru.vexillium.org/syscalls/nt/64/</a>.</p>
+<p><img src="../imgs/3.png" alt=""></p>
+<p>So the first syscall is made with eax = 4, and I found it is <code>NtWaitForSingleObject</code>. And the object it waits for happens to be the newly created thread. The next system call is 0x2c, which is <code>NtTerminateProcess</code>. So the remaining code just waits for the thread to finish, and terminate the process.</p>
+<p>We also see that the index for these two system calls is different on different major Windows versions, e.g., Win7 v.s. Win10, but they remain the same within different Win10 versions. So they do not account for the special requirement for the three Win10 builds.</p>
+<p>So now we shift the focus of the analysis to the thread routine, as shown below:</p>
+<p><img src="../imgs/4.png" alt=""></p>
+<p>It starts by making a syscall 0xd, which translates to <code>NtSetInformationThread</code>, with <code>r9</code> set to 0x11, which means <code>ThreadHideFromDebugger</code>. This is a common anti-debug technique that tried to hide the thread from the debugger. The thread will continue to execute, but the debugger will no longer be notified by any debug events related to the thread.</p>
+<p><img src="../imgs/5.png" alt=""></p>
+<p>Next, it retrieves <code>PEB</code> at <code>gs:0x60</code>, at checks whether the field at 0x118 is equal to 0xa. Inspecting the structure with windbg shows (some output omitted):</p>
+<pre><code>lkd&gt; dt _PEB
+nt!_PEB
+...
+   +0x118 OSMajorVersion   : Uint4B
+   +0x11c OSMinorVersion   : Uint4B
+   +0x120 OSBuildNumber    : Uint2B
+...
+</code></pre><p>So it is checking whether the OSMajorVersion is 10. Yeah, so it is checking whether this is a Win10.</p>
+<p><img src="../imgs/6.png" alt=""></p>
+<p>Moving downward, we see that it is checking OSBuildNumber for a specific value, 0x47bb. I have no idea what it is when I first see it (though there are ways to figure it out). If the version matches, we see it is setting the dword at 0x401149 to be 0xa1. At first, I do not understand it, so I skipped it and moved to analyze the code at 0x401125.</p>
+<p>The next system call it makes is 0xa5. Searching it on the previous webpage gives me an interesting result (the image is cropped to show only the important part):</p>
+<p><img src="../imgs/7.png" alt=""></p>
+<p>We can see on the latest two versions of Win10, i.e., version 2004 and 20H2, system call 0xa5 means <code>NtCreateDebugObject</code>. However, on version 1909, 0xa5 means a different system call and <code>NtCreateDebugObject</code> is 0xa1. Hmmm, 0xa1, does it look familiar? We have just seen it at address 0x40111e, right? And it is writing to <code>data_401149</code>, in the middle of an instruction. I suddenly understand what it is doing: it is patching the instruction at 0x401148 to <code>&quot;mov eax, 0xa1&quot;</code>, when the current system has OSBuildNumber 0x47bb.</p>
+<p>Now I am pretty sure 0x47bb means Win10 version 1909. And the code uses a small patching trick to make sure that always calls <code>NtCreateDebugObject</code>, even if the system call number varies. Besides, this also explains why the program only works on a very limited number of Win10 builds: the system call number of other Win10 builds are different as well, and there is no code to take care of that.</p>
+<p>A careful reader should have noticed that the code should also work on Win10 version 1903, which happens to have the system call number 0xa1 for <code>NtCreateDebugObject</code>. The only change needed is to also change the instruction to <code>&quot;mov eax, 0xa1&quot;</code> when a Win10 1903 is encountered.</p>
+<p>Now, let us get back to the code itself. It is calling <code>NtCreateDebugObject</code>, which is likely to be a common anti-debugging technique. Although I know this technique, I cannot remember the details of it. So let me research the code as if it is something new to me.</p>
+<p>The first thing to find out is the definition of the system call, which helps us understand the meaning of its parameters. MS does not document it, but we can still find some clue by searching withing the ReactOS source code:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C">NTSTATUS
+<span style="color:#a6e22e">NtCreateDebugObject</span>(
+    _Out_ PHANDLE DebugHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_ POBJECT_ATTRIBUTES ObjectAttributes,
+    _In_ ULONG Flags
+);
+</code></pre></div><p>Alternatively, we can always search it with Duckduckgo and this time we will be lucky since <code>Process Hacker</code> also uses it: <a href="https://processhacker.sourceforge.io/doc/ntdbg_8h.html#aaf201d37b7597c3997ba3380de6253dd">https://processhacker.sourceforge.io/doc/ntdbg_8h.html#aaf201d37b7597c3997ba3380de6253dd</a>.</p>
+<p>Among the four parameters, the interesting one is the first one, <code>DebugHandle</code>. Note the Windows x64 calling convention passes the first four parameters in the order of <code>rcx, rdx, r8, r9</code>. So we know <code>data_4015ac</code> is the returned <code>DebugHandle</code>. Then the code checks the return value and the system call <code>NtCreateDebugObject</code> must have succeeded.</p>
+<p><img src="../imgs/8.png" alt=""></p>
+<h2 id="anti-debugging-techniques">Anti-debugging Techniques</h2>
+<p>The next basic block is longer, which starts with two system calls and also includes a function call. Note the last two instructions, i.e.,</p>
+<pre><code>push 0x401288
+ret
+</code></pre><p>will transfer the control flow to 0x401288. The bytes at 0x401288 do not look like valid code yet, so there might be a second round of decryption. Scanning upwards I see at address 0x4011dc, 0x401288 is moved into <code>rcx</code>, along with a strange string <code>&quot;1c4TLKe6Px8M2fN7iAlC&quot;</code>. sub_401226 is very likely a decryption function! Let us have a look at it first:</p>
+<p><img src="../imgs/9.png" alt=""></p>
+<p>It is a rather small and simple function: it uses a string as the key to xor decrypt the given data. The actual xor happens at 0x401256. Its four parameters are:</p>
+<pre><code>rcx: data to decrypt
+rdx: data length
+r8:  xor key
+r9:  key length
+</code></pre><p>Comparing these with the call-site at 0x4011f8, we can know that the data (code) at 0x401288 is 0x143 bytes long, and the xor key is <code>&quot;1c4TLKe6Px8M2fN7iAlC&quot;</code>, which is 0x14 bytes long.</p>
+<p>However, if we proceed to decrypt the code, we will get the wrong result. The author sets up another trap here. The xor key string is written to before the decryption. This can be seen in a more obvious way if we define it as a string:</p>
+<p><img src="../imgs/10.png" alt="">
+<img src="../imgs/11.png" alt=""></p>
+<p><code>xor_key[4]</code> and <code>xor_key[0x13]</code> are both changed before the decryption. And the new value is derived from <code>data_4014b8</code> and <code>data_4015bc</code>, which we need to figure out now.</p>
+<p><code>data_4015bc</code> is easier to figure out, since we get cross reference to it, right in the code above:</p>
+<p><img src="../imgs/12.png" alt=""></p>
+<p>It is calling <code>NtQueryInformationThread</code> with the second parameter being <code>ThreadHideFromDebugger</code> to query whether <code>ThreadHideFromDebugger</code> is set. Remember the code at 0x4010ef, which uses <code>NtSetInformationThread</code> to set <code>ThreadHideFromDebugger</code> to true (0x1)? Here, the code is checking its value. It is trying to verify we do not change the value. Since a common way to circumvent the <code>ThreadHideFromDebugger</code> is to skip the <code>NtQueryInformationThread</code> call, in which case the thread will not hide from the debugger, but the query result will return false (0x0). Further, the program does not check whether the return value is true or false, rather it uses it as part of the decryption key. Had the program been running outside of a debugger, <code>data_4015bc</code> should have value 0x1 at 0x4011b6. If the value is altered, the program will appear to be running fine, but the decrypted code will contain errors.</p>
+<p>This is an aha moment in reversing, and it is one of the reasons I love reversing. Although I do not know the author of the challenge when I reached this point, I enjoy the obstacle he set up here. It even feels that we had a short but pleasant virtual conversation about this challenge.</p>
+<p>Also, this reminds me of checking out the implementation of <a href="https://github.com/x64dbg/ScyllaHide">ScyllaHide</a>, the popular anti-anti-debug plugin for x64db, to see if it handles this correctly. Which I will cover at the end of the write-up.</p>
+<p>What about <code>data_4014b8</code>? There is no xref to it. But it is pretty close to another data variable <code>data_4014a8</code>,</p>
+<p><img src="../imgs/13.png" alt=""></p>
+<p><code>data_4014a8</code> is referenced in the remaining system all that we have not analyzed yet:</p>
+<p><img src="../imgs/14.png" alt=""></p>
+<p>If <code>data_4014a8</code> is a non-trivial structure, then <code>data_4014b8</code> is very likely a field inside of it. And its value will be determined by the <code>NtQueryObject</code> call.</p>
+<p><code>NtQueryObject</code> happens to be <a href="https://docs.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntqueryobject">documented</a>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C">__kernel_entry NTSYSCALLAPI NTSTATUS <span style="color:#a6e22e">NtQueryObject</span>(
+  HANDLE                   Handle,
+  OBJECT_INFORMATION_CLASS ObjectInformationClass,
+  PVOID                    ObjectInformation,
+  ULONG                    ObjectInformationLength,
+  PULONG                   ReturnLength
+);
+</code></pre></div><p><code>rdx</code> is <code>ObjectInformationClass</code> and its value is 0x2, <code>r8</code> holds <code>ata_401478</code> and it is the <code>ObjectInformation</code> that we are interested in.</p>
+<p>Searching the MSVC headers or ReactOS source gives the following definition for <code>OBJECT_INFORMATION_CLASS</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C"><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">enum</span> _OBJECT_INFORMATION_CLASS {
+    ObjectBasicInformation,
+    ObjectNameInformation,
+    ObjectTypeInformation,
+    ObjectAllTypesInformation,
+    ObjectHandleInformation
+} OBJECT_INFO_CLASS;
+</code></pre></div><p>And 0x2 for <code>ObjectInformationClass</code> means <code>ObjectTypeInformation</code>.</p>
+<p>The reverse-engineered definition of <code>OBJECT_TYPE_INFORMATION</code> can be found at <a href="https://www.geoffchappell.com/studies/windows/km/ntoskrnl/api/ob/obquery/type.htm">geoffchappell&rsquo;s site</a>:</p>
+<p><img src="../imgs/15.png" alt=""></p>
+<p>(The screenshot is cut short to save space)</p>
+<p>We can do the calculation and find <code>data_4014a8</code> is at offset 0x10 into the structure at <code>data_4014a8</code>, and the field is <code>ULONG TotalNumberOfObjects</code>. What is the <code>correct</code> value of <code>TotalNumberOfObjects</code>, if the program is not being debugged? Details can be found <a href="https://ntquery.wordpress.com/2014/03/30/anti-debug-ntqueryobject/">here</a> and it should be 0x1. Now the code looks like this:</p>
+<p><img src="../imgs/16.png" alt=""></p>
+<p>And we know both <code>object_type.TotalNumberOfObjects</code> and <code>thread_hide_from_debugger</code> is 0x1, so we can deduce <code>xor_key[4]</code> will be changed to 0x42 (&lsquo;B&rsquo;), and <code>xor_key[0x13]</code> will be changed to 0x51 (&lsquo;Q&rsquo;). And the <code>xor_key</code> becomes <code>&quot;1c4TBKe6Px8M2fN7iAlQ&quot;</code>. Decrypting 0x143 bytes starting from 0x401288 gives me the following code:</p>
+<p><img src="../imgs/17.png" alt=""></p>
+<h2 id="resolving-dll-imports-with-function-name-hash">Resolving DLL Imports with Function Name Hash</h2>
+<p>The call at 0x40129c and 0x4012b7 looks way too familiar to me. It is finding the address of a particular function inside a DLL. The difference between the ordinary GetProcAddr is that it uses a hash of the function name, rather than the function name itself for the lookup. There is a <code>uint32_t hash(char* function_name)</code> that returns a dword as the hash for the function name. And the code walks the export table of the given DLL, calculate the hash of every export function, and see if there is a match. In this example, the two hashes are 0xa216a185 and 0x9a9c4525.</p>
+<p>How do we know which function it tries to find? Well, for this simple example, we can guess from the code that the first one is a <code>LoadLibraryA</code>, and the second one is a <code>MessageBoxA</code> (from the challenge description). However, if we need to deobfuscate a lot of functions, guessing is not a good idea.</p>
+<p>There are mostly two ways to deal with it. The first one is to run the code, ask itself to find the function, and we just write it down. This is helpful when the number of functions is small, and the code can run properly. If we are analyzing a large binary or a memory dump, then it is not feasible.</p>
+<p>The second way is to reverse engineer the hash function, enumerate the export table of the DLL, and try to find a match by ourselves.</p>
+<p><img src="../imgs/18.png" alt=""></p>
+<p>The function needs to process the PE format so it is not trivial. But there is a shortcut to deal with it. We can see the loop at 0x401372 is operating on a string in <code>rsi</code>, and the result is put into <code>rdi</code>. At 0x401381, the calculated hash is compared with the <code>expected_hash</code>, which is an argument of the function. If they match, the code proceeds to find the address of the function; if they do not match, the code proceeds to the next loop.</p>
+<p>So we only need to reverse engineer the loop at 0x401372. A Python equivalent is:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">rol</span>(val, n):
+    bin_str <span style="color:#f92672">=</span> bin(val)[<span style="color:#ae81ff">2</span>:]
+    bin_str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;0&#39;</span> <span style="color:#f92672">*</span> (<span style="color:#ae81ff">32</span> <span style="color:#f92672">-</span> len(bin_str)) <span style="color:#f92672">+</span> bin_str
+    bin_str <span style="color:#f92672">=</span> bin_str[n : ] <span style="color:#f92672">+</span> bin_str[ : n]
+    <span style="color:#66d9ef">return</span> int(bin_str, <span style="color:#ae81ff">2</span>)
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calc_hash</span>(name):
+    val <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> name:
+        val <span style="color:#f92672">+=</span> ord(c)
+        val <span style="color:#f92672">&amp;=</span> <span style="color:#ae81ff">0xffffffff</span>
+        val <span style="color:#f92672">=</span> rol(val, ord(c) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">31</span>)
+    <span style="color:#66d9ef">return</span> val
+
+<span style="color:#75715e"># prints 0xa216a185</span>
+<span style="color:#66d9ef">print</span>(calc_hash(<span style="color:#e6db74">&#39;LoadLibraryA&#39;</span>))
+<span style="color:#75715e"># prints 0x9a9c4525</span>
+<span style="color:#66d9ef">print</span>(calc_hash(<span style="color:#e6db74">&#39;MessageBoxA&#39;</span>))
+</code></pre></div><p>There is one thing worth noting about at 0x401377, the code is <code>&quot;rol edi, cl&quot;</code> where the <code>cl</code> is the next input char. <code>cl</code> can be (and likely is) larger than 31 since it is an ASCII char. However, the <code>edi</code> is only 32 bits wide, what would happen? Well, I studied the behavior of this case earlier in another <a href="https://github.com/jeffli678/writeups/blob/master/shl_undefined_behavior/writeup.md">writeup</a>, and the conclusion is:</p>
+<pre><code>The count is masked to 5 bits (or 6 bits if in 64-bit mode and REX.W is used). The count range is limited to 0 to 31 (or 63 if 64-bit mode and REX.W is used).
+</code></pre><p>In other words, only the lowest 5 bits of the input char will be involved in the <code>rol</code> operation. And that is also the reason that I wrote <code>val = rol(val, ord(c) &amp; 31)</code> in the Python code.</p>
+<!-- raw HTML omitted -->
+<p>Another interesting thing is the way the author passes the DLL handle. The second handle, i.e. the handle of <code>user32.dll</code>, is returned by <code>LoadLibraryA</code> so there is nothing special about it. But for the first handle, we can find <code>LoadLibraryA</code> from it, which indicates the module must be <code>kernel32.dll</code>. How does the author get it? We can see it is passed in by <code>r15</code> at 0x401288. Tracing back to the previous function we see <code>mov r15, qword [rel 0x4015c4]</code>, and cross-reference of <code>data_4015c4</code> brings me back to the very beginning of <code>_start</code>:</p>
+<p><img src="../imgs/19.png" alt=""></p>
+<p>I noticed this piece of code when I started the journey, but I do not immediately understand it then. But now it is another aha moment! Note this is a hand-written program, so its entry point is where the execution starts. This is different from a compiled program where the <code>main()</code> function is called by the C runtime.</p>
+<p>Who calls the entry point? Well, it is somebody inside of the <code>kernel32.dll</code>. Then the author clears the <code>ax</code>, and subtract 0x10000 from <code>rax</code> to get the base of <code>kernel32.dll</code>. This is related to memory alignment, the behavior of ASLR, as well as the offset of the callee into the base of the DLL. I am not sure it always works, but it looks fine to me. In the end, the base of <code>kernel32.dll</code> is saved into <code>data_4015c4</code>.</p>
+<p>Alright, we have deciphered all the secrets of this challenge!</p>
+<p>This is a small binary so we can reverse all of the bytes in it. I notice there are some bytes under the <code>GetProcAddr</code> function, which looks like this:</p>
+<p><img src="../imgs/20.png" alt=""></p>
+<p>The <code>4883</code> in the beginning tells me it is probably code, and defining a function there gives me:</p>
+<p><img src="../imgs/21.png" alt=""></p>
+<p>Ha, another call to <code>MessageBoxA</code>. And this one is calling the one in the IAT table, whereas the real one is dynamically resolved.</p>
+<h2 id="ntcreatethreadex-and-thread_create_flags_hide_from_debugger">NtCreateThreadEx and THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER</h2>
+<p>The original challenge asked us to make the program run properly and also pop up a MessageBox even when it runs under a debugger. Since we have analyzed all its tricks, I think it would not be hard at all to do it. To do this, I downloaded the Win10 20H2 ISO and installed a VM.</p>
+<p>The first patch needed is to hardcode the return value (0x64) of <code>cpuid</code>. I patched the following four instructions:</p>
+<pre><code>mov eax, 0x40
+bswap eax
+cpuid
+mov eax, ecx
+</code></pre><p>to</p>
+<pre><code>mov eax, 0x64
+</code></pre><p>and copies the patched binary to VM. Now if I double-click it, it does run and the MessageBox pops up:</p>
+<p><img src="../imgs/22.png" alt=""></p>
+<p>Not bad, it works!</p>
+<p>The next step is to remove the anti-debugging checks. The simplest way is to remove the calls to <code>NtSetInformationThread</code>, <code>NtQueryInformationThread</code>, <code>NtCreateDebugObject</code> and <code>NtQueryObject</code>. And hardcode the expected value, or directly change the <code>xor_key</code>. However, before I make those patches, I found the breakpoint at 0x4010ce is never triggered. The debuggee simple exits.</p>
+<p>The first mistake I made is using software breakpoint on self-modifying code. We know that software breakpoint works by patching the byte to 0xcc. The debugger internally keeps a list of addresses of software breakpoints and the original byte value so it will still display the old byte value if we display it. However, things get tricky when the code self-modifies. The 0xcc byte will be overwritten by the new byte value, and it is no longer a breakpoint. Now if the execution reaches the address where we put a breakpoint, it will not fire since the actual byte value is NOT 0xcc. If in a good case, another breakpoint hit (or any other debug event happens) and the debugger gets a chance to inspect the list of breakpoints and see one of them is changed from 0xcc to a new different value, then it can reason:</p>
+<pre><code>Ok, this byte was 0x12, and I changed it to 0xcc. Now it is 0xab.
+What happened? It must be the program modifies the byte.
+I simply need to restore it to 0xcc, and update the &quot;original value&quot; of this byte to 0xab.
+</code></pre><p>If this is the case, the debugger can handle self-modifying code properly. Unfortunately, the case I encounter is the bad case where the modified breakpoint is the one that is expected to fire. So there is no way it works. And the only way is to use a hardware breakpoint (or trace it with single-step).</p>
+<p>Nevertheless, even if I used hardware breakpoint on the thread entry it still does not hit. Later, I found the secret is with <code>NtCreateThreadEx</code>. I do not know any anti-debugging tricks with it, so I naively think I can set a breakpoint on the thread entry point and wait there. However, this <a href="https://ntquery.wordpress.com/2014/03/29/anti-debug-ntcreatethreadex/">blog post</a> explains an anti-debugging with <code>NtCreateThreadEx</code>: setting the <code>CreateFlags</code> to <code>THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER</code> (0x4) will also hide the debuggee from the debugger, which has the same effect as calling <code>NtSetInformationThread</code> with <code>ThreadHideFromDebugger</code>. So no wonder the breakpoint on the thread routine will not hit at all! The thread is hidden from the debugger.</p>
+<p>This is easy to fix once I understand the trick. Since the code is decrypted before it runs, if we were to patch it we need to make sure we patch the encrypted bytes so the decrypted code is what we want. This is possible, especially when the decryption is just xor. However, I am a little bit lazy and I decide to bypass it in a debugger, i.e., change <code>rbx</code> back to 0, right after the code set it to 0x4 at 0x401034. Now the breakpoint on the thread entry point hits.</p>
+<p>Then I directly set the <code>rip</code> to 0x4011b6:</p>
+<p><img src="../imgs/16.png" alt=""></p>
+<p>And manually set the value of <code>object_type.TotalNumberOfObjects</code> and <code>thread_hide_from_debugger</code> to 1. Then press F9 to run the program, and the MessageBox pops up:</p>
+<p><img src="../imgs/23.png" alt=""></p>
+<p>Nice, I have COMPLETELY analyzed the program and explained lots of details in it. I hope you like this write-up! And feel free to get in touch with me if you have any questions or suggestions.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        4741 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2020-11-29 08:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h">Read other posts</span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+            <span class="button previous">
+              <a href="/posts/reversing/ocaml_crackmes/readme/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Solving Two OCaml Crackmes Without Knowing Much about OCaml</span>
+              </a>
+            </span>
+          
+
+          
+            <span class="button next">
+              <a href="/posts/reversing/elf_format/readme/">
+                <span class="button__text">Dealing with Manipulated ELF Binary and Manually Resolving Import Functions</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2021</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span><span><a href="posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.af435e44374f1e99a669ea8cd5bb9a2fceed80588941a451bfddb66b86a67c9f40b0f417e9543a763f809aa7e9300d7b1d69bf99615810ba02ac70396d50fad5.js" integrity="sha512-r0NeRDdPHpmmaeqM1buaL87tgFiJQaRRv922a4amfJ9AsPQX6VQ6dj&#43;AmqfpMA17HWm/mWFYELoCrHA5bVD61Q=="></script>
+
+
+
+    </body>
+</html>

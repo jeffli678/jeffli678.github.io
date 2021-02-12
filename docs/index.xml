@@ -13,12 +13,137 @@
     
     
     <item>
-      <title>My First Post</title>
-      <link>/posts/my-first-post/</link>
+      <title>My New Blog is Ready!</title>
+      <link>/posts/my_new_blog/</link>
       <pubDate>Thu, 11 Feb 2021 18:46:24 +0800</pubDate>
       
-      <guid>/posts/my-first-post/</guid>
-      <description></description>
+      <guid>/posts/my_new_blog/</guid>
+      <description>I spent some time with Hugo and now my blog is hosted on GitHub. Feel free to visit it at xusheng.dev!
+I will write about reversing, coding, Xiangqi, and other stuff.</description>
+    </item>
+    
+    <item>
+      <title>How to Avoid Writing a Bad Crackme</title>
+      <link>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</link>
+      <pubDate>Tue, 29 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</guid>
+      <description>Recently, I was promoted to a reviewer on crackmes.one (along with @zed). I am so honored with this and I appreciate the recognition and trust from @stan (creator of crackmes.one) and the entire community. The task for a reviewer is interesting, that I read submitted solutions and verify new crackmes. This allows me to grasp the latest trend on the website.
+I did not tally the statistics, but there is a fairly good amount of new submissions (of both crackmes and solutions) every week.</description>
+    </item>
+    
+    <item>
+      <title>Solving Two OCaml Crackmes Without Knowing Much about OCaml</title>
+      <link>/posts/reversing/ocaml_crackmes/readme/</link>
+      <pubDate>Sun, 13 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/ocaml_crackmes/readme/</guid>
+      <description>Earlier this year, my friend Towel uploaded two OCaml crackmes to crackmes.one. One of them is Baby OCaml, and the other one is called Teenager OCaml. Well, interesting names!
+This is not the first time Towel came up with OCaml crackmes. Qt Scanner, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3.</description>
+    </item>
+    
+    <item>
+      <title>Deciphering a Windows Anti-debugging Challenge</title>
+      <link>/posts/reversing/reverseme3/readme/</link>
+      <pubDate>Sun, 29 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/reverseme3/readme/</guid>
+      <description>It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.
+This time I am writing about the challenge ReverseMe3 from jochen_. The challenge can be found on crackmes.one. The password to unzip is &amp;ldquo;crackmes.</description>
+    </item>
+    
+    <item>
+      <title>Dealing with Manipulated ELF Binary and Manually Resolving Import Functions</title>
+      <link>/posts/reversing/elf_format/readme/</link>
+      <pubDate>Sun, 30 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/elf_format/readme/</guid>
+      <description>Unfortunately, this writeup is delayed for almost a week because I am super busy recently. Please take my apologies and I will try my best to keep the weekly challenge going, forever!
+The challenge can be downloaded at https://crackmes.one/crackme/5e727daa33c5d4439bb2decd. It is created by user BinaryNewbie, who is NOT a newbie for binary reversing.
+We will discuss an important topic in this writeup: how to mutate binary executable to obstruct reverse engineering tools.</description>
+    </item>
+    
+    <item>
+      <title>Making and solving a Reversing Challenge Based-on x86 ISA Encoding</title>
+      <link>/posts/reversing/x86/readme/</link>
+      <pubDate>Sun, 02 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/x86/readme/</guid>
+      <description>This time the writeup is a little bit different &amp;ndash; I am the maker of this challenge so the narrative is from a different perspective. I will first cover how I made it, and then show two possible ways to solve it.
+The Plan I have always been hoping to make some reversing challenges based-on the encoding of the x86 instruction set. It does not have to be super hard, maybe just explore some interesting aspects of the x86, which goes lower than the disassembly.</description>
+    </item>
+    
+    <item>
+      <title>Solving a Recursive Crackme by Automating GDB</title>
+      <link>/posts/reversing/automating-gdb/readme/</link>
+      <pubDate>Mon, 27 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/automating-gdb/readme/</guid>
+      <description>The last week&amp;rsquo;s challenge is called Recursion. From the name we already expect to do some automation &amp;ndash; manually solving stuff recursively is not a wise idea.
+First Impression The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &amp;ldquo;Paste From&amp;rdquo; -&amp;gt; &amp;ldquo;Base64&amp;rdquo;.</description>
+    </item>
+    
+    <item>
+      <title>Solving an Obfuscated Crackme with BinaryNinja and Triton</title>
+      <link>/posts/reversing/obfuscation/readme/</link>
+      <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/obfuscation/readme/</guid>
+      <description>The last week&amp;rsquo;s challenge was created by Dennis Yurichev. It is also hosted on crackmes.one. The challenge is compiled by a modified Tiny C Compiler (TCC) which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.
+First Impression The target (keygenme4.exe) is a PE. The entry point looks like this:
+There are several things which we can notice easily:</description>
+    </item>
+    
+    <item>
+      <title>Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl</title>
+      <link>/posts/reversing/shl_undefined_behavior/writeup/</link>
+      <pubDate>Sat, 20 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/shl_undefined_behavior/writeup/</guid>
+      <description>Encountering a Weird Issue Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input n is in the range of 0-64 (both side include).
+The first idea is to use left shift and then minus 1:
+uint64_t getBitMask(size_t n) { uint64_t ret = (1UL &amp;lt;&amp;lt; n) - 1; return ret; } This works well when n is in the range of 0-63.</description>
+    </item>
+    
+    <item>
+      <title>Solving an ARM challenge with z3</title>
+      <link>/posts/reversing/armageddon/solve/</link>
+      <pubDate>Thu, 18 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/armageddon/solve/</guid>
+      <description>First Impression The last week&amp;rsquo;s challenge is hosted at https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b. It is authored by Towel and it is a real challenge in UMDCTF 2019.
+Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is armageddon. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember.</description>
+    </item>
+    
+    <item>
+      <title>Debugging and Solving an Android Challenge</title>
+      <link>/posts/reversing/quarkslab_android_crackme/main/</link>
+      <pubDate>Sat, 30 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/quarkslab_android_crackme/main/</guid>
+      <description>Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.
+First Impression The challenge is created by Quarkslab. The crackme-telegram.apk is ~25MB in size which is larger than a typical crackme.</description>
+    </item>
+    
+    <item>
+      <title>Solving a Reversing Challenge with Mitmproxy and OCR</title>
+      <link>/posts/reversing/client_houseplant_ctf_2020/solve/</link>
+      <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/client_houseplant_ctf_2020/solve/</guid>
+      <description>Over the weekend I had some fun with the Houseplant CTF. Among the reversing challenges, the RTCP Trivia is particularly interesting and I would like to share my unconventional way of solving it.
+First Impression We get a client.apk after downloading the challenge. I have no Android phones so I ran it in an emulator. It has no ARM native library so it runs well in x86 emulators.
+After asking for a user name, the app presents a multiple-choice problem with four options (shown below).</description>
+    </item>
+    
+    <item>
+      <title>Reverse Engineering and Repairing a Fan</title>
+      <link>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</link>
+      <pubDate>Sun, 26 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</guid>
+      <description>Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&amp;rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.
+A Broken Fan I have a fan &amp;ndash; an eight-year-old fan &amp;ndash; that is NOT smart or IoT.</description>
     </item>
     
     <item>
@@ -119,7 +244,7 @@
       <pubDate>Sun, 06 May 2018 15:09:32 +0800</pubDate>
       
       <guid>/posts/xiangqi/2018-05-06-endgame-10/</guid>
-      <description>&lt;p&gt;&lt;img src=&#34;../../../imgs/2018/05/capture-3-2.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-3-2.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
