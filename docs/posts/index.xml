@@ -21,11 +21,11 @@ However, I have not taken very few photos in recent years. One excuse is I becom
 <p>However, I have not taken very few photos in recent years. One excuse is I become busy and get obsessed with reverse engineering. But a more convincing reason is I am less interested in this world. The situation might change in the future, though.</p>
 <p> 
  </p>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" type="text/javascript"></script>
+<script src="/js/jquery.min.js" type="text/javascript"></script>
           
 
-<link  href="https://cdn.jsdelivr.net/npm/nanogallery2@3/dist/css/nanogallery2.min.css" rel="stylesheet" type="text/css">
-<script  type="text/javascript" src="https://cdn.jsdelivr.net/npm/nanogallery2@3/dist/jquery.nanogallery2.min.js"></script>
+<link  href="/css/nanogallery2.min.css" rel="stylesheet" type="text/css">
+<script  type="text/javascript" src="/js/jquery.nanogallery2.min.js"></script>
 
 <div class="gallery" data-nanogallery2 = '{
         "thumbnailHeight":  200,
