@@ -6,8 +6,24 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Sat, 13 Feb 2021 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Sat, 13 Feb 2021 19:44:00 +0800</lastBuildDate>
         <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>International Grand Master</title>
+            <link>/posts/grandmaster/</link>
+            <pubDate>Sat, 13 Feb 2021 19:44:00 +0800</pubDate>
+            
+            <guid>/posts/grandmaster/</guid>
+            <description>I was awarded the title of International Grand Master for Xiangqi in late 2020. I am very excited for this title!
+I earned this title since I am the Champnion of the 8th North American Cup. Game records can be viewed online.
+The certificate is shown here:</description>
+            <content type="html"><![CDATA[<p>I was awarded the title of <code>International Grand Master</code> for Xiangqi in late 2020. I am very excited for this title!</p>
+<p>I earned this title since I am the <a href="http://www.naxf.org/wp/wp-content/uploads/2018/11/ranking.txt">Champnion</a> of the 8th North American Cup. Game records can be viewed <a href="http://www.naxf.org/wp/8th/">online</a>.</p>
+<p>The certificate is shown here:</p>
+<p><img src="../grandmaster.jpg" alt=""></p>
+]]></content>
+        </item>
         
         <item>
             <title>Photo Works</title>
