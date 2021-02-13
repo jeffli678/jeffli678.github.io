@@ -12,7 +12,7 @@ Over the weekend I had some fun with the [Houseplant CTF](https://houseplant.ric
 
 ## First Impression
 
-We get a [**client.apk**](../client.apk) after downloading the challenge. I have no Android phones so I ran it in an emulator. It has no ARM native library so it runs well in x86 emulators. 
+We get a [**client.apk**](../client.zip) after downloading the challenge. I have no Android phones so I ran it in an emulator. It has no ARM native library so it runs well in x86 emulators. 
 
 After asking for a user name, the app presents a multiple-choice problem with four options (shown below). The problem itself is not difficult. However, there is a ten-second countdown and we must answer it before the time elapses. The challenge description says that we need to correctly answer 1000 such problems. So manual solving is probably not a wise idea. 
 

@@ -12,7 +12,7 @@ The last week's [challenge](https://yurichev.com/blog/58/) was created by [Denni
 
 ## First Impression
 
-The target ([keygenme4.exe](../keygenme4.exe)) is a PE. The entry point looks like this: 
+The target ([keygenme4.exe](../keygenme4.zip)) is a PE. The entry point looks like this: 
 
 ![](../imgs/1.png)
 
