@@ -6,8 +6,338 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Thu, 11 Feb 2021 18:46:24 +0800</lastBuildDate>
+        <lastBuildDate>Sat, 13 Feb 2021 00:00:00 +0000</lastBuildDate>
         <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Photo Works</title>
+            <link>/posts/photos/</link>
+            <pubDate>Sat, 13 Feb 2021 00:00:00 +0000</pubDate>
+            
+            <guid>/posts/photos/</guid>
+            <description>I used to be a keen photographer. I treat photography as a way of expressing my views toward the world. My photos capture both the beauty and absurdity of this world.
+However, I have not taken very few photos in recent years. One excuse is I become busy and get obsessed with reverse engineering. But a more convincing reason is I am less interested in this world. The situation might change in the future, though.</description>
+            <content type="html"><![CDATA[<p>I used to be a keen photographer. I treat photography as a way of expressing my views toward the world. My photos capture both the beauty and absurdity of this world.</p>
+<p>However, I have not taken very few photos in recent years. One excuse is I become busy and get obsessed with reverse engineering. But a more convincing reason is I am less interested in this world. The situation might change in the future, though.</p>
+<p> 
+ </p>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" type="text/javascript"></script>
+          
+
+<link  href="https://cdn.jsdelivr.net/npm/nanogallery2@3/dist/css/nanogallery2.min.css" rel="stylesheet" type="text/css">
+<script  type="text/javascript" src="https://cdn.jsdelivr.net/npm/nanogallery2@3/dist/jquery.nanogallery2.min.js"></script>
+
+<div class="gallery" data-nanogallery2 = '{
+        "thumbnailHeight":  200,
+        "thumbnailWidth":   200
+    }'>
+    
+    
+
+    
+    
+            <a href = "/imgs/004f190e727b65fa32d167c6c734c9bf.jpg"   data-ngThumb = "/imgs/004f190e727b65fa32d167c6c734c9bf-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/05884d06678c9eff168b21508268e213.jpg"   data-ngThumb = "/imgs/05884d06678c9eff168b21508268e213-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/0745305a7c04d3fc243285b0d1655005.jpg"   data-ngThumb = "/imgs/0745305a7c04d3fc243285b0d1655005-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/0a625fcb8226fbf5dd6c37af0d85f114.jpg"   data-ngThumb = "/imgs/0a625fcb8226fbf5dd6c37af0d85f114-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/0bb4a2b78a9c84c6f29019441003e208.jpg"   data-ngThumb = "/imgs/0bb4a2b78a9c84c6f29019441003e208-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/0e1b84bef3fa9301dc93bd53f4b748a0.jpg"   data-ngThumb = "/imgs/0e1b84bef3fa9301dc93bd53f4b748a0-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/0e61c28b60a7c65710600e95dd67a2f4.jpg"   data-ngThumb = "/imgs/0e61c28b60a7c65710600e95dd67a2f4-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/113d4ec18937492ab7a8a0e16f4e5bfc.jpg"   data-ngThumb = "/imgs/113d4ec18937492ab7a8a0e16f4e5bfc-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/11ee2eaf317ecc4732cf6aafad9a28a8.jpg"   data-ngThumb = "/imgs/11ee2eaf317ecc4732cf6aafad9a28a8-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/137cec05df0b9192311e238a26a3d49d.jpg"   data-ngThumb = "/imgs/137cec05df0b9192311e238a26a3d49d-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/156c8b08a88084fcabba32ce237d69eb.jpg"   data-ngThumb = "/imgs/156c8b08a88084fcabba32ce237d69eb-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/162d3af6f06ebf07da5069153441f90d.jpg"   data-ngThumb = "/imgs/162d3af6f06ebf07da5069153441f90d-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/16bb9d3d1a6e1479e11445dc74269d8a.jpg"   data-ngThumb = "/imgs/16bb9d3d1a6e1479e11445dc74269d8a-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/173ad9043d93663c3641daddb44c9a45.jpg"   data-ngThumb = "/imgs/173ad9043d93663c3641daddb44c9a45-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/19720d22175f58e203c823be8b574787.jpg"   data-ngThumb = "/imgs/19720d22175f58e203c823be8b574787-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/1ce72d2c2d51a30a72afb5cbd3c6018d.jpg"   data-ngThumb = "/imgs/1ce72d2c2d51a30a72afb5cbd3c6018d-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/1d326aa9fb3c88be7d3c37e63b1b1e10.jpeg"   data-ngThumb = "/imgs/1d326aa9fb3c88be7d3c37e63b1b1e10-thumb.jpeg" > </a>
+    
+    
+            <a href = "/imgs/1e8568f8a9d179f3c3a4cea4fac8fca2.jpg"   data-ngThumb = "/imgs/1e8568f8a9d179f3c3a4cea4fac8fca2-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/1fd232b640ffee8289f45b351a0df30e.jpg"   data-ngThumb = "/imgs/1fd232b640ffee8289f45b351a0df30e-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/22557894e3435af7553eafdbc7946141.jpg"   data-ngThumb = "/imgs/22557894e3435af7553eafdbc7946141-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/226efa60b6bffb8d0d95110c34cc56d4.jpg"   data-ngThumb = "/imgs/226efa60b6bffb8d0d95110c34cc56d4-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/2341279d8f7fa97fd01f9d4d50bf7863.jpg"   data-ngThumb = "/imgs/2341279d8f7fa97fd01f9d4d50bf7863-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/23974b7e1f5e801c35108c94ab331fbe.jpg"   data-ngThumb = "/imgs/23974b7e1f5e801c35108c94ab331fbe-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/252507309ce9c8efd7364df88a060e31.jpg"   data-ngThumb = "/imgs/252507309ce9c8efd7364df88a060e31-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/29c4b8964dead63e920ba075f71f7925.jpg"   data-ngThumb = "/imgs/29c4b8964dead63e920ba075f71f7925-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/305645815db88ba6c497bada9d4e699b.jpg"   data-ngThumb = "/imgs/305645815db88ba6c497bada9d4e699b-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/30b76003ce51943f717cb97ad870bb7f.jpg"   data-ngThumb = "/imgs/30b76003ce51943f717cb97ad870bb7f-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/322c71c6d84a30a4e1e19b9a2b173e95.jpg"   data-ngThumb = "/imgs/322c71c6d84a30a4e1e19b9a2b173e95-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/3358f4755a7573477c762aecd4b3f9e2.jpg"   data-ngThumb = "/imgs/3358f4755a7573477c762aecd4b3f9e2-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/342792c796ed138917a7ae42c588f6fb.jpg"   data-ngThumb = "/imgs/342792c796ed138917a7ae42c588f6fb-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/3551be61211c8b74ef8b9e95f2f53d89.jpg"   data-ngThumb = "/imgs/3551be61211c8b74ef8b9e95f2f53d89-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/378fd57d16d3fcc8ae19579273bc155e.jpg"   data-ngThumb = "/imgs/378fd57d16d3fcc8ae19579273bc155e-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/44411058e0b3674d6f73484e4f355a7d.jpg"   data-ngThumb = "/imgs/44411058e0b3674d6f73484e4f355a7d-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/486b44f761ec1a466d23fa921289ab0b.jpg"   data-ngThumb = "/imgs/486b44f761ec1a466d23fa921289ab0b-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/494d3664d79adba55911ba4e3d14a94d.jpg"   data-ngThumb = "/imgs/494d3664d79adba55911ba4e3d14a94d-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/4967ccf689b409475d549c4d4838b4d9.jpg"   data-ngThumb = "/imgs/4967ccf689b409475d549c4d4838b4d9-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/4d467d56cc38dfa592a196b955911cf6.jpg"   data-ngThumb = "/imgs/4d467d56cc38dfa592a196b955911cf6-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/4e18f152b9977228eafec7844261db59.jpg"   data-ngThumb = "/imgs/4e18f152b9977228eafec7844261db59-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/51628ef602f5bf8f527f173dbb735c2c.jpg"   data-ngThumb = "/imgs/51628ef602f5bf8f527f173dbb735c2c-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/537495440438b1ec4cc1cbf9fd8d7ab8.jpg"   data-ngThumb = "/imgs/537495440438b1ec4cc1cbf9fd8d7ab8-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/55112c5ff3870cb7d982fa4e91767ef0.jpg"   data-ngThumb = "/imgs/55112c5ff3870cb7d982fa4e91767ef0-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/582af99f441d22dd930e02281ad6ab77.jpg"   data-ngThumb = "/imgs/582af99f441d22dd930e02281ad6ab77-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/58b83238f76466031c28cc9972639ddf.jpg"   data-ngThumb = "/imgs/58b83238f76466031c28cc9972639ddf-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/58cb7f8ed0279e7865823fa00d93fd9b.jpg"   data-ngThumb = "/imgs/58cb7f8ed0279e7865823fa00d93fd9b-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/5f173c7dc31ab37cc5c2958373632448.jpg"   data-ngThumb = "/imgs/5f173c7dc31ab37cc5c2958373632448-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/600b0807a92a962413b44f1131f91524.jpg"   data-ngThumb = "/imgs/600b0807a92a962413b44f1131f91524-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/6269d0f1472dec784af8fd1bb71ff343.jpg"   data-ngThumb = "/imgs/6269d0f1472dec784af8fd1bb71ff343-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/63260dee308c0f2efc3a8f189939a4e9.jpg"   data-ngThumb = "/imgs/63260dee308c0f2efc3a8f189939a4e9-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/6326926e66d74eb35f4185eba130ee2f.jpg"   data-ngThumb = "/imgs/6326926e66d74eb35f4185eba130ee2f-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/6981cfe0908a49042670a92159f4e4c8.jpg"   data-ngThumb = "/imgs/6981cfe0908a49042670a92159f4e4c8-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/6c293f75ed5621dd7158390af4ab0308.jpg"   data-ngThumb = "/imgs/6c293f75ed5621dd7158390af4ab0308-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/781248d9c76ebfd11192f4126f77f7ad.jpg"   data-ngThumb = "/imgs/781248d9c76ebfd11192f4126f77f7ad-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/78543bd5dcbc3bd3b894d4dbc767107d.jpg"   data-ngThumb = "/imgs/78543bd5dcbc3bd3b894d4dbc767107d-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/7a0a79d09af32f179dd2090504b1685b.jpg"   data-ngThumb = "/imgs/7a0a79d09af32f179dd2090504b1685b-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/844c61b039186244636c2bb8a360648d.jpg"   data-ngThumb = "/imgs/844c61b039186244636c2bb8a360648d-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/862f58a33a1c5ba5b0eaa4c2820c0443.jpg"   data-ngThumb = "/imgs/862f58a33a1c5ba5b0eaa4c2820c0443-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/8bdaef02fe750887871edd92fc9df920.jpg"   data-ngThumb = "/imgs/8bdaef02fe750887871edd92fc9df920-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/8e66070e06ae2d39acc98c9782ceaf2f.jpg"   data-ngThumb = "/imgs/8e66070e06ae2d39acc98c9782ceaf2f-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/8ead3fb5cb301e137ed0e4ed84477ba0.jpg"   data-ngThumb = "/imgs/8ead3fb5cb301e137ed0e4ed84477ba0-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/8f094f4044eccbc7bee922aea7e784cb.jpg"   data-ngThumb = "/imgs/8f094f4044eccbc7bee922aea7e784cb-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/94dac48dc5dfdf3577c72926c25d4cb8.jpg"   data-ngThumb = "/imgs/94dac48dc5dfdf3577c72926c25d4cb8-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/96b03e7259efd6e08ff4fa33c53726e1.jpg"   data-ngThumb = "/imgs/96b03e7259efd6e08ff4fa33c53726e1-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/99431c7ad060f3f742e3c8e3a4c9a57c.jpg"   data-ngThumb = "/imgs/99431c7ad060f3f742e3c8e3a4c9a57c-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/9c4de1e239e1f8ff52f248ea453615ec.jpg"   data-ngThumb = "/imgs/9c4de1e239e1f8ff52f248ea453615ec-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/9d958f076c1e0105a77feaff8243cb42.jpg"   data-ngThumb = "/imgs/9d958f076c1e0105a77feaff8243cb42-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/9e1be91c65f86a423a4af082c0e6f147.jpg"   data-ngThumb = "/imgs/9e1be91c65f86a423a4af082c0e6f147-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/a0515f6b2e4f92ad21de85a5bb5256fc.jpg"   data-ngThumb = "/imgs/a0515f6b2e4f92ad21de85a5bb5256fc-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/a60d035a8afb277ea4338f0471a97c73.jpg"   data-ngThumb = "/imgs/a60d035a8afb277ea4338f0471a97c73-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/a6674551dc36ceb5db4d5cf82eb9a424.jpg"   data-ngThumb = "/imgs/a6674551dc36ceb5db4d5cf82eb9a424-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/ae9b3a22da6010190da7dc464b9c0ebb.jpg"   data-ngThumb = "/imgs/ae9b3a22da6010190da7dc464b9c0ebb-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/af654365e80d7c0bf947f591760fea35.jpg"   data-ngThumb = "/imgs/af654365e80d7c0bf947f591760fea35-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/b491542e29f926376b5941e6f04168a2.jpg"   data-ngThumb = "/imgs/b491542e29f926376b5941e6f04168a2-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/b6e30c15471be55af8471cc9f3ca3469.jpg"   data-ngThumb = "/imgs/b6e30c15471be55af8471cc9f3ca3469-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/bb1b25f49c7136463314f53fd98d88e5.jpg"   data-ngThumb = "/imgs/bb1b25f49c7136463314f53fd98d88e5-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/be5071aeee10ca261ce365a810033fa0.jpg"   data-ngThumb = "/imgs/be5071aeee10ca261ce365a810033fa0-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/c007e537aad6f547044db33bf0273375.jpg"   data-ngThumb = "/imgs/c007e537aad6f547044db33bf0273375-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/c0af59dbabc22047c84b4bbaa7a9e38c.jpg"   data-ngThumb = "/imgs/c0af59dbabc22047c84b4bbaa7a9e38c-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/c1873d39ad4e7ee0618e512a1f662b4f.jpg"   data-ngThumb = "/imgs/c1873d39ad4e7ee0618e512a1f662b4f-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/c6a60acc6c8475d2058c2ee6fe844cb7.jpg"   data-ngThumb = "/imgs/c6a60acc6c8475d2058c2ee6fe844cb7-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/c9c193288e05c56cc03f802195aef371.jpg"   data-ngThumb = "/imgs/c9c193288e05c56cc03f802195aef371-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/cdabf43f581d0035d5c8c784fd9a7e13.jpg"   data-ngThumb = "/imgs/cdabf43f581d0035d5c8c784fd9a7e13-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/ce7344d6720e90a3ad44c20fd078a84a.jpg"   data-ngThumb = "/imgs/ce7344d6720e90a3ad44c20fd078a84a-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/cfcf89686fac38ff9198f73ee4adc1c6.jpg"   data-ngThumb = "/imgs/cfcf89686fac38ff9198f73ee4adc1c6-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/d2de284a84ec92013daa8e041b723dbe.jpg"   data-ngThumb = "/imgs/d2de284a84ec92013daa8e041b723dbe-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/d7d72aaa63f07d9db61739c97931aca1.jpg"   data-ngThumb = "/imgs/d7d72aaa63f07d9db61739c97931aca1-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/db080f96b30819d634cd6afb383824ea.jpg"   data-ngThumb = "/imgs/db080f96b30819d634cd6afb383824ea-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/dc4915ecbe46536299fd1a8f0e17dcc2.jpg"   data-ngThumb = "/imgs/dc4915ecbe46536299fd1a8f0e17dcc2-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/dcae8b31fd55ab794e75550f6943f3c2.jpg"   data-ngThumb = "/imgs/dcae8b31fd55ab794e75550f6943f3c2-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/def85aca8280978859a45f22634d4982.jpg"   data-ngThumb = "/imgs/def85aca8280978859a45f22634d4982-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/e2ac05824f696c4f45a59d8a1376f86b.jpg"   data-ngThumb = "/imgs/e2ac05824f696c4f45a59d8a1376f86b-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/e36651423cc28960aeabb399380f29b9.jpg"   data-ngThumb = "/imgs/e36651423cc28960aeabb399380f29b9-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/e3963ca8975f09130cb63f998513f367.jpg"   data-ngThumb = "/imgs/e3963ca8975f09130cb63f998513f367-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/e515bca960ed9d210851d681037a9070.jpg"   data-ngThumb = "/imgs/e515bca960ed9d210851d681037a9070-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/e583966c78970ecd1f26c670e480b48a.jpg"   data-ngThumb = "/imgs/e583966c78970ecd1f26c670e480b48a-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/ec43f512122d4ef87efb5915a5a27869.jpg"   data-ngThumb = "/imgs/ec43f512122d4ef87efb5915a5a27869-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/eed3ea86102d356edcb17f72fcdada11.jpg"   data-ngThumb = "/imgs/eed3ea86102d356edcb17f72fcdada11-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/f090139e6db6a3abb21e7b6a3ae1da8e.jpg"   data-ngThumb = "/imgs/f090139e6db6a3abb21e7b6a3ae1da8e-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/f9ea974e0cd073c2d2a577654f6f7268.jpg"   data-ngThumb = "/imgs/f9ea974e0cd073c2d2a577654f6f7268-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/fa41f1b87480b37d878dbdd5a4ff2c5f.jpg"   data-ngThumb = "/imgs/fa41f1b87480b37d878dbdd5a4ff2c5f-thumb.jpg" > </a>
+    
+    
+            <a href = "/imgs/fd61030e47405f5e43cb20b0b9a1fb9b.jpg"   data-ngThumb = "/imgs/fd61030e47405f5e43cb20b0b9a1fb9b-thumb.jpg" > </a>
+    
+</div>
+]]></content>
+        </item>
         
         <item>
             <title>My New Blog is Ready!</title>
