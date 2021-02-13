@@ -29,7 +29,8 @@ However, I have not taken very few photos in recent years. One excuse is I becom
 
 <div class="gallery" data-nanogallery2 = '{
         "thumbnailHeight":  200,
-        "thumbnailWidth":   200
+        "thumbnailWidth":   200,
+        "viewerGallery": "none"
     }'>
     
     
