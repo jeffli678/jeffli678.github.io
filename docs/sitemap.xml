@@ -3,17 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/posts/grandmaster/</loc>
-    <lastmod>2021-02-13T19:44:00+08:00</lastmod>
+    <loc>/posts/</loc>
+    <lastmod>2021-04-18T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/posts/</loc>
-    <lastmod>2021-02-13T19:44:00+08:00</lastmod>
+    <loc>/posts/reversing/kata_vm/readme/</loc>
+    <lastmod>2021-04-18T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/</loc>
+    <lastmod>2021-04-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/grandmaster/</loc>
     <lastmod>2021-02-13T19:44:00+08:00</lastmod>
   </url>
   

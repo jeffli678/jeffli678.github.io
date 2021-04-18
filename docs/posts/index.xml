@@ -6,8 +6,214 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Sat, 13 Feb 2021 19:44:00 +0800</lastBuildDate>
+        <lastBuildDate>Sun, 18 Apr 2021 00:00:00 +0000</lastBuildDate>
         <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Solving a VM Challenge Using BinaryNinja</title>
+            <link>/posts/reversing/kata_vm/readme/</link>
+            <pubDate>Sun, 18 Apr 2021 00:00:00 +0000</pubDate>
+            
+            <guid>/posts/reversing/kata_vm/readme/</guid>
+            <description>Recently, my friend Towel created a VM challenge. I have not done any VM crackmes in the last year and decided to try this one. Towel says the challenge should be easy and serves mostly as an introduction for VM crackmes. More importantly, this one has no anti-debugging or static obfuscation, to allow the solver to concentrate on the VM itself.
+Preliminary The main() function is actually quite simple:
+Just one function call and a branch, which decides if the player succeeds.</description>
+            <content type="html"><![CDATA[<p>Recently, my friend <a href="https://crackmes.one/user/Towel">Towel</a> created a <a href="https://crackmes.one/crackme/605443e333c5d42c3d016f59">VM challenge</a>. I have not done any VM crackmes in the last year and decided to try this one. Towel says the challenge should be easy and serves mostly as an introduction for VM crackmes. More importantly, this one has no anti-debugging or static obfuscation, to allow the solver to concentrate on the VM itself.</p>
+<h2 id="preliminary">Preliminary</h2>
+<p>The <code>main()</code> function is actually quite simple:</p>
+<p><img src="../imgs/1.png" alt=""></p>
+<p>Just one function call and a branch, which decides if the player succeeds. The <code>core</code> function looks like what a VM should be:</p>
+<p><img src="../imgs/2.png" alt=""></p>
+<p>It has a dispatcher at the top-center of the graph, and various VM instruction handlers beneath it. We see most of the instructions are not complex (supposedly), except for the longer four ones at the left hand. Looking at the first basic block in the function quickly reveals some important information about the VM:</p>
+<p><img src="../imgs/3.png" alt=""></p>
+<p>The code first sets up a huge buffer on the stack and then copies 0x3b1a bytes of data from address 0x3008 into it. Upon further inspection, I decided this is the actual VM code. Then it clears 32-byte spaces at the top of the stack. I did not know what it is at the moment, since it could be RAM or registers for the VM. Anyways, let us proceed to the first VM instruction and its handlers.</p>
+<h2 id="analyzing-the-first-vm-instruction">Analyzing the First VM Instruction</h2>
+<p><img src="../imgs/4.png" alt=""></p>
+<p>The start of the common handler reads one byte from the current VIP (VM IP) and goes to different handlers based on its value. It serves as an opcode (operation code) for the instruction. The opcode of the first VM instruction is 0xf6, and we can find its handler according to the value:</p>
+<p><img src="../imgs/5.png" alt=""></p>
+<p>Looking at the handler, it reads another byte right after the opcode byte and checks whether the lowest two bits of it is 0x0. If so, it goes into the left branch in the image. We call this byte <code>sub-opcode</code> byte because it determines which variant of the opcode to execute. Then it has two <code>shr</code> instructions followed by two <code>and</code> and <code>mov</code>. It is not immediately clear to me what it is doing at first sight.</p>
+<p>Upon closer inspection, I find if we treat the data at the top of the stack (address <code>rsp</code>) as an array of dwords, then the two <code>mov</code> essentially moves a dword from index <code>rcx</code> into index <code>rax</code>. And tracing back, we find the two values come from the sub-opcode byte. The source index comes from bit 7-8 of it, and the destination index comes from bit 5-6. Remember the lowest two bits of the sub-opcode byte are used to decide the opcode variant.</p>
+<p>Now it is pretty clear that this is moving values between VM registers. (Well, it could also be VM memory, but this does not make a big difference.) This instruction can be disassembled something like <code>mov r1, r3</code>, for example. Of course, the actual indices of the registers need to be parsed from the sub-opcode byte.</p>
+<p>Alright, what about the other sub-opcode? I.e., when the lowest two bits of the byte is 0x2. It reads a dword after the sub-opcode, and moves that into a register decided by the bit 5-6 of the sub-opcode. Here, since both instructions are encoding registers using two bits, I deduced that this VM has four registers.</p>
+<p>Nice, we analyzed one VM instruction. Now we simply need to repeat the process for every VM instruction and will eventually complete it. However, the VM code is quite lengthy (0x3b1a bytes long), manually analyzing it is hopeless. We need some way to automate the process.</p>
+<h2 id="writing-an-architecture-plugin-in-binaryninja">Writing an Architecture Plugin in BinaryNinja</h2>
+<p>This time I decided to write an architecture plugin in BinaryNinja to disassemble the VM. I have been using BinaryNija for several years, but I have not written any architecture plugins before. Previously, I wrote my recursive descent <a href="https://github.com/jeffli678/VM_Disassembler">disassembler</a> for VMs. It requires the user to write a disassembler function for the custom architecture, and it will drive the disassembler, i.e., fetch the binary code, ask for disassembly, and then print it.</p>
+<p>However, writing an architecture plugin in BinaryNinja is a more powerful solution. Firstly, it benefits from a great GUI that I am already familiar with. I get a decent graph view, register highlighting, cross-references, etc, for free. Secondly, if we lift it to BinaryNinja IL, we can almost forget that we are dealing with an alien architecture &ndash; just read the BLIL and analyze it from there.</p>
+<p>Andrew has done a <a href="https://binary.ninja/2020/01/08/guide-to-architecture-plugins-part1.html">tutorial</a> on writing new architecture plugins, which I followed as I set up the initial code.</p>
+<h2 id="basics-of-architecture-plugin">Basics of Architecture Plugin</h2>
+<p>Writing a new architecture plugin turns out to be quite simple: one simply sub-classes <code>Architecture</code>, and then <code>register()</code> it. After that, in the GUI, we can create a function in the new architecture. Since Andrew&rsquo;s blogpost can already serve as a walk-through, so I will not cover every detail here. Instead, I will just describe some of my feelings and thoughts about the process.</p>
+<p>Most of the work needs to be done are implementing two functions of the new architecture: <code>get_instruction_info()</code> and <code>get_instruction_text()</code>. <code>get_instruction_info()</code> returns the length of the instruction, branches (if any) after the instruction, etc. It will help BinaryNinja disassemble the function and draw the graph of basic blocks. <code>get_instruction_text()</code> returns to tokens of the instruction, which will be displayed as the disassembly. There is another function <code>get_instruction_low_level_il()</code>, which allows the instruction in the architecture to be lifted to LLIL. Then BinaryNinja will then lift it to MLIL and HLIL, do lots more analysis, and produce a decompiler output eventually. In this VM example, since the disassembly is already quite straightforward to read, I did not lift it to LLIL.</p>
+<p>Let us go back to the first VM instruction and see how we handle it in the architecture plugin.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_instruction_info</span>(self, data, addr):
+    result <span style="color:#f92672">=</span> InstructionInfo()
+    opcode <span style="color:#f92672">=</span> data[<span style="color:#ae81ff">0</span>]
+    byte1 <span style="color:#f92672">=</span> data[<span style="color:#ae81ff">1</span>]
+    <span style="color:#66d9ef">if</span> opcode <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xf6</span>:
+        <span style="color:#66d9ef">if</span> byte1 <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">3</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+            result<span style="color:#f92672">.</span>length <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>
+        <span style="color:#66d9ef">elif</span> byte1 <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">3</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">2</span>:
+            result<span style="color:#f92672">.</span>length <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>
+</code></pre></div><p>Right, since this one does not affect the control-flow, we simply need to return the instruction length of it. This VM happens to use the <code>rdx</code> register to store the VMIP, so tracking its value change can tell us the instruction length. One interesting part of this VM is NOT all bytes in an instruction is necessarily used for encoding. Sometimes, it wastes several bytes for nothing. I guess the purpose of this is to confuse the reverser. For disassembly, it is slightly more complex:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_instruction_text</span>(self, data, addr):
+    instrLen <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+    tokens <span style="color:#f92672">=</span> []
+    opcode <span style="color:#f92672">=</span> data[<span style="color:#ae81ff">0</span>]
+    byte1 <span style="color:#f92672">=</span> data[<span style="color:#ae81ff">1</span>]
+    <span style="color:#66d9ef">if</span> opcode <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xf6</span>:
+        <span style="color:#66d9ef">if</span> byte1 <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">3</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+            instrLen <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>InstructionToken, <span style="color:#e6db74">&#39;mov&#39;</span>))
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>TextToken, <span style="color:#e6db74">&#39; &#39;</span>))
+            reg0 <span style="color:#f92672">=</span> (byte1 <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">3</span>
+            reg1 <span style="color:#f92672">=</span> (byte1 <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">6</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">3</span>
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>RegisterToken, <span style="color:#e6db74">&#39;r</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> reg0))
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>OperandSeparatorToken, <span style="color:#e6db74">&#39;,&#39;</span>))
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>TextToken, <span style="color:#e6db74">&#39; &#39;</span>))
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>RegisterToken, <span style="color:#e6db74">&#39;r</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> reg1))
+        <span style="color:#66d9ef">elif</span> byte1 <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">3</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">2</span>:
+            instrLen <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>InstructionToken, <span style="color:#e6db74">&#39;mov&#39;</span>))
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>TextToken, <span style="color:#e6db74">&#39; &#39;</span>))
+            reg0 <span style="color:#f92672">=</span> (byte1 <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">3</span>
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>RegisterToken, <span style="color:#e6db74">&#39;r</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> reg0))
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>OperandSeparatorToken, <span style="color:#e6db74">&#39;,&#39;</span>))
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>TextToken, <span style="color:#e6db74">&#39; &#39;</span>))
+            int0 <span style="color:#f92672">=</span> int<span style="color:#f92672">.</span>from_bytes(data[<span style="color:#ae81ff">2</span>:<span style="color:#ae81ff">6</span>], byteorder<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;little&#39;</span>)
+            tokens<span style="color:#f92672">.</span>append(InstructionTextToken(InstructionTextTokenType<span style="color:#f92672">.</span>IntegerToken, <span style="color:#e6db74">&#39;0x</span><span style="color:#e6db74">%x</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> int0, int0))
+
+    <span style="color:#66d9ef">return</span> tokens, instrLen
+</code></pre></div><p>The disassembly is made up of several tokens. The reason to use different types of tokens is to inform the UI of its purpose, which can then provide better support. For example, when we use <code>RegisterToken</code> in the disassembly, and we select one of them, all register tokens with the same text will be all highlighted. This allows us to track the data flow faster.</p>
+<p>Also, even one does not wish to spend time on creating these tokens, he can simply use a <code>TextToken</code> to hold all the token texts. That means my disassembler should retire because it is completely superseded by using the BinaryNinja architecture plugin.</p>
+<p>From here we repeat the process and disassemble all instructions one by one. In BinaryNinja, we can easily see what is the bytecode of the next unhandled instruction, which is quite convenient to speed up the development loop.</p>
+<h2 id="analyzing-the-algorithm">Analyzing the Algorithm</h2>
+<p>I did not wait until I finish every instruction to start analyzing the algorithm. The first three VM instruction already gives me something meaningful:</p>
+<p><img src="../imgs/6.png" alt=""></p>
+<p>We see that <code>r0</code> is 0x20 after the subtraction, and then it writes it to the terminal. The ASCII 0x20 corresponds to the space char. So these three instructions print space to the terminal. This process is repeated lots of times:</p>
+<p><img src="../imgs/7.png" alt=""></p>
+<p>What is it doing? Well, it just prints the text we see when we execute the binary:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Bash" data-lang="Bash">$ ./KataVM_L1 
+    .-------------------------.
+    | Towel<span style="color:#e6db74">&#39;s KataVM: Level 1 |
+</span><span style="color:#e6db74">    &#39;</span>-------------------------<span style="color:#960050;background-color:#1e0010">&#39;</span>
+
+&gt;&gt; 
+</code></pre></div><p>Well, yeah, it prints a banner and then asks for the input. So we do not bother analyzing these instructions, because we know their effect. Let us see what happens after the prints:</p>
+<p><img src="../imgs/8.png" alt=""></p>
+<p>It first sets <code>r2</code> to 4, and reads 4 bytes of input into both <code>r0</code> and <code>r1</code>. Note in this VM, the bytes to read are decided by the second parameter of the <code>read()</code> call, in this case being 4. Next, it copies the input in <code>r1</code> into <code>r2</code> and <code>r2</code>, and does some shift, add, and xor on it. This looks like the <code>TEA</code> algorithm, isn&rsquo;t it?</p>
+<h2 id="a-complex-vm-instruction">A COMPLEX VM Instruction</h2>
+<p>The next VM code I encounter is the hardest one in this VM. It has four sub-opcode, and all of them look similar.</p>
+<p><img src="../imgs/9.png" alt=""></p>
+<p>Even if I probably only need to analyze one of them, it is still quite complex. I first read its disassembly, but I quickly get lost. However, I do see some patterns within it. Let us look at the left-most sub-opcode, and the red block in the middle is always executed. And the code on top of it and beneath it also looks similar to each other. So it means maybe I only need to understand one of the two, drastically lowering the workload.</p>
+<p>Also, at the bottom of the handler, we see this interesting block:</p>
+<p><img src="../imgs/10.png" alt=""></p>
+<p>It is using the SSE instruction <code>pshufd</code> to reorganize the four dwords at address <code>rsp</code> and <code>rsp+0x10</code>. At first sight, this is more confusing than revealing. I thought this VM has four registers, which means four dwords. They are 16 bytes in total and span from <code>rsp</code> to <code>rsp+0x10</code>. Then what the heck is this code doing when it transforms the four dwords starting at <code>rsp+0x10</code>, is it just trying to confuse me?</p>
+<p>Well, let&rsquo;s first figure out what it does to the four registers sorted at <code>rsp</code>. We know <code>pshufd</code> transforms the second operand according to the third operand (which is an 8-bit immediate), and stores the result in the first operand. And what does the third parameter, <code>0x1b</code> corresponds to? It is actually <code>0b00011011</code> in binary, or <code>00 01 10 11</code> when put into groups. Wow, so the <code>pshufd</code> will swap the first dword with the last one, and the second one with the third one. Nice, this makes sense!</p>
+<p>Now we still need to read the bulky part of the handler.</p>
+<p><img src="../imgs/12.png" alt=""></p>
+<p>At the beginning of it, it first reads a dword after the sub-opcode byte. Then it does some length-based comparison based on that value. I did not make sense out of it initially, but when I zoom out, I discovered a new pattern:</p>
+<p><img src="../imgs/11.png" alt=""></p>
+<p>There are two loops in it. And the smaller one looks like this:</p>
+<p><img src="../imgs/13.png" alt=""></p>
+<p>It is just copying dwords from one pointer to another pointer until the two-pointer converges. Well, it seems to be reversing all of the dwords between two pointers. Looking at the larger one, it appears to be doing the same thing, just using SSE instructions to handle more data at the same time, to run it faster:</p>
+<p><img src="../imgs/14.png" alt=""></p>
+<p>Suddenly, the length comparison, as well as the two loops that does the same thing start to make sense to me! It is trying to reverse the dwords, but it will first use the SSE version when the buffer is large, then use regular instructions to wrap up. It is similar to the handling in SSE version of string functions, e,g., <code>strcpy</code>.</p>
+<p>Nice progress! The next thing I discover is that no arithmetic computation is performed on the data, they are just moved from one place to another. Given all this information, I fired up gdb to see what it is doing.</p>
+<p>The VM instruction I followed reads out a parameter from the dword after sub-opcode. The parameter has a value 0x5. The instruction breaks up the 8 dwords start at <code>rsp</code> into two groups, with the first group being the first 6 dwords, while the other being the rest 2 dwords. It then reverses the position of the dwords WITHIN the two groups, respectively. If you use an integer to represent the location of the dwords, it works like this:</p>
+<pre><code>Start 
+0 1 2 3 4 5 6 7
+
+Group 1
+0 1 2 3 4 5 ==&gt; 5 4 3 2 1 0
+
+Group 2
+6 7 ==&gt; 7 6
+
+End 
+5 4 3 2 1 0 7 6
+</code></pre><p>So far, no magic, right? Then it reverses the orders of the first four dwords, and the last four dwords, respectively:</p>
+<pre><code>Start 
+5 4 3 2 1 0 7 6
+
+Group 1
+5 4 3 2 ==&gt; 2 3 4 5
+
+Group 2
+1 0 7 6 ==&gt; 6 7 0 1
+
+End 
+2 3 4 5 6 7 0 1
+</code></pre><p>If we put the start and end together, we can see it clearly:</p>
+<pre><code>Start 
+0 1 2 3 4 5 6 7
+
+End 
+2 3 4 5 6 7 0 1
+</code></pre><p>Equivalently, the dwords are rotate shifted right 6 times! Wow, how smart a way to do it! I did not work out the mathematics behind this transformation, though I would expect it to be simpler than reversing this function.</p>
+<p>From here, I realize one of the three similar handlers does shift left in the same way. And the other two reads the number of cells to shift from a register. Great, we now fully reverse-engineered and understood the VM!</p>
+<h2 id="is-it-tea">Is it TEA?</h2>
+<p><img src="../imgs/15.png" alt=""></p>
+<p>Looking at the code and comparing it with a reference implementation (shown below, excerpted from Wikipedia), I believe it must be TEA. The registers are being rotated but if we track it precisely, we see those are just obfuscations. Everything matches except the delta is 0xe09ffbb1, not 0x9E3779B9. But that does not make a big difference to the algorithm. Also, the VM code is 32 rounds of unrolled loops. The entire program reads 16 bytes of input, and every 8 bytes are processed in the same way.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C"><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">encrypt</span> (uint32_t v[<span style="color:#ae81ff">2</span>], <span style="color:#66d9ef">const</span> uint32_t k[<span style="color:#ae81ff">4</span>]) {
+    uint32_t v0<span style="color:#f92672">=</span>v[<span style="color:#ae81ff">0</span>], v1<span style="color:#f92672">=</span>v[<span style="color:#ae81ff">1</span>], sum<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, i;           <span style="color:#75715e">/* set up */</span>
+    uint32_t delta<span style="color:#f92672">=</span><span style="color:#ae81ff">0x9E3779B9</span>;                     <span style="color:#75715e">/* a key schedule constant */</span>
+    uint32_t k0<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">0</span>], k1<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">1</span>], k2<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">2</span>], k3<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">3</span>];   <span style="color:#75715e">/* cache key */</span>
+    <span style="color:#66d9ef">for</span> (i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; i<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">32</span>; i<span style="color:#f92672">++</span>) {                         <span style="color:#75715e">/* basic cycle start */</span>
+        sum <span style="color:#f92672">+=</span> delta;
+        v0 <span style="color:#f92672">+=</span> ((v1<span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">4</span>) <span style="color:#f92672">+</span> k0) <span style="color:#f92672">^</span> (v1 <span style="color:#f92672">+</span> sum) <span style="color:#f92672">^</span> ((v1<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">5</span>) <span style="color:#f92672">+</span> k1);
+        v1 <span style="color:#f92672">+=</span> ((v0<span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">4</span>) <span style="color:#f92672">+</span> k2) <span style="color:#f92672">^</span> (v0 <span style="color:#f92672">+</span> sum) <span style="color:#f92672">^</span> ((v0<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">5</span>) <span style="color:#f92672">+</span> k3);
+    }                                              <span style="color:#75715e">/* end cycle */</span>
+    v[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">=</span>v0; v[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">=</span>v1;
+}
+</code></pre></div><p>And the key appears to be:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C">uint32_t key[<span style="color:#ae81ff">4</span>] <span style="color:#f92672">=</span> {<span style="color:#ae81ff">0x80b86e21</span>, <span style="color:#ae81ff">0xa268295d</span>, <span style="color:#ae81ff">0xf171f22d</span>, <span style="color:#ae81ff">0x28a13c94</span>};
+</code></pre></div><p>After 32 rounds of encryption, the encrypted input is checked against two constants:</p>
+<p><img src="../imgs/16.png" alt=""></p>
+<p>The <code>fail = 0x1</code> means if the <code>cmp</code> returns not equal, the check fails.</p>
+<p>Then I copied the reference decrypting code (from Wikipedia), changed the delta (and sum as well):</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C"><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">decrypt</span> (uint32_t v[<span style="color:#ae81ff">2</span>], <span style="color:#66d9ef">const</span> uint32_t k[<span style="color:#ae81ff">4</span>]) {
+    uint32_t v0<span style="color:#f92672">=</span>v[<span style="color:#ae81ff">0</span>], v1<span style="color:#f92672">=</span>v[<span style="color:#ae81ff">1</span>], sum<span style="color:#f92672">=</span><span style="color:#ae81ff">0x9E3779B9</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">32</span>, i;  <span style="color:#75715e">/* set up; sum is 32*delta */</span>
+    uint32_t delta<span style="color:#f92672">=</span><span style="color:#ae81ff">0x9E3779B9</span>;                     <span style="color:#75715e">/* a key schedule constant */</span>
+    uint32_t k0<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">0</span>], k1<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">1</span>], k2<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">2</span>], k3<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">3</span>];   <span style="color:#75715e">/* cache key */</span>
+    <span style="color:#66d9ef">for</span> (i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; i<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">32</span>; i<span style="color:#f92672">++</span>) {                         <span style="color:#75715e">/* basic cycle start */</span>
+        v1 <span style="color:#f92672">-=</span> ((v0<span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">4</span>) <span style="color:#f92672">+</span> k2) <span style="color:#f92672">^</span> (v0 <span style="color:#f92672">+</span> sum) <span style="color:#f92672">^</span> ((v0<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">5</span>) <span style="color:#f92672">+</span> k3);
+        v0 <span style="color:#f92672">-=</span> ((v1<span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">4</span>) <span style="color:#f92672">+</span> k0) <span style="color:#f92672">^</span> (v1 <span style="color:#f92672">+</span> sum) <span style="color:#f92672">^</span> ((v1<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">5</span>) <span style="color:#f92672">+</span> k1);
+        sum <span style="color:#f92672">-=</span> delta;
+    }                                              <span style="color:#75715e">/* end cycle */</span>
+    v[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">=</span>v0; v[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">=</span>v1;
+}
+</code></pre></div><p>Then I happily ran it, and believe I solved it. However, the decrypted one seems to contain unprintable char. And when I feed them in as input, the check also fails. Emmm, where did I make any mistake?</p>
+<h2 id="checking-each-round-one-by-one">Checking Each Round One-By-One</h2>
+<p>I used the text <code>12345678</code> as input and compared the encryption result from TEA and the VM. The first several rounds all match, and I am tired of comparing them manually. One difficulty here is there is no way to set a breakpoint on the VMIP, we can only set up breakpoints on the VM handlers. So if we wish to compare the result after n rounds, it is not easy to set a breakpoint.</p>
+<p>However, I made an observation that always ends up a <code>swap registers</code> VM instruction, and each round contains exactly four <code>swap registers</code> instructions. That makes the handler of that instruction a great place to set up a breakpoint. Set up a breakpoint at the end of the handler, when it hits, first use <code>c</code> to continue four times, and then dump the 8 dwords starting at <code>rsp</code> using <code>d/8dx $rsp</code>. I wrote a script to automate this process and dump the result, then compare it with the output from TEA.</p>
+<p>I discovered the result from the 22nd round of encryption is different in two outputs. I browsed the code to do the 22nd round of encryption, and almost immediately saw the issue:</p>
+<p><img src="../imgs/17.png" alt=""></p>
+<p>The number of shifts are different! They are 2 and 3 instead of 4 and 5. I adjusted my decryption code a little bit:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C"><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">decrypt</span> (uint32_t v[<span style="color:#ae81ff">2</span>], <span style="color:#66d9ef">const</span> uint32_t k[<span style="color:#ae81ff">4</span>]) {
+    uint32_t v0<span style="color:#f92672">=</span>v[<span style="color:#ae81ff">0</span>], v1<span style="color:#f92672">=</span>v[<span style="color:#ae81ff">1</span>], sum<span style="color:#f92672">=</span><span style="color:#ae81ff">0xe09ffbb1</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">32</span>, i;  <span style="color:#75715e">/* set up; sum is 32*delta */</span>
+    uint32_t delta<span style="color:#f92672">=</span><span style="color:#ae81ff">0xe09ffbb1</span>;                     <span style="color:#75715e">/* a key schedule constant */</span>
+    uint32_t k0<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">0</span>], k1<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">1</span>], k2<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">2</span>], k3<span style="color:#f92672">=</span>k[<span style="color:#ae81ff">3</span>];   <span style="color:#75715e">/* cache key */</span>
+    <span style="color:#66d9ef">for</span> (i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; i<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">32</span>; i<span style="color:#f92672">++</span>) {                         <span style="color:#75715e">/* basic cycle start */</span>
+        <span style="color:#66d9ef">if</span> (i <span style="color:#f92672">==</span> <span style="color:#ae81ff">9</span>)
+            v1 <span style="color:#f92672">-=</span> ((v0<span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">2</span>) <span style="color:#f92672">+</span> k2) <span style="color:#f92672">^</span> (v0 <span style="color:#f92672">+</span> sum) <span style="color:#f92672">^</span> ((v0<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">3</span>) <span style="color:#f92672">+</span> k3);
+        <span style="color:#66d9ef">else</span>
+            v1 <span style="color:#f92672">-=</span> ((v0<span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">4</span>) <span style="color:#f92672">+</span> k2) <span style="color:#f92672">^</span> (v0 <span style="color:#f92672">+</span> sum) <span style="color:#f92672">^</span> ((v0<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">5</span>) <span style="color:#f92672">+</span> k3);
+
+        v0 <span style="color:#f92672">-=</span> ((v1<span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">4</span>) <span style="color:#f92672">+</span> k0) <span style="color:#f92672">^</span> (v1 <span style="color:#f92672">+</span> sum) <span style="color:#f92672">^</span> ((v1<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">5</span>) <span style="color:#f92672">+</span> k1);
+        sum <span style="color:#f92672">-=</span> delta;
+    }                                              <span style="color:#75715e">/* end cycle */</span>
+    v[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">=</span>v0; v[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">=</span>v1;
+}
+</code></pre></div><p>Note, the decryption works in reverse, so the 22nd round in forwarding means the 9th round in reverse. Now it works! I get the output <code>xNVa2_N07_t3aAlg</code>, and it is correct:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Bash" data-lang="Bash">$ ./KataVM_L1 
+    .-------------------------.
+    | Towel<span style="color:#e6db74">&#39;s KataVM: Level 1 |
+</span><span style="color:#e6db74">    &#39;</span>-------------------------<span style="color:#960050;background-color:#1e0010">&#39;</span>
+
+&gt;&gt; xNVa2_N07_t3aAlg
+
+<span style="color:#f92672">[</span>+<span style="color:#f92672">]</span> Correct!
+</code></pre></div>]]></content>
+        </item>
         
         <item>
             <title>International Grand Master</title>

@@ -7,10 +7,17 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-    <lastBuildDate>Sat, 13 Feb 2021 19:44:00 +0800</lastBuildDate>
-    
-	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
-    
+    <lastBuildDate>Sun, 18 Apr 2021 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Solving a VM Challenge Using BinaryNinja</title>
+      <link>/posts/reversing/kata_vm/readme/</link>
+      <pubDate>Sun, 18 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/reversing/kata_vm/readme/</guid>
+      <description>Recently, my friend Towel created a VM challenge. I have not done any VM crackmes in the last year and decided to try this one. Towel says the challenge should be easy and serves mostly as an introduction for VM crackmes. More importantly, this one has no anti-debugging or static obfuscation, to allow the solver to concentrate on the VM itself.
+Preliminary The main() function is actually quite simple:
+Just one function call and a branch, which decides if the player succeeds.</description>
+    </item>
     
     <item>
       <title>International Grand Master</title>
