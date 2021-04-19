@@ -20,7 +20,7 @@ Just one function call and a branch, which decides if the player succeeds. The `
 
 ![](../imgs/2.png)
 
-It has a dispatcher at the top-center of the graph, and various VM instruction handlers beneath it. We see most of the instructions are not complex (supposedly), except for the longer four ones at the left hand. Looking at the first basic block in the function quickly reveals some important information about the VM:
+It has a dispatcher at the top-center of the graph, and various VM instruction handlers beneath it. We see most of the instructions are not complex (supposedly), except for the longer four ones at the left-hand side. Looking at the first basic block in the function quickly reveals some important information about the VM:
 
 ![](../imgs/3.png)
 
@@ -30,24 +30,24 @@ The code first sets up a huge buffer on the stack and then copies 0x3b1a bytes o
 
 ![](../imgs/4.png)
 
-The start of the common handler reads one byte from the current VIP (VM IP) and goes to different handlers based on its value. It serves as an opcode (operation code) for the instruction. The opcode of the first VM instruction is 0xf6, and we can find its handler according to the value:
+The start of the common handler reads one byte from the current VMIP (VM IP) and goes to different handlers based on its value. It serves as an opcode (operation code) for the instruction. The opcode of the first VM instruction is 0xf6, and we can find its handler according to the value:
 
 ![](../imgs/5.png)
 
 Looking at the handler, it reads another byte right after the opcode byte and checks whether the lowest two bits of it is 0x0. If so, it goes into the left branch in the image. We call this byte `sub-opcode` byte because it determines which variant of the opcode to execute. Then it has two `shr` instructions followed by two `and` and `mov`. It is not immediately clear to me what it is doing at first sight.
 
-Upon closer inspection, I find if we treat the data at the top of the stack (address `rsp`) as an array of dwords, then the two `mov` essentially moves a dword from index `rcx` into index `rax`. And tracing back, we find the two values come from the sub-opcode byte. The source index comes from bit 7-8 of it, and the destination index comes from bit 5-6. Remember the lowest two bits of the sub-opcode byte are used to decide the opcode variant.
+Upon closer inspection, I find if we treat the data at the top of the stack (address `rsp`) as an array of dwords, then the two `mov` essentially moves a dword from index `rcx` into index `rax`. And tracing back, we find the two values come from the sub-opcode byte. The source index comes from s 7-8 of it, and the destination index comes from bits 5-6. Remember the lowest two bits of the sub-opcode byte are used to decide the opcode variant.
 
 Now it is pretty clear that this is moving values between VM registers. (Well, it could also be VM memory, but this does not make a big difference.) This instruction can be disassembled something like `mov r1, r3`, for example. Of course, the actual indices of the registers need to be parsed from the sub-opcode byte.
 
-Alright, what about the other sub-opcode? I.e., when the lowest two bits of the byte is 0x2. It reads a dword after the sub-opcode, and moves that into a register decided by the bit 5-6 of the sub-opcode. Here, since both instructions are encoding registers using two bits, I deduced that this VM has four registers.
+Alright, what about the other sub-opcode? I.e., when the lowest two bits of the byte is 0x2. It reads a dword after the sub-opcode, and moves that into a register decided by the bits 5-6 of the sub-opcode. Here, since both instructions are encoding registers using two bits, I deduced that this VM has four registers. However, this conclusion is later challenged when I reverse the last VM Opcode.
 
 Nice, we analyzed one VM instruction. Now we simply need to repeat the process for every VM instruction and will eventually complete it. However, the VM code is quite lengthy (0x3b1a bytes long), manually analyzing it is hopeless. We need some way to automate the process.
 
 
 ## Writing an Architecture Plugin in BinaryNinja
 
-This time I decided to write an architecture plugin in BinaryNinja to disassemble the VM. I have been using BinaryNija for several years, but I have not written any architecture plugins before. Previously, I wrote my recursive descent [disassembler](https://github.com/jeffli678/VM_Disassembler) for VMs. It requires the user to write a disassembler function for the custom architecture, and it will drive the disassembler, i.e., fetch the binary code, ask for disassembly, and then print it. 
+This time I decided to write an architecture plugin in BinaryNinja to disassemble the VM. I have been using BinaryNinja for several years, but I have not written any architecture plugins before. Previously, I wrote my recursive descent [disassembler](https://github.com/jeffli678/VM_Disassembler) for VMs. It requires the user to write a disassembler function for the custom architecture, and it will drive the disassembler, i.e., fetch the binary code, ask for disassembly, and then print it. 
 
 However, writing an architecture plugin in BinaryNinja is a more powerful solution. Firstly, it benefits from a great GUI that I am already familiar with. I get a decent graph view, register highlighting, cross-references, etc, for free. Secondly, if we lift it to BinaryNinja IL, we can almost forget that we are dealing with an alien architecture -- just read the BLIL and analyze it from there.
 
@@ -139,7 +139,7 @@ Well, yeah, it prints a banner and then asks for the input. So we do not bother 
 
 ![](../imgs/8.png)
 
-It first sets `r2` to 4, and reads 4 bytes of input into both `r0` and `r1`. Note in this VM, the bytes to read are decided by the second parameter of the `read()` call, in this case being 4. Next, it copies the input in `r1` into `r2` and `r2`, and does some shift, add, and xor on it. This looks like the `TEA` algorithm, isn't it? 
+It first sets `r2` to 4, and reads 4 bytes of input into both `r0` and `r1`. Note in this VM, the bytes to read are decided by the third parameter of the `read()` call, in this case being 4. Next, it copies the input in `r1` into `r2` and `r3`, and does some shift, add, and xor on it. This looks like the `TEA` algorithm, isn't it? 
 
 
 ## A COMPLEX VM Instruction
@@ -222,7 +222,9 @@ End
 
 Equivalently, the dwords are rotate shifted right 6 times! Wow, how smart a way to do it! I did not work out the mathematics behind this transformation, though I would expect it to be simpler than reversing this function.
 
-From here, I realize one of the three similar handlers does shift left in the same way. And the other two reads the number of cells to shift from a register. Great, we now fully reverse-engineered and understood the VM!
+Now that the VM turns out to have eight registers, though only the first four can be accessed using `r0`-`r3`. To access the other four ones, they have to be first shifted into the position of the first four, and then operated upon. Interesting, this is the first time I have seen something like this!
+
+For the rest handlers similar to the one we have dechiphered, one does shift left in the same way. And the other two reads the number of cells to shift from a register. Great, we now fully reverse-engineered and understood the VM!
 
 
 ## Is it TEA?
