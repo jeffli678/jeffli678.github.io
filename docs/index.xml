@@ -1,449 +1,616 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Xusheng&#39;s blog</title>
-    <link>/</link>
-    <description>Recent content on Xusheng&#39;s blog</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-    <lastBuildDate>Sun, 18 Apr 2021 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
-    
-    
-    <item>
-      <title>Solving a VM Challenge Using BinaryNinja</title>
-      <link>/posts/reversing/kata_vm/readme/</link>
-      <pubDate>Sun, 18 Apr 2021 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/kata_vm/readme/</guid>
-      <description>Recently, my friend Towel created a VM challenge. I have not done any VM crackmes in the last year and decided to try this one. Towel says the challenge should be easy and serves mostly as an introduction for VM crackmes. More importantly, this one has no anti-debugging or static obfuscation, to allow the solver to concentrate on the VM itself.
-Preliminary The main() function is actually quite simple:
-Just one function call and a branch, which decides if the player succeeds.</description>
-    </item>
-    
-    <item>
-      <title>International Grand Master</title>
-      <link>/posts/grandmaster/</link>
-      <pubDate>Sat, 13 Feb 2021 19:44:00 +0800</pubDate>
-      
-      <guid>/posts/grandmaster/</guid>
-      <description>I was awarded the title of International Grand Master for Xiangqi in late 2020. I am very excited about this title!
-I earned this title since I am the Champnion of the 8th North American Cup. Game records can be viewed online.
-The certificate is shown here:</description>
-    </item>
-    
-    <item>
-      <title>Photo Works</title>
-      <link>/posts/photos/</link>
-      <pubDate>Sat, 13 Feb 2021 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/photos/</guid>
-      <description>I used to be a keen photographer. I treat photography as a way of expressing my views toward the world. My photos capture both the beauty and absurdity of this world.
-However, I have not taken very few photos in recent years. One excuse is I become busy and get obsessed with reverse engineering. But a more convincing reason is I am less interested in this world. The situation might change in the future, though.</description>
-    </item>
-    
-    <item>
-      <title>My New Blog is Ready!</title>
-      <link>/posts/my_new_blog/</link>
-      <pubDate>Thu, 11 Feb 2021 18:46:24 +0800</pubDate>
-      
-      <guid>/posts/my_new_blog/</guid>
-      <description>I spent some time with Hugo and now my blog is hosted on GitHub. Feel free to visit it at xusheng.dev!
-I will write about reversing, coding, Xiangqi, and other stuff.</description>
-    </item>
-    
-    <item>
-      <title>How to Avoid Writing a Bad Crackme</title>
-      <link>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</link>
-      <pubDate>Tue, 29 Dec 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</guid>
-      <description>Recently, I was promoted to a reviewer on crackmes.one (along with @zed). I am so honored with this and I appreciate the recognition and trust from @stan (creator of crackmes.one) and the entire community. The task for a reviewer is interesting, that I read submitted solutions and verify new crackmes. This allows me to grasp the latest trend on the website.
-I did not tally the statistics, but there is a fairly good amount of new submissions (of both crackmes and solutions) every week.</description>
-    </item>
-    
-    <item>
-      <title>Solving Two OCaml Crackmes Without Knowing Much about OCaml</title>
-      <link>/posts/reversing/ocaml_crackmes/readme/</link>
-      <pubDate>Sun, 13 Dec 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/ocaml_crackmes/readme/</guid>
-      <description>Earlier this year, my friend Towel uploaded two OCaml crackmes to crackmes.one. One of them is Baby OCaml, and the other one is called Teenager OCaml. Well, interesting names!
-This is not the first time Towel came up with OCaml crackmes. Qt Scanner, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3.</description>
-    </item>
-    
-    <item>
-      <title>Deciphering a Windows Anti-debugging Challenge</title>
-      <link>/posts/reversing/reverseme3/readme/</link>
-      <pubDate>Sun, 29 Nov 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/reverseme3/readme/</guid>
-      <description>It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.
-This time I am writing about the challenge ReverseMe3 from jochen_. The challenge can be found on crackmes.one. The password to unzip is &amp;ldquo;crackmes.</description>
-    </item>
-    
-    <item>
-      <title>Dealing with Manipulated ELF Binary and Manually Resolving Import Functions</title>
-      <link>/posts/reversing/elf_format/readme/</link>
-      <pubDate>Sun, 30 Aug 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/elf_format/readme/</guid>
-      <description>Unfortunately, this writeup is delayed for almost a week because I am super busy recently. Please take my apologies and I will try my best to keep the weekly challenge going, forever!
-The challenge can be downloaded at https://crackmes.one/crackme/5e727daa33c5d4439bb2decd. It is created by user BinaryNewbie, who is NOT a newbie for binary reversing.
-We will discuss an important topic in this writeup: how to mutate binary executable to obstruct reverse engineering tools.</description>
-    </item>
-    
-    <item>
-      <title>Making and solving a Reversing Challenge Based-on x86 ISA Encoding</title>
-      <link>/posts/reversing/x86/readme/</link>
-      <pubDate>Sun, 02 Aug 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/x86/readme/</guid>
-      <description>This time the writeup is a little bit different &amp;ndash; I am the maker of this challenge so the narrative is from a different perspective. I will first cover how I made it, and then show two possible ways to solve it.
-The Plan I have always been hoping to make some reversing challenges based-on the encoding of the x86 instruction set. It does not have to be super hard, maybe just explore some interesting aspects of the x86, which goes lower than the disassembly.</description>
-    </item>
-    
-    <item>
-      <title>Solving a Recursive Crackme by Automating GDB</title>
-      <link>/posts/reversing/automating-gdb/readme/</link>
-      <pubDate>Mon, 27 Jul 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/automating-gdb/readme/</guid>
-      <description>The last week&amp;rsquo;s challenge is called Recursion. From the name we already expect to do some automation &amp;ndash; manually solving stuff recursively is not a wise idea.
-First Impression The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &amp;ldquo;Paste From&amp;rdquo; -&amp;gt; &amp;ldquo;Base64&amp;rdquo;.</description>
-    </item>
-    
-    <item>
-      <title>Solving an Obfuscated Crackme with BinaryNinja and Triton</title>
-      <link>/posts/reversing/obfuscation/readme/</link>
-      <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/obfuscation/readme/</guid>
-      <description>The last week&amp;rsquo;s challenge was created by Dennis Yurichev. It is also hosted on crackmes.one. The challenge is compiled by a modified Tiny C Compiler (TCC) which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.
-First Impression The target (keygenme4.exe) is a PE. The entry point looks like this:
-There are several things which we can notice easily:</description>
-    </item>
-    
-    <item>
-      <title>Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl</title>
-      <link>/posts/reversing/shl_undefined_behavior/writeup/</link>
-      <pubDate>Sat, 20 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/shl_undefined_behavior/writeup/</guid>
-      <description>Encountering a Weird Issue Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input n is in the range of 0-64 (both side include).
-The first idea is to use left shift and then minus 1:
-uint64_t getBitMask(size_t n) { uint64_t ret = (1UL &amp;lt;&amp;lt; n) - 1; return ret; } This works well when n is in the range of 0-63.</description>
-    </item>
-    
-    <item>
-      <title>Solving an ARM challenge with z3</title>
-      <link>/posts/reversing/armageddon/solve/</link>
-      <pubDate>Thu, 18 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/armageddon/solve/</guid>
-      <description>First Impression The last week&amp;rsquo;s challenge is hosted at https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b. It is authored by Towel and it is a real challenge in UMDCTF 2019.
-Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is armageddon. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember.</description>
-    </item>
-    
-    <item>
-      <title>Debugging and Solving an Android Challenge</title>
-      <link>/posts/reversing/quarkslab_android_crackme/main/</link>
-      <pubDate>Sat, 30 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/quarkslab_android_crackme/main/</guid>
-      <description>Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.
-First Impression The challenge is created by Quarkslab. The crackme-telegram.apk is ~25MB in size which is larger than a typical crackme.</description>
-    </item>
-    
-    <item>
-      <title>Solving a Reversing Challenge with Mitmproxy and OCR</title>
-      <link>/posts/reversing/client_houseplant_ctf_2020/solve/</link>
-      <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/client_houseplant_ctf_2020/solve/</guid>
-      <description>Over the weekend I had some fun with the Houseplant CTF. Among the reversing challenges, the RTCP Trivia is particularly interesting and I would like to share my unconventional way of solving it.
-First Impression We get a client.apk after downloading the challenge. I have no Android phones so I ran it in an emulator. It has no ARM native library so it runs well in x86 emulators.
-After asking for a user name, the app presents a multiple-choice problem with four options (shown below).</description>
-    </item>
-    
-    <item>
-      <title>Reverse Engineering and Repairing a Fan</title>
-      <link>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</link>
-      <pubDate>Sun, 26 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</guid>
-      <description>Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&amp;rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.
-A Broken Fan I have a fan &amp;ndash; an eight-year-old fan &amp;ndash; that is NOT smart or IoT.</description>
-    </item>
-    
-    <item>
-      <title>排局-20</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-20/</link>
-      <pubDate>Sun, 06 May 2018 16:19:08 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-20/</guid>
-      <description> 车八退一 士４进５ 车八平六 士５进４ 炮八进九 马５退４ 炮八退三 马４进３ 马九退七 将５平４ 兵四平五 炮７平５ 炮八进三 象３进５ 兵五进一 将４进１ 炮八退一  </description>
-    </item>
-    
-    <item>
-      <title>排局-19</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-19/</link>
-      <pubDate>Sun, 06 May 2018 16:10:59 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-19/</guid>
-      <description> 炮六平八 士４进５ 马四进五! 士５进４ 马五进六!  </description>
-    </item>
-    
-    <item>
-      <title>排局-18</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-18/</link>
-      <pubDate>Sun, 06 May 2018 16:06:56 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-18/</guid>
-      <description> 兵六平五 炮７平５ 兵三平四 马５退６ 马一进二 车７退７ 炮七进一 士５退４ 马四进六 士４退５ 炮七退七  由此红方转为进攻黑方底士，此亦本局取名《峰回路转》之意。
-&amp;hellip;&amp;hellip; 车７平８ 炮七平六 车８进６ 炮六平二 马８退７ 炮二进一 马７进９  如马7退6，炮二平四，困毙红胜
-炮二平六 马９进７ 帅四退一 马７退８ 帅四进一 马８退７ 帅四退一 马７进５ 帅四进一 马５退４ 炮六进一 马４退３ 炮六进三 马３退２ 炮六进二 红胜  </description>
-    </item>
-    
-    <item>
-      <title>排局-17</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-17/</link>
-      <pubDate>Sun, 06 May 2018 15:31:13 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-17/</guid>
-      <description> 帅六退一 士５进６ 兵五平四 将４退１ 炮五平七 将４进１ 炮七平四 将４平５ 炮四退一 将５平４ 炮四平五 士６退５ 兵四平五 士５退６ 炮五进一 士６进５ 炮五平六  </description>
-    </item>
-    
-    <item>
-      <title>排局-16</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-16/</link>
-      <pubDate>Sun, 06 May 2018 15:30:08 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-16/</guid>
-      <description> 兵九平八 将４进１ 兵八平七 将４退１ 帅五退一 象３进１ 马七进八 象１进３ 兵七进一 将４退１ 马八进七 象３退５ 兵七平六 将４平５ 马七退五 车１退１ 仕六退五 车１平４ 马五进四 将５平６ 兵六平五 车４退２ 马四进二  </description>
-    </item>
-    
-    <item>
-      <title>排局-15</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-15/</link>
-      <pubDate>Sun, 06 May 2018 15:27:58 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-15/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>排局-14</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-14/</link>
-      <pubDate>Sun, 06 May 2018 15:25:19 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-14/</guid>
-      <description> 车四平六 将４平５ 车六平五 将５平６ 相五进三 车７平６ 车五平二 将６退１ 帅五平六 车６平９ 车二进五 将６退１ 车二退八 车９平７ 车二进三 车７平９ 帅六进一 车９进１ 帅六进一 车９平２ 帅六平五 车２退２ 仕五进六 车２退６ 车二进六 将６进１ 车二退一 将６退１ 车二平八  </description>
-    </item>
-    
-    <item>
-      <title>排局-13</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-13/</link>
-      <pubDate>Sun, 06 May 2018 15:23:59 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-13/</guid>
-      <description> 炮九平六 士５进４ 仕六退五 车４平５ 炮六平八 卒６平７ 炮八退八 卒７平６ 帅五平六 士４退５ 炮八进四 卒６平７ 炮八平五 卒７平６ 炮五平一 卒６平７ 炮一退四 卒７平６ 相九进七 将６进１ 相七退五 将６退１ 炮一进四 卒６平７ 炮一平八 卒７平６ 炮八退四 将６进１ 仕五退四 车５平６ 炮八平四  </description>
-    </item>
-    
-    <item>
-      <title>排局-12</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-12/</link>
-      <pubDate>Sun, 06 May 2018 15:21:12 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-12/</guid>
-      <description> 马七退五 将６退１ 马五进三 将６进１ 马三退一 士５退４ 前马退二 将６退１ 马一进二 将６平５ 帅五平六 象５进７ 后马退四 象７退９ 马四退二 将５进１ 后马进三 将５平６ 马三进二 将６平５ 后马进四 象９进７ 马四退三 将５退１ 马二退一 象３进５ 马一进三 将５平６ 前马进二 将６平５ 马二退四 象５退３ 马四退五 象７退９ 马五进七  </description>
-    </item>
-    
-    <item>
-      <title>排局-11</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-11/</link>
-      <pubDate>Sun, 06 May 2018 15:19:51 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-11/</guid>
-      <description> 马六退七 将５退１ 马七进八 象１进３ 相九进七 象３退１ 帅四退一 象１进３ 相七退五 象３退１ 帅四平五 象１进３ 帅五平六 象３退１ 帅六退一 象１进３ 炮九退一 将５进１ 马八退七 将５平６ 马七进六 将６平５ 炮九退七 将５退１ 炮九平五 象３退５ 相五进七 象５进７ 马六退五 象３进５ 马五进三 将５平６ 炮五进八  </description>
-    </item>
-    
-    <item>
-      <title>排局-10</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-10/</link>
-      <pubDate>Sun, 06 May 2018 15:09:32 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-10/</guid>
-      <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-3-2.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>排局-09</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-09/</link>
-      <pubDate>Sun, 06 May 2018 15:05:02 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-09/</guid>
-      <description>车五退一 炮５进６ 兵五平四 卒９平８ 相三退一 象７退５ 后兵进一 炮５退４ 后兵进一 卒６平５ 帅五平四  第一步只有车五退一可以获胜</description>
-    </item>
-    
-    <item>
-      <title>排局-08</title>
-      <link>/posts/xiangqi/2018-05-06-endgame-08/</link>
-      <pubDate>Sun, 06 May 2018 15:01:11 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-06-endgame-08/</guid>
-      <description>2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p w
-如图形势，红方当然可以连续打掉两个黑卒。但这样黑方得以调整阵型，红方无法取胜。
-   正确的走法是借叫杀之机，调整士相，将黑方双象赶到两边，进而获胜。
- 炮四平六 将４平５ 炮六平五 将５平４ 仕五退四 将４平５  如改走将4退1，则帅四平五，红必得象，胜定。
-相三退五 将５平４ 相五进七 将４平５ 仕四进五 将５平４ 炮五平七  驱黑象到边线。
-&amp;hellip;&amp;hellip; 象３进１ 炮七平六 将４平５ 炮六平五 将５平４ 仕五进四 将４平５ 相七退五 将５平６ 帅四平五 将６平５ 帅五平六  红帅移行换位。
-&amp;hellip;&amp;hellip; 将５平４ 相五进三 将４平５ 仕六退五 将５平６ 仕五退六 将６平５ 相三进五 将５平６ 相五进七 将６平５ 仕六进五 将５平６ 炮五平三 象７退９  再驱另一象到边线。
-帅六进一 将６退１ 帅六平五 红胜。  </description>
-    </item>
-    
-    <item>
-      <title>排局-07</title>
-      <link>/posts/xiangqi/2018-05-05-endgame-07/</link>
-      <pubDate>Sat, 05 May 2018 23:18:22 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-05-endgame-07/</guid>
-      <description>4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c w
-如图形势，红方仅有双炮做攻，似乎难以进取。
-   第一步的进攻方向很是重要，如果沉底叫将，则与胜利失之交臂。</description>
-    </item>
-    
-    <item>
-      <title>排局-06</title>
-      <link>/posts/xiangqi/2018-05-05-endgame-06/</link>
-      <pubDate>Sat, 05 May 2018 22:21:07 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-05-endgame-06/</guid>
-      <description>3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5 w
-如图形式，红方双炮巧妙腾挪，迫使黑方子力自相堵塞，最终一举获胜。
-   此局的进攻思路比较直接，运炮叫将，利用黑士自相阻塞，重炮或者闷宫而胜。
- 炮九平四 将６平５ 炮五退六！  红方退炮引而不发，伏有士六进五， 将5平4，炮四平六，士4退5，炮五平六重炮杀。黑方只有先将5平4才能解杀，红方则士六进五追杀：
-&amp;hellip;&amp;hellip; 将５平４ 仕六进五 士４退５  黑方退士也是仅有的解着。如图形式，直观的攻法是架炮做杀，但均难以奏效。试演两变如下：
-a.
-炮四平六 将４进１ 帅四进一 车４平３ 帅四平五 车３进９  红方无杀，黑方胜势
-b.
-炮五平六 将４进１ 仕五进六 将４平５  红方无杀，黑方胜势
-正确的走法是先士五进六做准备。细看之下，其实这是叫杀，演变如下：
-仕五进六 车４平３？ 炮五平六 士５进４ 仕六退五 将４平５ 炮六平五 将５平４ 炮四平六 士４退５ 炮五平六 重炮胜  此路攻法虽是连杀，但需要来回运炮，粗看之下不易发现，可以算作此局的核心。
-仕五进六扬士之后，黑方无暇挪车。最顽强的防守是先将4进1，当然红方辗转腾挪，攻势依然紧凑：
-仕五进六 将４进１ 帅四平五！ 将４退１ 炮五平六 士５进４ 帅五平四！  以上着法，红方先进帅做杀，逼黑方下将，而后平炮打将，待黑方扬士时候再出帅，次序井然。注意此时红方仍然威胁士六退五然后连杀。
-&amp;hellip;&amp;hellip; 将４平５ 仕六退五 将５退１  红方出帅，黑方顺势占中解杀。然而红方一手士六退五继续做杀，此时四六两路均已被控制，黑方只有坐将求生，但仍难免被重炮：
-炮六平五 士６退５ 仕五退六 士５进６ 炮四平五  从开始的局面看，谁又能想到最后黑将会在原位被擒住呢？</description>
-    </item>
-    
-    <item>
-      <title>排局-05</title>
-      <link>/posts/xiangqi/2018-05-04-endgame-05/</link>
-      <pubDate>Fri, 04 May 2018 17:13:21 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-04-endgame-05/</guid>
-      <description>6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3 w
-如图，红方似乎可以车三退三叫杀得车．可红方的取胜之路真的如此简单嘛？
-   显然不是这样简单&amp;ndash;不过黑方的应对也可谓奇思妙想:
- 车三退三 车５退１!  一着花心车龟缩防守，红方也暂时无计可施．此时平车打将会自找麻烦，因为黑方平将躲避后会形成兑车，红方反而不好处理．不过借打将之机调整炮位，进而扬士叫杀似乎是可行之策．
-车三进一 车５进１ 炮四进五 车５退１ 炮四退六 车５进１ 车三退一 车５退１ 仕五进六  此时红方伏有炮四平六，将４平５，车三平五的杀着．黑方不能车５平６牵炮，因为红方车三进一绝杀．其他解杀手段均会丢４路车．看似红方已经取得了胜利，但这真的是黑方最顽强的抵抗嘛？非也！惯性思维导致黑方在第５回合还是退花心车，但此时红炮的位置已经挡住了自己的老帅，所以黑方可以车５平８反杀！
-５．　车５平８！
-此时红方无暇抽车，只有借打将之机先占中路，然后进帅做杀：
-车三平六 将４平５ 车六平五 将５平４ 帅四平五  此时黑方有两种防守方法，均难逃一败：
-a.
-&amp;hellip;&amp;hellip; 车４平８ 仕五退四 前车进１ 车五进一 将４退１ 炮四平六 前车进５  此路变化黑方双车并线，与红方邀兑．无奈红方借先手打将，进而运炮卡位，胜势已成．前车进５是比较顽强的防守．如果后车进１？则车五进一！将４退１，车五退四，红胜定．注意这里车五进一的过们是必须的，如果直接车五退三，黑方有前车进２！红方车五平六，黑有后车平４，反而节外生枝．
-仕六进五 后车进５ 车五退一 后车退４ 车五退三  以上几步红方顿挫井然，如下图形势，黑方如果动前车，则红方士五进六得车胜．黑方如果动将或者移动后车，如将４退１，红方仍有士五进六，弃炮绝杀！以下黑方前车平４，车五平六，车８平４，车六进四绝杀红胜．
-此路变化，黑方竖向连车难以抵挡红方进攻，如果改为横向会怎样呢？
-b.
-&amp;hellip;&amp;hellip; 车４平７ 仕五退四 将４退１ 炮四平六 车７进１ 车五平六 车７平４  此路变化黑车会被红方栓住，但以炮换车红方只能得到和局，所以红方并不会轻易交换．
-仕六进五 车８平５ 炮六退一　红胜定  红方士六进五，暗伏车六进一，将４进１，士五进六绝杀．黑方不能简单车８进１弃车解杀，否则仍是车六进一，将４进１，士五进六，红得车亦胜．
-从最初的车三退三看似一步即胜，到后来的占中，架炮，红方的取胜之路可谓曲折．</description>
-    </item>
-    
-    <item>
-      <title>排局-04</title>
-      <link>/posts/xiangqi/2018-05-04-endgame-04/</link>
-      <pubDate>Fri, 04 May 2018 16:00:41 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-05-04-endgame-04/</guid>
-      <description>1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9 w
-如图形势，红方进攻子力仅有一车，如何才能利用黑车的位置取得胜利？
-   最直观的思路并不能奏效：
- 车八退三 士６进５ 车八平五 将５平４ 帅四平五 将４退１ 车五平六 士５进４  虽然黑方篡位车位置尴尬，但这样直接叫吃还是太过急躁．同样，如果直接车八退八，确实可以吃掉黑卒，但红方并不能取得胜利．
-正确的走法是先将黑将打到二楼，然后退车捉卒：
- 车八退二 将５退１ 车八退六  此时黑方虽然没有丢车之虞，但也无法疏通子力．当然不能回中象，否则红方车八进七绝杀．将５平４躲避会被红方车八平六先手带将吃掉卒，上将则会送车．所以黑方只有躲卒．这里有一个小陷阱，就是黑方卒８平７送吃：
-&amp;hellip;&amp;hellip; 卒８平７ 车八平三 象３退５ 车三平八 将５平４  红方无法取胜，和棋
-红方急于吃卒，但车被自己的高相挡住，黑方侥幸某得和局．细看之下，死卒不急吃，红方没有必要立刻杀卒，可以先落边相给车通头．
-相三退一  接下来，黑卒走投无路，红方可以将其吃掉并且保持车通头，已成胜势．具体的胜方可以参考后文着法．
-黑方较为顽强的抵抗是卒８进１沉底：
- 车八退二 将５退１ 车八退六 卒８进１ 车八退一 卒８平７！ 相三退一 卒７平６！  黑方先将卒沉底，然后平移进入红方九宫，如入无人之境．红方为了保持车通头，竟然不能简单将其杀掉．如下图形势，红方如帅四退一捉卒，黑方可以卒６平５占中！红方车八平五杀卒叫将则象３退５，进而某得和局．
-那红方怎样才能取得胜利呢？这里红方需要切换一下进攻思路，不再用车捉卒，而是采用排局中常见的捉弄底卒的方式来将其擒获．正着初看之下有点不可思议，红方不仅不吃卒，还主动抬车；并且抬车的方式必须是车八进三或进四，连看起来更有威胁的车八进六都不行：
-车八进三 卒６平５ 相一进三 卒５平４ 相三退五 卒４平５ 帅四退一 卒５平４ 帅四退一  以上着法对于排局爱好者并不陌生，首先运相回中路让黑卒无法离开九宫，然后下帅挤掉其仅有的活动空间．此时黑方只有动将，而对红方来说，取得胜利已经不再困难：
-&amp;hellip;&amp;hellip; 将５平４ 车八平六 将４平５ 车六进三 卒４平５  红方叫将后进车点穴，黑方无子可动．其实黑方的高象也是有意为之，如果黑方是底象，没有这一手塞象眼，红方还是无法取得胜利．此时只有方弃卒一搏，不过仍难免一败：
-帅四平五 将５平６ 车六平四 将６平５ 帅五平四 将５平４ 车四平六 将４平５ 相五进七　红胜定  如果黑方先出将，则红方先车八平六叫将然后车六进三点穴．黑卒还是会被困死．细心的读者可能已经发现前面为什么只能车八进三或进四，不能直接进六．否则，由于不需要进车点穴，差了一步棋．换句话说，最后单双步不对，并不能困死黑卒．</description>
-    </item>
-    
-    <item>
-      <title>排局-03</title>
-      <link>/posts/xiangqi/2018-01-18-endgame-03/</link>
-      <pubDate>Thu, 18 Jan 2018 20:47:50 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-01-18-endgame-03/</guid>
-      <description>2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9 w
-如图，黑方将位不安，且双车略背，红方如何凭借先行之利取胜？
-   按照惯例，首先分析一路不成熟的攻势，打将之后占中做杀：
- 车七平四 将６平５ 车四平五 将５平６ 帅六平五 车４平５ 兵六平五 将６退１  红方平兵继续叫杀，黑方当然不能直接车5进3砍兵，否则红方顺势车五进一吃掉之后即是绝杀。黑如车3进4弃车解杀，则红方兵五平四之后吃掉底车，仍是胜势。黑方下将正着，红如兵五进一，黑方便可以车5进2某得和局。
-车五平四 将６平５ 兵五进一 将５平４ 车四进三 将４退１  红劣黑胜
-黑方下将是一步容易被忽略的着法。最初算到这里的时候我以为黑方只能落士，红兵五进一之后由于黑车低头，形成巧胜。不料黑方有此着躲避，从而反败为胜。 所以红方正确的攻法是打两将之后平兵叫杀：
- 车七平四 将６平５ 车四平五 将５平６ 兵六平五 将６退１  黑方当然不能士4退5打将，否则红方帅六平五占中之后，黑方速败。
-兵五进一 将６退１ 车五平四 将６平５ 车四平二 将５平６  此时红方走不到兵五平四做杀，因为黑方可以士4退5带将抽掉。又不能帅六平五，否则黑方车3进5弃车杀相可以谋和。红方攻势暂时受阻，怎样才能打开局面呢？
-车二进四 将６进１ 车二退五 将６退１  红方借叫杀之机保住自己的高相，使得黑方杀相谋和的计划落空。但此时平帅黑方还是可以车3进4通头，下步即可以抢占中路，红方似乎还是难有进取。
-帅六平五 车３进４  如图形势，红方有两路较为直观的攻法，但都难以奏效：
-a.
-兵五平四 车４平５！ 相七退五 车３进４ 帅五退一 车５进７ 黑胜  黑方车4平5妙手，粉碎了红方的攻势，一举反败为胜
-b.
-车二平四 将６平５ 帅五平四 士４退５ 车四进四 车３平６!</description>
-    </item>
-    
-    <item>
-      <title>排局-02</title>
-      <link>/posts/xiangqi/2018-01-11-endgame-02/</link>
-      <pubDate>Thu, 11 Jan 2018 23:08:29 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-01-11-endgame-02/</guid>
-      <description>rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w
-如图，双方子力不多，且黑方双车通头，红方怎样才能借先行之利取胜？
-   初看之下，红方虽有空头炮，但黑方双车相连，抽将也得不到便宜。且边线双车对头，所以红方第一步究竟要不要打将就是值得思索的问题。如果打将，黑方必定士4进5，等红车再次打将离开中路，黑方可以有针对性的支士落士，红方难以进取。但若是不打将，则只有平车躲避，此时黑方可以进车打将，似乎很快可以化解红方尚不成熟的攻势。
-当然，红方还是可以先车九平三叫杀（伏士六进五，士4进5，车三进八杀）。此时黑方并不能打将抽车，因为车2进7，帅四退一，车2进1? 士六进五，反将红胜。简单上将并不能解杀：
- 车九平三 将５进１ 车三平五 将５平４ 车五平六 将４平５ 仕六进五 红胜  所以将5进1的走法是错误的。那黑方怎样才能化解红方攻势呢？看来只有先车2进7打将，红方必定帅四退一躲避。此时再将5进1，红方没法平车打将，是不是可以守住呢？非也，此时红方可以从竖线进攻：
- 车九平三 车２进７ 帅四退一 将５进１ 车三进七 将５进１ 仕六进五 将５平４ 车三退二 红胜定  可惜，红方的胜利是建立在黑方的失误之上，当然正解也绝非寻常着法：
- 车九平三 车２进７ 帅四退一 车１进９  黑方一手车1进9（亦可车2进2），明为送，实为捉，红方不能炮五平九，否则车2进1抽车黑速胜。因炮被牵制，士六进五也不成，所以红方只能车三进八借打将之机先吃一车。
-车三进八 将５进１ 炮五平九  此时红方不仅净多一炮，且底车先捉黑士，怎么看黑方也是败势难逃。但黑方自有妙计：
-&amp;hellip;&amp;hellip; 车２进１ 帅四进一 车２进１  黑方车2进1打将，迫使红帅定位。红方如果帅四退一下帅，黑方则车2进1捉双，随后车2平4吃士，然后车4平5占中成单车守和车炮之势。红方不肯，只好帅上三楼。黑方随即再度进车捉双。为什么黑方不直接车2进2捉双呢？这里按下不表，稍后揭晓。
-炮九进九 车２平４ 车三平五 将５平４  </description>
-    </item>
-    
-    <item>
-      <title>排局-01</title>
-      <link>/posts/xiangqi/2018-01-11-endgame-01/</link>
-      <pubDate>Thu, 11 Jan 2018 23:04:07 +0800</pubDate>
-      
-      <guid>/posts/xiangqi/2018-01-11-endgame-01/</guid>
-      <description>9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w
-如图局面，是我不久前从残局库中发现的一个挺有意思的局面，红先胜。
-   分析：
-从初始盘面来看，双方各有一炮，红方有士相，黑方仅光将且在三楼，估计是要在困炮的同时调整阵型，最后白脸将杀。
-最直接的思路是打两将之后扬相，然后帅占中路做杀。但黑方有一手叫闷可解：
- 炮二平四 将６平５ 炮四平五 将５平６ 相五进三 将６平５ 仕六进五 将５平６ 帅六进一 炮９平８  此路虽不通，但红方另有一路攻法，就是先上帅，然后再运炮做攻。由于红炮占位，黑方走不到炮9平8，形势十分不妙。将如6平5红方则顺势炮二平五打将。炮9退1也难挽颓势：
- 帅六进一 炮９退１ 炮二平四 炮９平６ 帅六退一 将６平５ 炮四平五 将５平６ 帅六平五 炮６进１ 相五进七 将６退１ 帅五进一 将６退１ 仕六进五 炮６退１ 炮五平四 将６进１ 仕五进六 将６进１ 帅五退一 捉死炮胜  当然，这则排局并非如此简单。黑方炮9退1不是应对帅六进一的最顽强走法。黑方有一手将6退1可以某得和局。下将后，红方当然不能急于炮二平四打将，否则黑方可以从容炮9平8再炮8退7防守。于是红方只有先飞相，但无论红相往哪边去，黑方都有妙手化解。
-如图形势，如红飞三七高相，则黑方炮击底士，而后绕回防守，红方无计可施：
-相五进七 炮９平４ 炮二平四 将６平５ 炮四平五 炮４平２  如红落相，黑方当然不能打士（否则炮被困死）。正确走法是将6平5占中：
-相五退七 将６平５ 仕六进五 炮９平３ 炮二平五 将５平６ 帅六平五 炮３退７  红方自己落下来的底相被黑方打掉然后借机回防，也是十分有趣。
-那正确的攻法是什么呢？还是先从运炮入手：
- 炮二平四 将６平５ 炮四平五 将５平６ 相五进三 将６平５ 仕六进五 将５平６  红方直接上帅并不能奏效，但这里如果46路的子力调换一下，红帅在4路，士和黑将在6路，则黑方无法借助炮9平8防守。但红方怎样才能调整阵型，达到上述目标呢？且看后续着法：</description>
-    </item>
-    
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Xusheng Li</title><link>/</link><description>Recent content on Xusheng Li</description><generator>Hugo</generator><language>en-us</language><copyright>&lt;a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener"&gt;CC BY-NC 4.0&lt;/a&gt;</copyright><lastBuildDate>Sun, 18 Apr 2021 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Solving a VM Challenge Using BinaryNinja</title><link>/posts/reversing/kata_vm/readme/</link><pubDate>Sun, 18 Apr 2021 00:00:00 +0000</pubDate><guid>/posts/reversing/kata_vm/readme/</guid><description>&lt;p&gt;Recently, my friend &lt;a href="https://crackmes.one/user/Towel"&gt;Towel&lt;/a&gt; created a &lt;a href="https://crackmes.one/crackme/605443e333c5d42c3d016f59"&gt;VM challenge&lt;/a&gt;. I have not done any VM crackmes in the last year and decided to try this one. Towel says the challenge should be easy and serves mostly as an introduction for VM crackmes. More importantly, this one has no anti-debugging or static obfuscation, to allow the solver to concentrate on the VM itself.&lt;/p&gt;
+&lt;h2 id="preliminary"&gt;Preliminary&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;main()&lt;/code&gt; function is actually quite simple:&lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/1.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;Just one function call and a branch, which decides if the player succeeds. The &lt;code&gt;core&lt;/code&gt; function looks like what a VM should be:&lt;/p&gt;</description></item><item><title>International Grand Master</title><link>/posts/grandmaster/</link><pubDate>Sat, 13 Feb 2021 19:44:00 +0800</pubDate><guid>/posts/grandmaster/</guid><description>&lt;p&gt;I was awarded the title of &lt;code&gt;International Grand Master&lt;/code&gt; for Xiangqi in late 2020. I am very excited about this title!&lt;/p&gt;
+&lt;p&gt;I earned this title since I am the &lt;a href="http://www.naxf.org/wp/wp-content/uploads/2018/11/ranking.txt"&gt;Champnion&lt;/a&gt; of the 8th North American Cup. Game records can be viewed &lt;a href="http://www.naxf.org/wp/8th/"&gt;online&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The certificate is shown here:&lt;/p&gt;
+&lt;p&gt;&lt;img src="../grandmaster.jpg" alt=""&gt;&lt;/p&gt;</description></item><item><title>Photo Works</title><link>/posts/photos/</link><pubDate>Sat, 13 Feb 2021 00:00:00 +0000</pubDate><guid>/posts/photos/</guid><description>&lt;p&gt;I used to be a keen photographer. I treat photography as a way of expressing my views toward the world. My photos capture both the beauty and absurdity of this world.&lt;/p&gt;
+&lt;p&gt;However, I have not taken very few photos in recent years. One excuse is I become busy and get obsessed with reverse engineering. But a more convincing reason is I am less interested in this world. The situation might change in the future, though.&lt;/p&gt;</description></item><item><title>My New Blog is Ready!</title><link>/posts/my_new_blog/</link><pubDate>Thu, 11 Feb 2021 18:46:24 +0800</pubDate><guid>/posts/my_new_blog/</guid><description>&lt;p&gt;I spent some time with &lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt; and now my blog is hosted on GitHub. Feel free to visit it at &lt;a href="https://xusheng.dev"&gt;xusheng.dev&lt;/a&gt;!&lt;/p&gt;
+&lt;p&gt;I will write about reversing, coding, Xiangqi, and other stuff.&lt;/p&gt;</description></item><item><title>How to Avoid Writing a Bad Crackme</title><link>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</link><pubDate>Tue, 29 Dec 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</guid><description>&lt;p&gt;Recently, I was promoted to a reviewer on crackmes.one (along with @zed). I am so honored with this and I appreciate the recognition and trust from @stan (creator of crackmes.one) and the entire community. The task for a reviewer is interesting, that I read submitted solutions and verify new crackmes. This allows me to grasp the latest trend on the website.&lt;/p&gt;
+&lt;p&gt;I did not tally the statistics, but there is a fairly good amount of new submissions (of both crackmes and solutions) every week. And most of them are nice! For me, crackmes.one is a place for reversers to exchange knowledge and joyfulness. So I am very glad that we see a steady flow of input. Now that we have three reviewers, and I hope an increase in the reviewing speed will shorten the feedback loop for contributors, which, in turn, will lead to more contributions from the community.&lt;/p&gt;</description></item><item><title>Solving Two OCaml Crackmes Without Knowing Much about OCaml</title><link>/posts/reversing/ocaml_crackmes/readme/</link><pubDate>Sun, 13 Dec 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/ocaml_crackmes/readme/</guid><description>&lt;p&gt;Earlier this year, my friend &lt;a href="https://crackmes.one/user/Towel"&gt;Towel&lt;/a&gt; uploaded two OCaml crackmes to crackmes.one. One of them is &lt;a href="https://crackmes.one/crackme/5f600af333c5d4357b3b01d6"&gt;&lt;code&gt;Baby OCaml&lt;/code&gt;&lt;/a&gt;, and the other one is called &lt;a href="https://crackmes.one/crackme/5f600b9933c5d4357b3b01d7"&gt;&lt;code&gt;Teenager OCaml&lt;/code&gt;&lt;/a&gt;. Well, interesting names!&lt;/p&gt;
+&lt;p&gt;This is not the first time Towel came up with OCaml crackmes. &lt;a href="https://crackmes.one/crackme/5ec1b82133c5d449d91ae539"&gt;&lt;code&gt;Qt Scanner&lt;/code&gt;&lt;/a&gt;, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3. Nevertheless, we cannot hide from challenges forever, so I decided to try it last week. And the outcome is good, I managed to solve them without digging deep into the OCaml runtime.&lt;/p&gt;</description></item><item><title>Deciphering a Windows Anti-debugging Challenge</title><link>/posts/reversing/reverseme3/readme/</link><pubDate>Sun, 29 Nov 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/reverseme3/readme/</guid><description>&lt;p&gt;It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.&lt;/p&gt;
+&lt;p&gt;This time I am writing about the challenge &lt;code&gt;ReverseMe3&lt;/code&gt; from &lt;code&gt;jochen_&lt;/code&gt;. The challenge can be found on &lt;a href="https://crackmes.one/crackme/5fb1642933c5d424269a1850"&gt;crackmes.one&lt;/a&gt;. The password to unzip is &amp;ldquo;crackmes.one&amp;rdquo;.&lt;/p&gt;</description></item><item><title>Dealing with Manipulated ELF Binary and Manually Resolving Import Functions</title><link>/posts/reversing/elf_format/readme/</link><pubDate>Sun, 30 Aug 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/elf_format/readme/</guid><description>&lt;p&gt;Unfortunately, this writeup is delayed for almost a week because I am super busy recently. Please take my apologies and I will try my best to keep the weekly challenge going, forever!&lt;/p&gt;
+&lt;p&gt;The challenge can be downloaded at &lt;a href="https://crackmes.one/crackme/5e727daa33c5d4439bb2decd"&gt;https://crackmes.one/crackme/5e727daa33c5d4439bb2decd&lt;/a&gt;. It is created by user BinaryNewbie, who is NOT a newbie for binary reversing.&lt;/p&gt;
+&lt;p&gt;We will discuss an important topic in this writeup: how to mutate binary executable to obstruct reverse engineering tools. Specifically, these techniques aim to fool the binary parsers so that they fail to parse the binary or the parsing result is missing important information. In the worst case, the binary crashes the analysis tool. For convenience, we will call these techniques &lt;code&gt;Executable Format Manipulation (EFP)&lt;/code&gt;.&lt;/p&gt;</description></item><item><title>Making and solving a Reversing Challenge Based-on x86 ISA Encoding</title><link>/posts/reversing/x86/readme/</link><pubDate>Sun, 02 Aug 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/x86/readme/</guid><description>&lt;p&gt;This time the writeup is a little bit different &amp;ndash; I am the maker of this challenge so the narrative is from a different perspective. I will first cover how I made it, and then show two possible ways to solve it.&lt;/p&gt;
+&lt;h2 id="the-plan"&gt;The Plan&lt;/h2&gt;
+&lt;p&gt;I have always been hoping to make some reversing challenges based-on the encoding of the x86 instruction set. It does not have to be super hard, maybe just explore some interesting aspects of the x86, which goes lower than the disassembly. Recently, thanks to my intern task that lifts x86 instructions, as well as reading this &lt;a href="https://www.msreverseengineering.com/blog/2015/6/9/x86-trivia-for-nerds"&gt;blog post&lt;/a&gt;, I decided to do it rather than set it for the future (indefinitely).&lt;/p&gt;</description></item><item><title>Solving a Recursive Crackme by Automating GDB</title><link>/posts/reversing/automating-gdb/readme/</link><pubDate>Mon, 27 Jul 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/automating-gdb/readme/</guid><description>&lt;p&gt;The last week&amp;rsquo;s challenge is called &lt;a href="https://0x00sec.org/t/reverseme-recursion/21802"&gt;&lt;code&gt;Recursion&lt;/code&gt;&lt;/a&gt;. From the name we already expect to do some automation &amp;ndash; manually solving stuff recursively is not a wise idea.&lt;/p&gt;
+&lt;h2 id="first-impression"&gt;First Impression&lt;/h2&gt;
+&lt;p&gt;The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &amp;ldquo;Paste From&amp;rdquo; -&amp;gt; &amp;ldquo;Base64&amp;rdquo;. Then you are done!&lt;/p&gt;</description></item><item><title>Solving an Obfuscated Crackme with BinaryNinja and Triton</title><link>/posts/reversing/obfuscation/readme/</link><pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/obfuscation/readme/</guid><description>&lt;p&gt;The last week&amp;rsquo;s &lt;a href="https://yurichev.com/blog/58/"&gt;challenge&lt;/a&gt; was created by &lt;a href="https://yurichev.com/"&gt;Dennis Yurichev&lt;/a&gt;. It is also hosted on &lt;a href="https://crackmes.one/crackme/5ab77f6233c5d40ad448c9e4"&gt;crackmes.one&lt;/a&gt;. The challenge is compiled by a modified &lt;a href="https://bellard.org/tcc/"&gt;Tiny C Compiler (TCC)&lt;/a&gt; which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.&lt;/p&gt;
+&lt;h2 id="first-impression"&gt;First Impression&lt;/h2&gt;
+&lt;p&gt;The target (&lt;a href="../keygenme4.zip"&gt;keygenme4.exe&lt;/a&gt;) is a PE. The entry point looks like this:&lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/1.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;There are several things which we can notice easily:&lt;/p&gt;</description></item><item><title>Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl</title><link>/posts/reversing/shl_undefined_behavior/writeup/</link><pubDate>Sat, 20 Jun 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/shl_undefined_behavior/writeup/</guid><description>&lt;h2 id="encountering-a-weird-issue"&gt;Encountering a Weird Issue&lt;/h2&gt;
+&lt;p&gt;Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input &lt;code&gt;n&lt;/code&gt; is in the range of 0-64 (both side include).&lt;/p&gt;
+&lt;p&gt;The first idea is to use left shift and then minus 1:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-C" data-lang="C"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;uint64_t&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;getBitMask&lt;/span&gt;(&lt;span style="color:#66d9ef"&gt;size_t&lt;/span&gt; n)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;uint64_t&lt;/span&gt; ret &lt;span style="color:#f92672"&gt;=&lt;/span&gt; (&lt;span style="color:#ae81ff"&gt;1UL&lt;/span&gt; &lt;span style="color:#f92672"&gt;&amp;lt;&amp;lt;&lt;/span&gt; n) &lt;span style="color:#f92672"&gt;-&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; ret;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This works well when n is in the range of 0-63. However, when n is 64, the code returns 0 instead of 0xffffffffffffffff.&lt;/p&gt;</description></item><item><title>Solving an ARM challenge with z3</title><link>/posts/reversing/armageddon/solve/</link><pubDate>Thu, 18 Jun 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/armageddon/solve/</guid><description>&lt;h2 id="first-impression"&gt;First Impression&lt;/h2&gt;
+&lt;p&gt;The last week&amp;rsquo;s challenge is hosted at &lt;a href="https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b"&gt;https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b&lt;/a&gt;. It is authored by Towel and it is a real challenge in UMDCTF 2019.&lt;/p&gt;
+&lt;p&gt;Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is &lt;code&gt;armageddon&lt;/code&gt;. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember.&lt;/p&gt;</description></item><item><title>Debugging and Solving an Android Challenge</title><link>/posts/reversing/quarkslab_android_crackme/main/</link><pubDate>Sat, 30 May 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/quarkslab_android_crackme/main/</guid><description>&lt;p&gt;Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.&lt;/p&gt;
+&lt;h2 id="first-impression"&gt;First Impression&lt;/h2&gt;
+&lt;p&gt;The &lt;a href="https://blog.quarkslab.com/android-challenge.html"&gt;challenge&lt;/a&gt; is created by Quarkslab. The &lt;strong&gt;crackme-telegram.apk&lt;/strong&gt; is ~25MB in size which is larger than a typical crackme. One of the challenges in real-world reverse engineering is the huge size of the binary. There are too many possible places to hide the crucial code so even finding it is non-trivial in the first place.&lt;/p&gt;</description></item><item><title>Solving a Reversing Challenge with Mitmproxy and OCR</title><link>/posts/reversing/client_houseplant_ctf_2020/solve/</link><pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/client_houseplant_ctf_2020/solve/</guid><description>&lt;p&gt;Over the weekend I had some fun with the &lt;a href="https://houseplant.riceteacatpanda.wtf/home"&gt;Houseplant CTF&lt;/a&gt;. Among the reversing challenges, the &lt;a href="https://houseplant.riceteacatpanda.wtf/challenge?id=8"&gt;&lt;strong&gt;RTCP Trivia&lt;/strong&gt;&lt;/a&gt; is particularly interesting and I would like to share my unconventional way of solving it.&lt;/p&gt;
+&lt;h2 id="first-impression"&gt;First Impression&lt;/h2&gt;
+&lt;p&gt;We get a &lt;a href="../client.zip"&gt;&lt;strong&gt;client.apk&lt;/strong&gt;&lt;/a&gt; after downloading the challenge. I have no Android phones so I ran it in an emulator. It has no ARM native library so it runs well in x86 emulators.&lt;/p&gt;
+&lt;p&gt;After asking for a user name, the app presents a multiple-choice problem with four options (shown below). The problem itself is not difficult. However, there is a ten-second countdown and we must answer it before the time elapses. The challenge description says that we need to correctly answer 1000 such problems. So manual solving is probably not a wise idea.&lt;/p&gt;</description></item><item><title>Reverse Engineering and Repairing a Fan</title><link>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</link><pubDate>Sun, 26 Apr 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</guid><description>&lt;p&gt;Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&amp;rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.&lt;/p&gt;
+&lt;h2 id="a-broken-fan"&gt;A Broken Fan&lt;/h2&gt;
+&lt;p&gt;I have a fan &amp;ndash; an eight-year-old fan &amp;ndash; that is NOT smart or IoT. It is just a simple fan. One day it fell from the table to the ground and stopped working. &lt;em&gt;RIP&lt;/em&gt;. It accompanied me for several summers and I love it. I decided to take it apart and see what is indeed broken, before saying farewell to my friend.&lt;/p&gt;</description></item><item><title>排局-20</title><link>/posts/xiangqi/2018-05-06-endgame-20/</link><pubDate>Sun, 06 May 2018 16:19:08 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-20/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-24.png" alt=""&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车八退一 士４进５&lt;/li&gt;
+&lt;li&gt;车八平六 士５进４&lt;/li&gt;
+&lt;li&gt;炮八进九 马５退４&lt;/li&gt;
+&lt;li&gt;炮八退三 马４进３&lt;/li&gt;
+&lt;li&gt;马九退七 将５平４&lt;/li&gt;
+&lt;li&gt;兵四平五 炮７平５&lt;/li&gt;
+&lt;li&gt;炮八进三 象３进５&lt;/li&gt;
+&lt;li&gt;兵五进一 将４进１&lt;/li&gt;
+&lt;li&gt;炮八退一&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>排局-19</title><link>/posts/xiangqi/2018-05-06-endgame-19/</link><pubDate>Sun, 06 May 2018 16:10:59 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-19/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-1-3.png" alt=""&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;炮六平八 士４进５&lt;/li&gt;
+&lt;li&gt;马四进五! 士５进４&lt;/li&gt;
+&lt;li&gt;马五进六!&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>排局-18</title><link>/posts/xiangqi/2018-05-06-endgame-18/</link><pubDate>Sun, 06 May 2018 16:06:56 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-18/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-21.png" alt=""&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;兵六平五 炮７平５&lt;/li&gt;
+&lt;li&gt;兵三平四 马５退６&lt;/li&gt;
+&lt;li&gt;马一进二 车７退７&lt;/li&gt;
+&lt;li&gt;炮七进一 士５退４&lt;/li&gt;
+&lt;li&gt;马四进六 士４退５&lt;/li&gt;
+&lt;li&gt;炮七退七&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;由此红方转为进攻黑方底士，此亦本局取名《峰回路转》之意。&lt;/p&gt;
+&lt;ol start="6"&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;        车７平８&lt;/li&gt;
+&lt;li&gt;炮七平六 车８进６&lt;/li&gt;
+&lt;li&gt;炮六平二 马８退７&lt;/li&gt;
+&lt;li&gt;炮二进一 马７进９&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;如马7退6，炮二平四，困毙红胜&lt;/p&gt;
+&lt;ol start="10"&gt;
+&lt;li&gt;炮二平六 马９进７&lt;/li&gt;
+&lt;li&gt;帅四退一 马７退８&lt;/li&gt;
+&lt;li&gt;帅四进一 马８退７&lt;/li&gt;
+&lt;li&gt;帅四退一 马７进５&lt;/li&gt;
+&lt;li&gt;帅四进一 马５退４&lt;/li&gt;
+&lt;li&gt;炮六进一 马４退３&lt;/li&gt;
+&lt;li&gt;炮六进三 马３退２&lt;/li&gt;
+&lt;li&gt;炮六进二 红胜&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>排局-17</title><link>/posts/xiangqi/2018-05-06-endgame-17/</link><pubDate>Sun, 06 May 2018 15:31:13 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-17/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-20.png" alt=""&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;帅六退一 士５进６&lt;/li&gt;
+&lt;li&gt;兵五平四 将４退１&lt;/li&gt;
+&lt;li&gt;炮五平七 将４进１&lt;/li&gt;
+&lt;li&gt;炮七平四 将４平５&lt;/li&gt;
+&lt;li&gt;炮四退一 将５平４&lt;/li&gt;
+&lt;li&gt;炮四平五 士６退５&lt;/li&gt;
+&lt;li&gt;兵四平五 士５退６&lt;/li&gt;
+&lt;li&gt;炮五进一 士６进５&lt;/li&gt;
+&lt;li&gt;炮五平六&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>排局-16</title><link>/posts/xiangqi/2018-05-06-endgame-16/</link><pubDate>Sun, 06 May 2018 15:30:08 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-16/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-18.png" alt=""&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;兵九平八 将４进１&lt;/li&gt;
+&lt;li&gt;兵八平七 将４退１&lt;/li&gt;
+&lt;li&gt;帅五退一 象３进１&lt;/li&gt;
+&lt;li&gt;马七进八 象１进３&lt;/li&gt;
+&lt;li&gt;兵七进一 将４退１&lt;/li&gt;
+&lt;li&gt;马八进七 象３退５&lt;/li&gt;
+&lt;li&gt;兵七平六 将４平５&lt;/li&gt;
+&lt;li&gt;马七退五 车１退１&lt;/li&gt;
+&lt;li&gt;仕六退五 车１平４&lt;/li&gt;
+&lt;li&gt;马五进四 将５平６&lt;/li&gt;
+&lt;li&gt;兵六平五 车４退２&lt;/li&gt;
+&lt;li&gt;马四进二&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-19.png" alt=""&gt;&lt;/p&gt;</description></item><item><title>排局-15</title><link>/posts/xiangqi/2018-05-06-endgame-15/</link><pubDate>Sun, 06 May 2018 15:27:58 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-15/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-16.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-17.png" alt=""&gt;&lt;/p&gt;</description></item><item><title>排局-14</title><link>/posts/xiangqi/2018-05-06-endgame-14/</link><pubDate>Sun, 06 May 2018 15:25:19 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-14/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-14-1.png" alt=""&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车四平六 将４平５&lt;/li&gt;
+&lt;li&gt;车六平五 将５平６&lt;/li&gt;
+&lt;li&gt;相五进三 车７平６&lt;/li&gt;
+&lt;li&gt;车五平二 将６退１&lt;/li&gt;
+&lt;li&gt;帅五平六 车６平９&lt;/li&gt;
+&lt;li&gt;车二进五 将６退１&lt;/li&gt;
+&lt;li&gt;车二退八 车９平７&lt;/li&gt;
+&lt;li&gt;车二进三 车７平９&lt;/li&gt;
+&lt;li&gt;帅六进一 车９进１&lt;/li&gt;
+&lt;li&gt;帅六进一 车９平２&lt;/li&gt;
+&lt;li&gt;帅六平五 车２退２&lt;/li&gt;
+&lt;li&gt;仕五进六 车２退６&lt;/li&gt;
+&lt;li&gt;车二进六 将６进１&lt;/li&gt;
+&lt;li&gt;车二退一 将６退１&lt;/li&gt;
+&lt;li&gt;车二平八&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>排局-13</title><link>/posts/xiangqi/2018-05-06-endgame-13/</link><pubDate>Sun, 06 May 2018 15:23:59 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-13/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-13-1.png" alt=""&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;炮九平六 士５进４&lt;/li&gt;
+&lt;li&gt;仕六退五 车４平５&lt;/li&gt;
+&lt;li&gt;炮六平八 卒６平７&lt;/li&gt;
+&lt;li&gt;炮八退八 卒７平６&lt;/li&gt;
+&lt;li&gt;帅五平六 士４退５&lt;/li&gt;
+&lt;li&gt;炮八进四 卒６平７&lt;/li&gt;
+&lt;li&gt;炮八平五 卒７平６&lt;/li&gt;
+&lt;li&gt;炮五平一 卒６平７&lt;/li&gt;
+&lt;li&gt;炮一退四 卒７平６&lt;/li&gt;
+&lt;li&gt;相九进七 将６进１&lt;/li&gt;
+&lt;li&gt;相七退五 将６退１&lt;/li&gt;
+&lt;li&gt;炮一进四 卒６平７&lt;/li&gt;
+&lt;li&gt;炮一平八 卒７平６&lt;/li&gt;
+&lt;li&gt;炮八退四 将６进１&lt;/li&gt;
+&lt;li&gt;仕五退四 车５平６&lt;/li&gt;
+&lt;li&gt;炮八平四&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>排局-12</title><link>/posts/xiangqi/2018-05-06-endgame-12/</link><pubDate>Sun, 06 May 2018 15:21:12 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-12/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-12-1.png" alt=""&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;马七退五 将６退１&lt;/li&gt;
+&lt;li&gt;马五进三 将６进１&lt;/li&gt;
+&lt;li&gt;马三退一 士５退４&lt;/li&gt;
+&lt;li&gt;前马退二 将６退１&lt;/li&gt;
+&lt;li&gt;马一进二 将６平５&lt;/li&gt;
+&lt;li&gt;帅五平六 象５进７&lt;/li&gt;
+&lt;li&gt;后马退四 象７退９&lt;/li&gt;
+&lt;li&gt;马四退二 将５进１&lt;/li&gt;
+&lt;li&gt;后马进三 将５平６&lt;/li&gt;
+&lt;li&gt;马三进二 将６平５&lt;/li&gt;
+&lt;li&gt;后马进四 象９进７&lt;/li&gt;
+&lt;li&gt;马四退三 将５退１&lt;/li&gt;
+&lt;li&gt;马二退一 象３进５&lt;/li&gt;
+&lt;li&gt;马一进三 将５平６&lt;/li&gt;
+&lt;li&gt;前马进二 将６平５&lt;/li&gt;
+&lt;li&gt;马二退四 象５退３&lt;/li&gt;
+&lt;li&gt;马四退五 象７退９&lt;/li&gt;
+&lt;li&gt;马五进七&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>排局-11</title><link>/posts/xiangqi/2018-05-06-endgame-11/</link><pubDate>Sun, 06 May 2018 15:19:51 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-11/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-11-1.png" alt=""&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;马六退七 将５退１&lt;/li&gt;
+&lt;li&gt;马七进八 象１进３&lt;/li&gt;
+&lt;li&gt;相九进七 象３退１&lt;/li&gt;
+&lt;li&gt;帅四退一 象１进３&lt;/li&gt;
+&lt;li&gt;相七退五 象３退１&lt;/li&gt;
+&lt;li&gt;帅四平五 象１进３&lt;/li&gt;
+&lt;li&gt;帅五平六 象３退１&lt;/li&gt;
+&lt;li&gt;帅六退一 象１进３&lt;/li&gt;
+&lt;li&gt;炮九退一 将５进１&lt;/li&gt;
+&lt;li&gt;马八退七 将５平６&lt;/li&gt;
+&lt;li&gt;马七进六 将６平５&lt;/li&gt;
+&lt;li&gt;炮九退七 将５退１&lt;/li&gt;
+&lt;li&gt;炮九平五 象３退５&lt;/li&gt;
+&lt;li&gt;相五进七 象５进７&lt;/li&gt;
+&lt;li&gt;马六退五 象３进５&lt;/li&gt;
+&lt;li&gt;马五进三 将５平６&lt;/li&gt;
+&lt;li&gt;炮五进八&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>排局-10</title><link>/posts/xiangqi/2018-05-06-endgame-10/</link><pubDate>Sun, 06 May 2018 15:09:32 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-10/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-3-2.png" alt=""&gt;&lt;/p&gt;</description></item><item><title>排局-09</title><link>/posts/xiangqi/2018-05-06-endgame-09/</link><pubDate>Sun, 06 May 2018 15:05:02 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-09/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-1-2.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-2-2.png" alt=""&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车五退一 炮５进６&lt;/li&gt;
+&lt;li&gt;兵五平四 卒９平８&lt;/li&gt;
+&lt;li&gt;相三退一 象７退５&lt;/li&gt;
+&lt;li&gt;后兵进一 炮５退４&lt;/li&gt;
+&lt;li&gt;后兵进一 卒６平５&lt;/li&gt;
+&lt;li&gt;帅五平四&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;第一步只有车五退一可以获胜&lt;/p&gt;</description></item><item><title>排局-08</title><link>/posts/xiangqi/2018-05-06-endgame-08/</link><pubDate>Sun, 06 May 2018 15:01:11 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-08/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-14.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p%20w"&gt;2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p w&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如图形势，红方当然可以连续打掉两个黑卒。但这样黑方得以调整阵型，红方无法取胜。&lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt;正确的走法是借叫杀之机，调整士相，将黑方双象赶到两边，进而获胜。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;炮四平六 将４平５&lt;/li&gt;
+&lt;li&gt;炮六平五 将５平４&lt;/li&gt;
+&lt;li&gt;仕五退四 将４平５&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;如改走将4退1，则帅四平五，红必得象，胜定。&lt;/p&gt;
+&lt;ol start="4"&gt;
+&lt;li&gt;相三退五 将５平４&lt;/li&gt;
+&lt;li&gt;相五进七 将４平５&lt;/li&gt;
+&lt;li&gt;仕四进五 将５平４&lt;/li&gt;
+&lt;li&gt;炮五平七&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;驱黑象到边线。&lt;/p&gt;
+&lt;ol start="7"&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;        象３进１&lt;/li&gt;
+&lt;li&gt;炮七平六 将４平５&lt;/li&gt;
+&lt;li&gt;炮六平五 将５平４&lt;/li&gt;
+&lt;li&gt;仕五进四 将４平５&lt;/li&gt;
+&lt;li&gt;相七退五 将５平６&lt;/li&gt;
+&lt;li&gt;帅四平五 将６平５&lt;/li&gt;
+&lt;li&gt;帅五平六&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红帅移行换位。&lt;/p&gt;
+&lt;ol start="13"&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;        将５平４&lt;/li&gt;
+&lt;li&gt;相五进三 将４平５&lt;/li&gt;
+&lt;li&gt;仕六退五 将５平６&lt;/li&gt;
+&lt;li&gt;仕五退六 将６平５&lt;/li&gt;
+&lt;li&gt;相三进五 将５平６&lt;/li&gt;
+&lt;li&gt;相五进七 将６平５&lt;/li&gt;
+&lt;li&gt;仕六进五 将５平６&lt;/li&gt;
+&lt;li&gt;炮五平三 象７退９&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;再驱另一象到边线。&lt;/p&gt;
+&lt;ol start="21"&gt;
+&lt;li&gt;帅六进一 将６退１&lt;/li&gt;
+&lt;li&gt;帅六平五 红胜。&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>排局-07</title><link>/posts/xiangqi/2018-05-05-endgame-07/</link><pubDate>Sat, 05 May 2018 23:18:22 +0800</pubDate><guid>/posts/xiangqi/2018-05-05-endgame-07/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-4-1.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c%20w"&gt;4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c w&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如图形势，红方仅有双炮做攻，似乎难以进取。&lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt;第一步的进攻方向很是重要，如果沉底叫将，则与胜利失之交臂。&lt;/p&gt;</description></item><item><title>排局-06</title><link>/posts/xiangqi/2018-05-05-endgame-06/</link><pubDate>Sat, 05 May 2018 22:21:07 +0800</pubDate><guid>/posts/xiangqi/2018-05-05-endgame-06/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-13.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5%20w%22"&gt;3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5 w&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如图形式，红方双炮巧妙腾挪，迫使黑方子力自相堵塞，最终一举获胜。&lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt;此局的进攻思路比较直接，运炮叫将，利用黑士自相阻塞，重炮或者闷宫而胜。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;炮九平四 将６平５&lt;/li&gt;
+&lt;li&gt;炮五退六！&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红方退炮引而不发，伏有士六进五， 将5平4，炮四平六，士4退5，炮五平六重炮杀。黑方只有先将5平4才能解杀，红方则士六进五追杀：&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;        将５平４&lt;/li&gt;
+&lt;li&gt;仕六进五 士４退５&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;黑方退士也是仅有的解着。如图形式，直观的攻法是架炮做杀，但均难以奏效。试演两变如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-1-1.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;a.&lt;/p&gt;
+&lt;ol start="4"&gt;
+&lt;li&gt;炮四平六 将４进１&lt;/li&gt;
+&lt;li&gt;帅四进一 车４平３&lt;/li&gt;
+&lt;li&gt;帅四平五 车３进９&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红方无杀，黑方胜势&lt;/p&gt;
+&lt;p&gt;b.&lt;/p&gt;
+&lt;ol start="4"&gt;
+&lt;li&gt;炮五平六 将４进１&lt;/li&gt;
+&lt;li&gt;仕五进六 将４平５&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红方无杀，黑方胜势&lt;/p&gt;
+&lt;p&gt;正确的走法是先士五进六做准备。细看之下，其实这是叫杀，演变如下：&lt;/p&gt;
+&lt;ol start="4"&gt;
+&lt;li&gt;仕五进六 车４平３？&lt;/li&gt;
+&lt;li&gt;炮五平六 士５进４&lt;/li&gt;
+&lt;li&gt;仕六退五 将４平５&lt;/li&gt;
+&lt;li&gt;炮六平五 将５平４&lt;/li&gt;
+&lt;li&gt;炮四平六 士４退５&lt;/li&gt;
+&lt;li&gt;炮五平六 重炮胜&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;此路攻法虽是连杀，但需要来回运炮，粗看之下不易发现，可以算作此局的核心。&lt;/p&gt;
+&lt;p&gt;仕五进六扬士之后，黑方无暇挪车。最顽强的防守是先将4进1，当然红方辗转腾挪，攻势依然紧凑：&lt;/p&gt;
+&lt;ol start="4"&gt;
+&lt;li&gt;仕五进六 将４进１&lt;/li&gt;
+&lt;li&gt;帅四平五！ 将４退１&lt;/li&gt;
+&lt;li&gt;炮五平六 士５进４&lt;/li&gt;
+&lt;li&gt;帅五平四！&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-2-1.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;以上着法，红方先进帅做杀，逼黑方下将，而后平炮打将，待黑方扬士时候再出帅，次序井然。注意此时红方仍然威胁士六退五然后连杀。&lt;/p&gt;
+&lt;ol start="7"&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;        将４平５&lt;/li&gt;
+&lt;li&gt;仕六退五 将５退１&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-3-1.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;红方出帅，黑方顺势占中解杀。然而红方一手士六退五继续做杀，此时四六两路均已被控制，黑方只有坐将求生，但仍难免被重炮：&lt;/p&gt;
+&lt;ol start="9"&gt;
+&lt;li&gt;炮六平五 士６退５&lt;/li&gt;
+&lt;li&gt;仕五退六 士５进６&lt;/li&gt;
+&lt;li&gt;炮四平五&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;从开始的局面看，谁又能想到最后黑将会在原位被擒住呢？&lt;/p&gt;</description></item><item><title>排局-05</title><link>/posts/xiangqi/2018-05-04-endgame-05/</link><pubDate>Fri, 04 May 2018 17:13:21 +0800</pubDate><guid>/posts/xiangqi/2018-05-04-endgame-05/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-4.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3%20w"&gt;6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3 w&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如图，红方似乎可以车三退三叫杀得车．可红方的取胜之路真的如此简单嘛？&lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt;显然不是这样简单&amp;ndash;不过黑方的应对也可谓奇思妙想:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车三退三 车５退１!&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;一着花心车龟缩防守，红方也暂时无计可施．此时平车打将会自找麻烦，因为黑方平将躲避后会形成兑车，红方反而不好处理．不过借打将之机调整炮位，进而扬士叫杀似乎是可行之策．&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;车三进一 车５进１&lt;/li&gt;
+&lt;li&gt;炮四进五 车５退１&lt;/li&gt;
+&lt;li&gt;炮四退六 车５进１&lt;/li&gt;
+&lt;li&gt;车三退一 车５退１&lt;/li&gt;
+&lt;li&gt;仕五进六&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-5.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;此时红方伏有炮四平六，将４平５，车三平五的杀着．黑方不能车５平６牵炮，因为红方车三进一绝杀．其他解杀手段均会丢４路车．看似红方已经取得了胜利，但这真的是黑方最顽强的抵抗嘛？非也！惯性思维导致黑方在第５回合还是退花心车，但此时红炮的位置已经挡住了自己的老帅，所以黑方可以车５平８反杀！&lt;/p&gt;
+&lt;p&gt;５．　　　　车５平８！&lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-6.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;此时红方无暇抽车，只有借打将之机先占中路，然后进帅做杀：&lt;/p&gt;
+&lt;ol start="6"&gt;
+&lt;li&gt;车三平六 将４平５&lt;/li&gt;
+&lt;li&gt;车六平五 将５平４&lt;/li&gt;
+&lt;li&gt;帅四平五&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-8.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;此时黑方有两种防守方法，均难逃一败：&lt;/p&gt;
+&lt;p&gt;a.&lt;/p&gt;
+&lt;ol start="8"&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;        车４平８&lt;/li&gt;
+&lt;li&gt;仕五退四 前车进１&lt;/li&gt;
+&lt;li&gt;车五进一 将４退１&lt;/li&gt;
+&lt;li&gt;炮四平六 前车进５&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-9.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;此路变化黑方双车并线，与红方邀兑．无奈红方借先手打将，进而运炮卡位，胜势已成．前车进５是比较顽强的防守．如果后车进１？则车五进一！将４退１，车五退四，红胜定．注意这里车五进一的过们是必须的，如果直接车五退三，黑方有前车进２！红方车五平六，黑有后车平４，反而节外生枝．&lt;/p&gt;
+&lt;ol start="12"&gt;
+&lt;li&gt;仕六进五 后车进５&lt;/li&gt;
+&lt;li&gt;车五退一 后车退４&lt;/li&gt;
+&lt;li&gt;车五退三&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;以上几步红方顿挫井然，如下图形势，黑方如果动前车，则红方士五进六得车胜．黑方如果动将或者移动后车，如将４退１，红方仍有士五进六，弃炮绝杀！以下黑方前车平４，车五平六，车８平４，车六进四绝杀红胜．&lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-10.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;此路变化，黑方竖向连车难以抵挡红方进攻，如果改为横向会怎样呢？&lt;/p&gt;
+&lt;p&gt;b.&lt;/p&gt;
+&lt;ol start="8"&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;        车４平７&lt;/li&gt;
+&lt;li&gt;仕五退四 将４退１&lt;/li&gt;
+&lt;li&gt;炮四平六 车７进１&lt;/li&gt;
+&lt;li&gt;车五平六 车７平４&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-12.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;此路变化黑车会被红方栓住，但以炮换车红方只能得到和局，所以红方并不会轻易交换．&lt;/p&gt;
+&lt;ol start="12"&gt;
+&lt;li&gt;仕六进五 车８平５&lt;/li&gt;
+&lt;li&gt;炮六退一　红胜定&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红方士六进五，暗伏车六进一，将４进１，士五进六绝杀．黑方不能简单车８进１弃车解杀，否则仍是车六进一，将４进１，士五进六，红得车亦胜．&lt;/p&gt;
+&lt;p&gt;从最初的车三退三看似一步即胜，到后来的占中，架炮，红方的取胜之路可谓曲折．&lt;/p&gt;</description></item><item><title>排局-04</title><link>/posts/xiangqi/2018-05-04-endgame-04/</link><pubDate>Fri, 04 May 2018 16:00:41 +0800</pubDate><guid>/posts/xiangqi/2018-05-04-endgame-04/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-04252018.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9%20w"&gt;1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9 w&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如图形势，红方进攻子力仅有一车，如何才能利用黑车的位置取得胜利？&lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt;最直观的思路并不能奏效：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车八退三 士６进５&lt;/li&gt;
+&lt;li&gt;车八平五 将５平４&lt;/li&gt;
+&lt;li&gt;帅四平五 将４退１&lt;/li&gt;
+&lt;li&gt;车五平六 士５进４&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;虽然黑方篡位车位置尴尬，但这样直接叫吃还是太过急躁．同样，如果直接车八退八，确实可以吃掉黑卒，但红方并不能取得胜利．&lt;/p&gt;
+&lt;p&gt;正确的走法是先将黑将打到二楼，然后退车捉卒：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车八退二 将５退１&lt;/li&gt;
+&lt;li&gt;车八退六&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;此时黑方虽然没有丢车之虞，但也无法疏通子力．当然不能回中象，否则红方车八进七绝杀．将５平４躲避会被红方车八平六先手带将吃掉卒，上将则会送车．所以黑方只有躲卒．这里有一个小陷阱，就是黑方卒８平７送吃：&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;        卒８平７&lt;/li&gt;
+&lt;li&gt;车八平三 象３退５&lt;/li&gt;
+&lt;li&gt;车三平八 将５平４&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红方无法取胜，和棋&lt;/p&gt;
+&lt;p&gt;红方急于吃卒，但车被自己的高相挡住，黑方侥幸某得和局．细看之下，死卒不急吃，红方没有必要立刻杀卒，可以先落边相给车通头．&lt;/p&gt;
+&lt;ol start="3"&gt;
+&lt;li&gt;相三退一&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;接下来，黑卒走投无路，红方可以将其吃掉并且保持车通头，已成胜势．具体的胜方可以参考后文着法．&lt;/p&gt;
+&lt;p&gt;黑方较为顽强的抵抗是卒８进１沉底：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车八退二 将５退１&lt;/li&gt;
+&lt;li&gt;车八退六 卒８进１&lt;/li&gt;
+&lt;li&gt;车八退一 卒８平７！&lt;/li&gt;
+&lt;li&gt;相三退一 卒７平６！&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;黑方先将卒沉底，然后平移进入红方九宫，如入无人之境．红方为了保持车通头，竟然不能简单将其杀掉．如下图形势，红方如帅四退一捉卒，黑方可以卒６平５占中！红方车八平五杀卒叫将则象３退５，进而某得和局．&lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-2.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;那红方怎样才能取得胜利呢？这里红方需要切换一下进攻思路，不再用车捉卒，而是采用排局中常见的捉弄底卒的方式来将其擒获．正着初看之下有点不可思议，红方不仅不吃卒，还主动抬车；并且抬车的方式必须是车八进三或进四，连看起来更有威胁的车八进六都不行：&lt;/p&gt;
+&lt;ol start="5"&gt;
+&lt;li&gt;车八进三 卒６平５&lt;/li&gt;
+&lt;li&gt;相一进三 卒５平４&lt;/li&gt;
+&lt;li&gt;相三退五 卒４平５&lt;/li&gt;
+&lt;li&gt;帅四退一 卒５平４&lt;/li&gt;
+&lt;li&gt;帅四退一&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/05/capture-3.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;以上着法对于排局爱好者并不陌生，首先运相回中路让黑卒无法离开九宫，然后下帅挤掉其仅有的活动空间．此时黑方只有动将，而对红方来说，取得胜利已经不再困难：&lt;/p&gt;
+&lt;ol start="9"&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;        将５平４&lt;/li&gt;
+&lt;li&gt;车八平六 将４平５&lt;/li&gt;
+&lt;li&gt;车六进三 卒４平５&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红方叫将后进车点穴，黑方无子可动．其实黑方的高象也是有意为之，如果黑方是底象，没有这一手塞象眼，红方还是无法取得胜利．此时只有方弃卒一搏，不过仍难免一败：&lt;/p&gt;
+&lt;ol start="12"&gt;
+&lt;li&gt;帅四平五 将５平６&lt;/li&gt;
+&lt;li&gt;车六平四 将６平５&lt;/li&gt;
+&lt;li&gt;帅五平四 将５平４&lt;/li&gt;
+&lt;li&gt;车四平六 将４平５&lt;/li&gt;
+&lt;li&gt;相五进七　红胜定&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;如果黑方先出将，则红方先车八平六叫将然后车六进三点穴．黑卒还是会被困死．细心的读者可能已经发现前面为什么只能车八进三或进四，不能直接进六．否则，由于不需要进车点穴，差了一步棋．换句话说，最后单双步不对，并不能困死黑卒．&lt;/p&gt;</description></item><item><title>排局-03</title><link>/posts/xiangqi/2018-01-18-endgame-03/</link><pubDate>Thu, 18 Jan 2018 20:47:50 +0800</pubDate><guid>/posts/xiangqi/2018-01-18-endgame-03/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/01/5.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9%20w"&gt;2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9 w&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如图，黑方将位不安，且双车略背，红方如何凭借先行之利取胜？&lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt;按照惯例，首先分析一路不成熟的攻势，打将之后占中做杀：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车七平四 将６平５&lt;/li&gt;
+&lt;li&gt;车四平五 将５平６&lt;/li&gt;
+&lt;li&gt;帅六平五 车４平５&lt;/li&gt;
+&lt;li&gt;兵六平五 将６退１&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红方平兵继续叫杀，黑方当然不能直接车5进3砍兵，否则红方顺势车五进一吃掉之后即是绝杀。黑如车3进4弃车解杀，则红方兵五平四之后吃掉底车，仍是胜势。黑方下将正着，红如兵五进一，黑方便可以车5进2某得和局。&lt;/p&gt;
+&lt;ol start="5"&gt;
+&lt;li&gt;车五平四 将６平５&lt;/li&gt;
+&lt;li&gt;兵五进一 将５平４&lt;/li&gt;
+&lt;li&gt;车四进三 将４退１&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红劣黑胜&lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/01/6.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;黑方下将是一步容易被忽略的着法。最初算到这里的时候我以为黑方只能落士，红兵五进一之后由于黑车低头，形成巧胜。不料黑方有此着躲避，从而反败为胜。
+所以红方正确的攻法是打两将之后平兵叫杀：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车七平四 将６平５&lt;/li&gt;
+&lt;li&gt;车四平五 将５平６&lt;/li&gt;
+&lt;li&gt;兵六平五 将６退１&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;黑方当然不能士4退5打将，否则红方帅六平五占中之后，黑方速败。&lt;/p&gt;
+&lt;ol start="4"&gt;
+&lt;li&gt;兵五进一 将６退１&lt;/li&gt;
+&lt;li&gt;车五平四 将６平５&lt;/li&gt;
+&lt;li&gt;车四平二 将５平６&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;此时红方走不到兵五平四做杀，因为黑方可以士4退5带将抽掉。又不能帅六平五，否则黑方车3进5弃车杀相可以谋和。红方攻势暂时受阻，怎样才能打开局面呢？&lt;/p&gt;
+&lt;ol start="7"&gt;
+&lt;li&gt;车二进四 将６进１&lt;/li&gt;
+&lt;li&gt;车二退五 将６退１&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红方借叫杀之机保住自己的高相，使得黑方杀相谋和的计划落空。但此时平帅黑方还是可以车3进4通头，下步即可以抢占中路，红方似乎还是难有进取。&lt;/p&gt;
+&lt;ol start="9"&gt;
+&lt;li&gt;帅六平五 车３进４&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;如图形势，红方有两路较为直观的攻法，但都难以奏效：&lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/01/9.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;a.&lt;/p&gt;
+&lt;ol start="10"&gt;
+&lt;li&gt;兵五平四 车４平５！&lt;/li&gt;
+&lt;li&gt;相七退五 车３进４&lt;/li&gt;
+&lt;li&gt;帅五退一 车５进７ 黑胜&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;黑方车4平5妙手，粉碎了红方的攻势，一举反败为胜&lt;/p&gt;
+&lt;p&gt;b.&lt;/p&gt;
+&lt;ol start="10"&gt;
+&lt;li&gt;车二平四 将６平５&lt;/li&gt;
+&lt;li&gt;帅五平四 士４退５&lt;/li&gt;
+&lt;li&gt;车四进四 车３平６!&lt;/li&gt;
+&lt;li&gt;车四退三 车４进８&lt;/li&gt;
+&lt;li&gt;帅四进一 车４平５&lt;/li&gt;
+&lt;li&gt;相七退五 车５进１!&lt;/li&gt;
+&lt;li&gt;帅四退一 车５退２&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;黑方弃车照将的手法颇有排局味道，且即使红方落相盖车，黑方还是有沉底车的冷手，最终谋得和局。&lt;/p&gt;</description></item><item><title>排局-02</title><link>/posts/xiangqi/2018-01-11-endgame-02/</link><pubDate>Thu, 11 Jan 2018 23:08:29 +0800</pubDate><guid>/posts/xiangqi/2018-01-11-endgame-02/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/01/3.png" alt="rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4%20w"&gt;rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如图，双方子力不多，且黑方双车通头，红方怎样才能借先行之利取胜？&lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt;初看之下，红方虽有空头炮，但黑方双车相连，抽将也得不到便宜。且边线双车对头，所以红方第一步究竟要不要打将就是值得思索的问题。如果打将，黑方必定士4进5，等红车再次打将离开中路，黑方可以有针对性的支士落士，红方难以进取。但若是不打将，则只有平车躲避，此时黑方可以进车打将，似乎很快可以化解红方尚不成熟的攻势。&lt;/p&gt;
+&lt;p&gt;当然，红方还是可以先车九平三叫杀（伏士六进五，士4进5，车三进八杀）。此时黑方并不能打将抽车，因为车2进7，帅四退一，车2进1? 士六进五，反将红胜。简单上将并不能解杀：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车九平三 将５进１&lt;/li&gt;
+&lt;li&gt;车三平五 将５平４&lt;/li&gt;
+&lt;li&gt;车五平六 将４平５&lt;/li&gt;
+&lt;li&gt;仕六进五 红胜&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;所以将5进1的走法是错误的。那黑方怎样才能化解红方攻势呢？看来只有先车2进7打将，红方必定帅四退一躲避。此时再将5进1，红方没法平车打将，是不是可以守住呢？非也，此时红方可以从竖线进攻：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车九平三 车２进７&lt;/li&gt;
+&lt;li&gt;帅四退一 将５进１&lt;/li&gt;
+&lt;li&gt;车三进七 将５进１&lt;/li&gt;
+&lt;li&gt;仕六进五 将５平４&lt;/li&gt;
+&lt;li&gt;车三退二 红胜定&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;可惜，红方的胜利是建立在黑方的失误之上，当然正解也绝非寻常着法：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;车九平三 车２进７&lt;/li&gt;
+&lt;li&gt;帅四退一 车１进９&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/01/3.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;黑方一手车1进9（亦可车2进2），明为送，实为捉，红方不能炮五平九，否则车2进1抽车黑速胜。因炮被牵制，士六进五也不成，所以红方只能车三进八借打将之机先吃一车。&lt;/p&gt;
+&lt;ol start="3"&gt;
+&lt;li&gt;车三进八 将５进１&lt;/li&gt;
+&lt;li&gt;炮五平九&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;此时红方不仅净多一炮，且底车先捉黑士，怎么看黑方也是败势难逃。但黑方自有妙计：&lt;/p&gt;
+&lt;ol start="4"&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;        车２进１&lt;/li&gt;
+&lt;li&gt;帅四进一 车２进１&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;黑方车2进1打将，迫使红帅定位。红方如果帅四退一下帅，黑方则车2进1捉双，随后车2平4吃士，然后车4平5占中成单车守和车炮之势。红方不肯，只好帅上三楼。黑方随即再度进车捉双。为什么黑方不直接车2进2捉双呢？这里按下不表，稍后揭晓。&lt;/p&gt;
+&lt;ol start="6"&gt;
+&lt;li&gt;炮九进九 车２平４&lt;/li&gt;
+&lt;li&gt;车三平五 将５平４&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>排局-01</title><link>/posts/xiangqi/2018-01-11-endgame-01/</link><pubDate>Thu, 11 Jan 2018 23:04:07 +0800</pubDate><guid>/posts/xiangqi/2018-01-11-endgame-01/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/01/1.png" alt="9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc%20w"&gt;9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如图局面，是我不久前从残局库中发现的一个挺有意思的局面，红先胜。&lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt; 
+ &lt;/p&gt;
+&lt;p&gt;分析：&lt;/p&gt;
+&lt;p&gt;从初始盘面来看，双方各有一炮，红方有士相，黑方仅光将且在三楼，估计是要在困炮的同时调整阵型，最后白脸将杀。&lt;/p&gt;
+&lt;p&gt;最直接的思路是打两将之后扬相，然后帅占中路做杀。但黑方有一手叫闷可解：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;炮二平四 将６平５&lt;/li&gt;
+&lt;li&gt;炮四平五 将５平６&lt;/li&gt;
+&lt;li&gt;相五进三 将６平５&lt;/li&gt;
+&lt;li&gt;仕六进五 将５平６&lt;/li&gt;
+&lt;li&gt;帅六进一 炮９平８&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;此路虽不通，但红方另有一路攻法，就是先上帅，然后再运炮做攻。由于红炮占位，黑方走不到炮9平8，形势十分不妙。将如6平5红方则顺势炮二平五打将。炮9退1也难挽颓势：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;帅六进一 炮９退１&lt;/li&gt;
+&lt;li&gt;炮二平四 炮９平６&lt;/li&gt;
+&lt;li&gt;帅六退一 将６平５&lt;/li&gt;
+&lt;li&gt;炮四平五 将５平６&lt;/li&gt;
+&lt;li&gt;帅六平五 炮６进１&lt;/li&gt;
+&lt;li&gt;相五进七 将６退１&lt;/li&gt;
+&lt;li&gt;帅五进一 将６退１&lt;/li&gt;
+&lt;li&gt;仕六进五 炮６退１&lt;/li&gt;
+&lt;li&gt;炮五平四 将６进１&lt;/li&gt;
+&lt;li&gt;仕五进六 将６进１&lt;/li&gt;
+&lt;li&gt;帅五退一 捉死炮胜&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;当然，这则排局并非如此简单。黑方炮9退1不是应对帅六进一的最顽强走法。黑方有一手将6退1可以某得和局。下将后，红方当然不能急于炮二平四打将，否则黑方可以从容炮9平8再炮8退7防守。于是红方只有先飞相，但无论红相往哪边去，黑方都有妙手化解。&lt;/p&gt;
+&lt;p&gt;&lt;img src="../imgs/2018/01/2.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;如图形势，如红飞三七高相，则黑方炮击底士，而后绕回防守，红方无计可施：&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;相五进七 炮９平４&lt;/li&gt;
+&lt;li&gt;炮二平四 将６平５&lt;/li&gt;
+&lt;li&gt;炮四平五 炮４平２&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;如红落相，黑方当然不能打士（否则炮被困死）。正确走法是将6平5占中：&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;相五退七 将６平５&lt;/li&gt;
+&lt;li&gt;仕六进五 炮９平３&lt;/li&gt;
+&lt;li&gt;炮二平五 将５平６&lt;/li&gt;
+&lt;li&gt;帅六平五 炮３退７&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红方自己落下来的底相被黑方打掉然后借机回防，也是十分有趣。&lt;/p&gt;
+&lt;p&gt;那正确的攻法是什么呢？还是先从运炮入手：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;炮二平四 将６平５&lt;/li&gt;
+&lt;li&gt;炮四平五 将５平６&lt;/li&gt;
+&lt;li&gt;相五进三 将６平５&lt;/li&gt;
+&lt;li&gt;仕六进五 将５平６&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;红方直接上帅并不能奏效，但这里如果46路的子力调换一下，红帅在4路，士和黑将在6路，则黑方无法借助炮9平8防守。但红方怎样才能调整阵型，达到上述目标呢？且看后续着法：&lt;/p&gt;</description></item></channel></rss>

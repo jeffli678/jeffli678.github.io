@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Solving a VM Challenge Using BinaryNinja
 date: '2021-04-18'
 categories:

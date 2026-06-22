@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: How to Avoid Writing a Bad Crackme
 date: '2020-12-29'
 categories:

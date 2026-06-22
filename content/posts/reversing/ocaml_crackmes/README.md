@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Solving Two OCaml Crackmes Without Knowing Much about OCaml
 date: '2020-12-13'
 categories:

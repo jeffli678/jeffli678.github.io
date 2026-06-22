@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Deciphering a Windows Anti-debugging Challenge
 date: '2020-11-29'
 categories:

@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Reverse Engineering and Repairing a Fan
 date: '2020-04-26'
 categories:

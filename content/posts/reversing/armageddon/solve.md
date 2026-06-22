@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Solving an ARM challenge with z3
 date: '2020-06-18'
 categories:

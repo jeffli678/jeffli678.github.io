@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: International Grand Master
 date: '2021-02-13 19:44:00 +0800'
 categories:

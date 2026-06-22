@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Solving an Obfuscated Crackme with BinaryNinja and Triton
 date: '2020-07-02'
 categories:

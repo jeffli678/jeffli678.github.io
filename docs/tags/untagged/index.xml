@@ -1,26 +1,2 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>untagged on Xusheng&#39;s blog</title>
-    <link>/tags/untagged/</link>
-    <description>Recent content in untagged on Xusheng&#39;s blog</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-    <lastBuildDate>Thu, 11 Feb 2021 18:46:24 +0800</lastBuildDate>
-    
-	<atom:link href="/tags/untagged/index.xml" rel="self" type="application/rss+xml" />
-    
-    
-    <item>
-      <title>My New Blog is Ready!</title>
-      <link>/posts/my_new_blog/</link>
-      <pubDate>Thu, 11 Feb 2021 18:46:24 +0800</pubDate>
-      
-      <guid>/posts/my_new_blog/</guid>
-      <description>I spent some time with Hugo and now my blog is hosted on GitHub. Feel free to visit it at xusheng.dev!
-I will write about reversing, coding, Xiangqi, and other stuff.</description>
-    </item>
-    
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Untagged on Xusheng Li</title><link>/tags/untagged/</link><description>Recent content in Untagged on Xusheng Li</description><generator>Hugo</generator><language>en-us</language><copyright>&lt;a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener"&gt;CC BY-NC 4.0&lt;/a&gt;</copyright><lastBuildDate>Thu, 11 Feb 2021 18:46:24 +0800</lastBuildDate><atom:link href="/tags/untagged/index.xml" rel="self" type="application/rss+xml"/><item><title>My New Blog is Ready!</title><link>/posts/my_new_blog/</link><pubDate>Thu, 11 Feb 2021 18:46:24 +0800</pubDate><guid>/posts/my_new_blog/</guid><description>&lt;p&gt;I spent some time with &lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt; and now my blog is hosted on GitHub. Feel free to visit it at &lt;a href="https://xusheng.dev"&gt;xusheng.dev&lt;/a&gt;!&lt;/p&gt;
+&lt;p&gt;I will write about reversing, coding, Xiangqi, and other stuff.&lt;/p&gt;</description></item></channel></rss>

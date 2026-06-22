@@ -1,10 +1,16 @@
 baseurl      = ""
-title        = "My Blog"
+title        = "Xusheng Li"
 languageCode = "en-us"
 theme        = "hello-friend-ng"
 paginate     = 10
 
 publishDir = "docs"
+
+ignoreFiles = ["\\.bndb-.*\\.html$"]
+ignoreErrors = ["error-remote-getjson"]
+
+[security]
+  allowContent = ['.*']
 
 [params]
   dateform        = "Jan 2, 2006"
@@ -13,7 +19,7 @@ publishDir = "docs"
   dateformNumTime = "2006-01-02 15:04"
 
   # Subtitle for home
-  homeSubtitle = "Reversing, coding, and Xiangqi"
+  homeSubtitle = "Reverse engineering, debugger development, and security research"
 
   # Set disableReadOtherPosts to true in order to hide the links to other posts.
   disableReadOtherPosts = false
@@ -22,9 +28,21 @@ publishDir = "docs"
   enableSharingButtons = false
 
   # Metadata mostly used in document's head
-  description = "Xusheng's blog"
-  keywords = "Xusheng, blog"
+  description = "Personal site of Xusheng Li — software developer at Vector 35, core developer of Binary Ninja, and independent security researcher."
+  keywords = "Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35"
   images = [""]
+
+  [[params.social]]
+    name = "email"
+    url  = "mailto:xusheng@vector35.com"
+
+  [[params.social]]
+    name = "github"
+    url  = "https://github.com/xusheng6"
+
+  [[params.social]]
+    name = "linkedin"
+    url  = "https://www.linkedin.com/in/xusheng-li-8819b7329/"
 
 [taxonomies]
     category = "blog"
@@ -33,8 +51,8 @@ publishDir = "docs"
 
 [languages]
   [languages.en]
-    title = "Xusheng's blog"
-    subtitle = "Reversing, coding, and Xiangqi"
+    title = "Xusheng Li"
+    subtitle = "Reverse engineering, debugger development, and security research"
     keywords = ""
     copyright = '<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>'
     readOtherPosts = "Read other posts"
@@ -52,3 +70,8 @@ publishDir = "docs"
     identifier = "blog"
     name       = "Blog"
     url        = "/posts"
+
+  [[menu.main]]
+    identifier = "cv"
+    name       = "CV"
+    url        = "/cv.pdf"

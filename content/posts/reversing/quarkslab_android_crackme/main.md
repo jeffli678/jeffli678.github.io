@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Debugging and Solving an Android Challenge
 date: '2020-05-30'
 categories:

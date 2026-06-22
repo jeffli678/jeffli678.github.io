@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Making and solving a Reversing Challenge Based-on x86 ISA Encoding
 date: '2020-08-02'
 categories:

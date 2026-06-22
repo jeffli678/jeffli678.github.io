@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Solving a Reversing Challenge with Mitmproxy and OCR
 date: '2020-04-27'
 categories:

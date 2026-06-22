@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Photo Works
 date: '2021-02-13'
 categories:

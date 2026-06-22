@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Solving a Recursive Crackme by Automating GDB
 date: '2020-07-27'
 categories:

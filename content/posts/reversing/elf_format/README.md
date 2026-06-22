@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Dealing with Manipulated ELF Binary and Manually Resolving Import Functions
 date: '2020-08-30'
 categories:

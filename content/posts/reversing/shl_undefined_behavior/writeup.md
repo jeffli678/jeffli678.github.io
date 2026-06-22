@@ -1,7 +1,6 @@
 ---
 layout: post
 status: publish
-published: true
 title: Examining the difference between C program and Assembly -- An Example of << and shl
 date: '2020-06-20'
 categories:
