@@ -169,8 +169,32 @@ To be fair, I downloaded all eight LG installers and checked them, and every one
 
 The net of it: the whole trust model rests on HTTPS and on LG keeping `lmu.lge.com` pristine. Whoever controls that endpoint — an origin/CDN compromise on LG's side, or an attacker who can MITM with a certificate the system trusts — gets silent, elevated, zero-interaction code execution on every machine running this, because the software auto-starts and will happily install whatever the catalog points at. Under the right conditions that is a textbook supply chain attack. It is not something anyone can trivially exploit from the outside, but for software that shipped itself to your PC uninvited and runs at boot, "we only pinky-promise the server is fine" is a thin guarantee.
 
+## How does this even get on your machine?
+
+The part that bothered most people, including me, is that nobody installed this. You buy a monitor, plug it in, and some time later it is just *there*. The common explanation online is "Windows Update," and that turns out to be exactly right — but the mechanism is more specific and more interesting than "Windows Update installs random programs," so I dug the trail out of my own machine.
+
+It rides in on a driver, using Microsoft's **Hardware Support App (HSA)** feature. Here is the chain, all verifiable locally with `pnputil` and the registry:
+
+1. You connect the monitor. Windows sees its PnP hardware id — on my machine `DISPLAY\GSM77E8`, "Generic Monitor (LG ULTRAWIDE)".
+2. Windows Update matches that id and automatically pulls down two LG driver packages, **both WHQL-signed by "Microsoft Windows Hardware Compatibility Publisher"** (i.e. they went through Microsoft's hardware certification and are distributed through Windows Update itself):
+   - a monitor **extension** INF (`monitor.inf`), which among other things advertises a child device literally named "LG Monitor Support Application";
+   - a **SoftwareComponent** INF (`lgmonitorappsoftwarecomponent.inf`), which matches that child and runs an `AddSoftware` directive.
+3. That directive is the whole trick:
+
+```ini
+[LG_Monitor_Control_Install]
+SoftwareType=2
+SoftwareID=pfn://LGElectronics.LGMonitorApp_cfnzzhwkr8z5w
+```
+
+`SoftwareType=2` with a `pfn://` id means "go install this **Microsoft Store** app by its package family name." So Windows fetches `LGElectronics.LGMonitorApp` from the Store and installs it. On my machine it landed at `C:\Program Files\WindowsApps\LGElectronics.LGMonitorApp_1.2606.1601.0_x86__cfnzzhwkr8z5w`, `SignatureKind = Store`, version `1.2606.1601.0` — the exact binary I had been reverse engineering. The INF does not even hide what it is; one of its strings is `Hsa.ComponentDesc = "LG Monitor Support Application"`, and *HSA* is Microsoft's own acronym for Hardware Support App.
+
+So, does Windows Update install third-party programs? Not arbitrary `.exe` files, no — but through this sanctioned path, effectively yes. A WHQL-signed driver is allowed to pair itself with a companion app via `AddSoftware`. There are two flavors: `SoftwareType=1` is a Win32 executable bundled *inside* the driver package and run once, and `SoftwareType=2` is a Microsoft Store (MSIX) app referenced by package family name. LG uses type 2, so what you get is a packaged, Store-signed app that a Windows-Update-delivered driver quietly requested on your behalf.
+
+Here is the nuance that ties this back to the rest of the post. The Microsoft-blessed, signed, sandboxed part of this whole story *ends* at "a Store app is installed." Everything that app then does — phoning `lmu.lge.com`, and downloading and silently installing classic Win32 installers with no signature check — happens entirely outside the Windows Update and Store trust model. Windows Update delivered a signed driver, the driver requested a signed Store app, and that Store app is the thing that goes off and side-loads everything else. The trust chain quietly falls off a cliff at the last step.
+
 ## Conclusion
 
 So what is LG Monitor App Manager? Honestly, it is fairly ordinary adware. It detects your LG monitor, phones home for a list of LG apps and promotions, nudges you to install them, quietly bundles a McAfee referral, and plants a tracked shortcut to an ad-supported streaming service. Nothing here is malware, nothing exfiltrates your files, and it is all signed by LG. As adware goes, it is tame.
 
-What still surprises me is the *delivery*. I did not install this. I did not visit lg.com. I plugged in a monitor, and at some point Windows Update pushed LG's installer onto my machine, which then set itself to run at every boot and started offering to install more software. Shipping an auto-updating, self-starting software distribution channel to people simply because they bought your monitor — and wiring it up with no signature checks on the payloads — is a lot of trust to ask for a brightness-control utility. If you have an LG monitor and would rather not have this, uninstalling the "LG Monitor" software, deleting the shortcut from your Startup folder, and disabling the corresponding StartupTask will get rid of it, at least until the next time you reconnect the monitor.
+What still surprises me is the *delivery*. I did not install this. I did not visit lg.com. I plugged in a monitor, and Windows Update — by way of a signed driver and the Hardware Support App mechanism above — installed a Store app that then set itself to run at every boot and started offering to install more software. The HSA part is a legitimate Windows feature and works as designed; what unsettles me is what LG chose to put at the end of it. Shipping an auto-updating, self-starting software distribution channel to people simply because they bought your monitor — and wiring up its final stage with no signature checks on the payloads — is a lot of trust to ask for a brightness-control utility. If you have an LG monitor and would rather not have this, uninstalling the "LG Monitor" software, deleting the shortcut from your Startup folder, and disabling the corresponding StartupTask will get rid of it, at least until the next time you reconnect the monitor.
