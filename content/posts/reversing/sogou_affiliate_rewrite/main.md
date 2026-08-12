@@ -7,7 +7,7 @@ categories:
 - Reversing
 ---
 
-I recently poked at [Sogou Browser](https://ie.sogou.com/) (version `13.9.6121.400`) out of curiosity and found that it rewrites the affiliate code in certain Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
+I recently poked at [Sogou Browser](https://ie.sogou.com/) (version `13.9.6121.400`) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
 
 ## Affiliate codes, briefly
 
