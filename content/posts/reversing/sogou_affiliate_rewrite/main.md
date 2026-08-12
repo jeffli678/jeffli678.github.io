@@ -7,7 +7,7 @@ categories:
 - Reversing
 ---
 
-I recently poked at [Sogou Browser](https://ie.sogou.com/) (version `13.9.6121.400`) out of curiosity and found that it rewrites the affiliate code in certain Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced with a different one. The search engine only ever sees the substituted code — the original never reaches it.
+I recently poked at [Sogou Browser](https://ie.sogou.com/) (version `13.9.6121.400`) out of curiosity and found that it rewrites the affiliate code in certain Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
 
 ## Affiliate codes, briefly
 
@@ -21,9 +21,9 @@ That `tn=` is a Baidu Union account identifier — it tells Baidu which partner 
 
 Sogou has an equivalent. Sogou search URLs carry a `p=` parameter shaped like `sogou-site-0e57098d0318a954` — a four-letter channel type and sixteen hex digits.
 
-## What it does
+## Replacing the codes
 
-The whole behavior fits in four lines. Navigate to a Baidu search carrying an affiliate code, and this is what the browser actually requests:
+When a Sogou Browser user navigates to a Baidu search carrying an affiliate code, this is what the browser actually requests:
 
 ```
 in   https://www.baidu.com/s?wd=test&tn=47018152_13_dg&ie=utf-8
@@ -41,7 +41,7 @@ The code is swapped and the rest of the URL is left alone. On the Baidu side a `
 
 Two conditions have to hold for it to fire at all. The URL must *begin* with `www.baidu.com` or `sogou.com` — a Sogou code carried by some other site, or a Baidu URL nested in a redirect wrapper, is ignored. And the code has to appear on a list built into the browser; anything else is left untouched.
 
-## Which codes, and what they become
+## The list of codes
 
 The lists live in a plugin called `QBSafe.dll`, loaded at browser startup, which receives every navigation URL.
 
@@ -64,7 +64,7 @@ tn=93139410_hao_pg   tn=02049043_30_pg
             tn=98010089_dg     (plus ch=19)
 ```
 
-## On the wire
+## MITM verification
 
 To confirm my finding, I set up mitmproxy in front of the browser and observed the behavior:
 
@@ -76,6 +76,5 @@ To confirm my finding, I set up mitmproxy in front of the browser and observed t
 | sogou `p=sogou-site-ffffffffffffffff` | unchanged |
 | `example.com/?p=sogou-site-0e57098d0318a954&x=1` | unchanged |
 
-Note that internally this is not an edit of the navigation already in flight — the plugin hands back a replacement URL and the browser starts a fresh navigation to it. But the first navigation is abandoned before it issues a network request, so there are two navigations inside the browser and only one HTTP request to the search engine.
 
 You might be curious why Sogou is doing this. There are many possible reasons, and I will leave that to interested readers.
