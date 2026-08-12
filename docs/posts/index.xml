@@ -1,4 +1,87 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Xusheng Li</title><link>/posts/</link><description>Recent content in Posts on Xusheng Li</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>&lt;a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener"&gt;CC BY-NC 4.0&lt;/a&gt;</copyright><lastBuildDate>Sun, 19 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Freeing Dev Hunter from Excel 2000</title><link>/posts/reversing/dev_hunter/readme/</link><pubDate>Sun, 19 Jul 2026 00:00:00 +0000</pubDate><guid>/posts/reversing/dev_hunter/readme/</guid><description>&lt;p&gt;Dev Hunter is a small game hidden inside Microsoft Excel 2000. It was one of the few pastimes I had during the dull computer classes I sat through in high school, and, like all adults who grow nostalgic for the things they had when they were young, I eventually went looking for it again.&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Xusheng Li</title><link>/posts/</link><description>Recent content in Posts on Xusheng Li</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>&lt;a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener"&gt;CC BY-NC 4.0&lt;/a&gt;</copyright><lastBuildDate>Tue, 11 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>How Sogou Browser Rewrites Search Affiliate Codes</title><link>/posts/reversing/sogou_affiliate_rewrite/main/</link><pubDate>Tue, 11 Aug 2026 00:00:00 +0000</pubDate><guid>/posts/reversing/sogou_affiliate_rewrite/main/</guid><description>&lt;p&gt;I recently poked at &lt;a href="https://ie.sogou.com/"&gt;Sogou Browser&lt;/a&gt; (version &lt;code&gt;13.9.6121.400&lt;/code&gt;) out of curiosity and found that it rewrites the affiliate code in certain Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced with a different one. The search engine only ever sees the substituted code — the original never reaches it.&lt;/p&gt;
+&lt;h2 id="affiliate-codes-briefly"&gt;Affiliate codes, briefly&lt;/h2&gt;
+&lt;p&gt;If you have looked closely at a Baidu search URL you have seen something like this:&lt;/p&gt;</description><content type="html"><![CDATA[<p>I recently poked at <a href="https://ie.sogou.com/">Sogou Browser</a> (version <code>13.9.6121.400</code>) out of curiosity and found that it rewrites the affiliate code in certain Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced with a different one. The search engine only ever sees the substituted code — the original never reaches it.</p>
+<h2 id="affiliate-codes-briefly">Affiliate codes, briefly</h2>
+<p>If you have looked closely at a Baidu search URL you have seen something like this:</p>
+<pre tabindex="0"><code>https://www.baidu.com/s?wd=something&amp;tn=47018152_13_dg&amp;ie=utf-8
+</code></pre><p>That <code>tn=</code> is a Baidu Union account identifier — it tells Baidu which partner the traffic came through. This is old and well known; Firefox historically shipped <code>tn=suvion_dg</code>, Maxthon used <code>tn=myie2dg</code>. Software that ships a Baidu search box generally has its own code.</p>
+<p>Sogou has an equivalent. Sogou search URLs carry a <code>p=</code> parameter shaped like <code>sogou-site-0e57098d0318a954</code> — a four-letter channel type and sixteen hex digits.</p>
+<h2 id="what-it-does">What it does</h2>
+<p>The whole behavior fits in four lines. Navigate to a Baidu search carrying an affiliate code, and this is what the browser actually requests:</p>
+<pre tabindex="0"><code>in   https://www.baidu.com/s?wd=test&amp;tn=47018152_13_dg&amp;ie=utf-8
+out  https://www.baidu.com/s?wd=test&amp;tn=98010089_dg&amp;ie=utf-8&amp;ch=19
+</code></pre><p>And the same on Sogou, with that engine&rsquo;s own <code>p=</code> scheme:</p>
+<pre tabindex="0"><code>in   https://www.sogou.com/web?query=x&amp;p=sogou-site-0e57098d0318a954&amp;ie=utf8
+out  https://www.sogou.com/web?query=x&amp;p=sogou-addr-cc9657884708170e&amp;ie=utf8
+</code></pre><p>The code is swapped and the rest of the URL is left alone. On the Baidu side a <code>ch=19</code> parameter is set as well, overwriting any existing <code>ch</code> value rather than duplicating it.</p>
+<p>Two conditions have to hold for it to fire at all. The URL must <em>begin</em> with <code>www.baidu.com</code> or <code>sogou.com</code> — a Sogou code carried by some other site, or a Baidu URL nested in a redirect wrapper, is ignored. And the code has to appear on a list built into the browser; anything else is left untouched.</p>
+<h2 id="which-codes-and-what-they-become">Which codes, and what they become</h2>
+<p>The lists live in a plugin called <code>QBSafe.dll</code>, loaded at browser startup, which receives every navigation URL.</p>
+<p>For Sogou URLs there are three tables of strings in <code>.data</code>, holding 128, 219 and 246 entries — 593 in total, every one of the form <code>sogou-&lt;four letters&gt;-&lt;sixteen hex&gt;</code>, and every one distinct. Each table has a single replacement, and the tables are tried in order with the first match winning:</p>
+<table>
+	<thead>
+			<tr>
+					<th>entries</th>
+					<th>replaced with</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>128</td>
+					<td><code>sogou-clse-f507783927f2ec27</code></td>
+			</tr>
+			<tr>
+					<td>219</td>
+					<td><code>sogou-clse-60a70bb05b08d6cd</code></td>
+			</tr>
+			<tr>
+					<td>246</td>
+					<td><code>sogou-addr-cc9657884708170e</code></td>
+			</tr>
+	</tbody>
+</table>
+<p>For Baidu URLs there are eleven codes built directly on the stack, all mapping to one replacement:</p>
+<pre tabindex="0"><code>tn=93912046_hao_pg   tn=68082196_oem_dg   tn=18029102_oem_dg
+tn=39042058_2_oem_dg tn=02049043_35_pg    tn=47018152_13_dg
+tn=02049043_32_pg    tn=47018152_8_dg     tn=02049043_50_pg
+tn=93139410_hao_pg   tn=02049043_30_pg
+                  ↓
+            tn=98010089_dg     (plus ch=19)
+</code></pre><h2 id="on-the-wire">On the wire</h2>
+<p>To confirm my finding, I set up mitmproxy in front of the browser and observed the behavior:</p>
+<table>
+	<thead>
+			<tr>
+					<th>navigated to</th>
+					<th>what left the machine</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>baidu <code>tn=02049043_35_pg</code></td>
+					<td><code>tn=98010089_dg …&amp;ch=19</code></td>
+			</tr>
+			<tr>
+					<td>baidu <code>tn=00000000_xx_yy</code></td>
+					<td>unchanged</td>
+			</tr>
+			<tr>
+					<td>sogou <code>p=sogou-site-0e57098d0318a954</code></td>
+					<td><code>p=sogou-addr-cc9657884708170e</code></td>
+			</tr>
+			<tr>
+					<td>sogou <code>p=sogou-site-ffffffffffffffff</code></td>
+					<td>unchanged</td>
+			</tr>
+			<tr>
+					<td><code>example.com/?p=sogou-site-0e57098d0318a954&amp;x=1</code></td>
+					<td>unchanged</td>
+			</tr>
+	</tbody>
+</table>
+<p>Note that internally this is not an edit of the navigation already in flight — the plugin hands back a replacement URL and the browser starts a fresh navigation to it. But the first navigation is abandoned before it issues a network request, so there are two navigations inside the browser and only one HTTP request to the search engine.</p>
+<p>You might be curious why Sogou is doing this. There are many possible reasons, and I will leave that to interested readers.</p>
+]]></content></item><item><title>Freeing Dev Hunter from Excel 2000</title><link>/posts/reversing/dev_hunter/readme/</link><pubDate>Sun, 19 Jul 2026 00:00:00 +0000</pubDate><guid>/posts/reversing/dev_hunter/readme/</guid><description>&lt;p&gt;Dev Hunter is a small game hidden inside Microsoft Excel 2000. It was one of the few pastimes I had during the dull computer classes I sat through in high school, and, like all adults who grow nostalgic for the things they had when they were young, I eventually went looking for it again.&lt;/p&gt;
 &lt;p&gt;This post is the whole story of chasing it down: first getting the game to run on its own outside of Excel, and then — years later — freeing it completely, into a standalone program that carries nothing of Excel with it at all.&lt;/p&gt;</description><content type="html"><![CDATA[<p>Dev Hunter is a small game hidden inside Microsoft Excel 2000. It was one of the few pastimes I had during the dull computer classes I sat through in high school, and, like all adults who grow nostalgic for the things they had when they were young, I eventually went looking for it again.</p>
 <p>This post is the whole story of chasing it down: first getting the game to run on its own outside of Excel, and then — years later — freeing it completely, into a standalone program that carries nothing of Excel with it at all.</p>
 <p><img src="../imgs/gameplay.gif" alt="Dev Hunter running as a standalone program"></p>
