@@ -1,6 +1,300 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Xusheng Li</title><link>/posts/</link><description>Recent content in Posts on Xusheng Li</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>&lt;a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener"&gt;CC BY-NC 4.0&lt;/a&gt;</copyright><lastBuildDate>Tue, 11 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>How Sogou Browser Rewrites Search Affiliate Codes</title><link>/posts/reversing/sogou_affiliate_rewrite/main/</link><pubDate>Tue, 11 Aug 2026 00:00:00 +0000</pubDate><guid>/posts/reversing/sogou_affiliate_rewrite/main/</guid><description>&lt;p&gt;I recently poked at &lt;a href="https://ie.sogou.com/"&gt;Sogou Browser&lt;/a&gt; (version &lt;code&gt;13.9.6121.400&lt;/code&gt;) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.&lt;/p&gt;
-&lt;h2 id="affiliate-codes-briefly"&gt;Affiliate codes, briefly&lt;/h2&gt;
-&lt;p&gt;If you have looked closely at a Baidu search URL you have seen something like this:&lt;/p&gt;</description><content type="html"><![CDATA[<p>I recently poked at <a href="https://ie.sogou.com/">Sogou Browser</a> (version <code>13.9.6121.400</code>) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.</p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Posts on Xusheng Li</title>
+        <link>/posts/</link>
+        <description>Recent content in Posts on Xusheng Li</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+        <lastBuildDate>Sun, 16 Aug 2026 00:00:00 +0000</lastBuildDate>
+        <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Windows&#39; Performance Optimizer Is More Capable Than It Needs to Be</title>
+            <link>/posts/reversing/whesvc/main/</link>
+            <pubDate>Sun, 16 Aug 2026 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/whesvc/main/</guid>
+            <description>&lt;p&gt;Earlier this month, &lt;a href=&#34;https://x.com/x1lly/status/2083229864862056532&#34;&gt;a post on X&lt;/a&gt; went viral by claiming Microsoft had quietly slipped a spy into Windows 11:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;MICROSOFT ADDED A NEW BACKGROUND SERVICE TO YOUR PC IN WINDOWS 11. It is called Windows Health and Optimized Experiences. It starts automatically every time you boot. It monitors your CPU, thermals, and battery then sends data to Microsoft every 15 minutes.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Enough people believed it that Microsoft&amp;rsquo;s Scott Hanselman &lt;a href=&#34;https://x.com/shanselman/status/2083959057845727702&#34;&gt;replied personally&lt;/a&gt;:&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>Earlier this month, <a href="https://x.com/x1lly/status/2083229864862056532">a post on X</a> went viral by claiming Microsoft had quietly slipped a spy into Windows 11:</p>
+<blockquote>
+<p>MICROSOFT ADDED A NEW BACKGROUND SERVICE TO YOUR PC IN WINDOWS 11. It is called Windows Health and Optimized Experiences. It starts automatically every time you boot. It monitors your CPU, thermals, and battery then sends data to Microsoft every 15 minutes.</p>
+</blockquote>
+<p>Enough people believed it that Microsoft&rsquo;s Scott Hanselman <a href="https://x.com/shanselman/status/2083959057845727702">replied personally</a>:</p>
+<blockquote>
+<p>This was added in 2025 and is for Performance-diagnostic capture: When Windows detects slow or sluggish behavior, it can record targeted performance traces locally under <code>%SystemRoot%\Temp\DiagOutputDir\Whesvc</code> that can be filed with Feedback Hub. It&rsquo;s not laptop specific. SAYING THINGS IN ALL CAPS FOR DRAMA DOESN&rsquo;T MAKE THEM DRAMATIC</p>
+</blockquote>
+<p>He is right, and so are the fact-checks that followed on <a href="https://www.neowin.net/reports/what-is-the-viral-whesvc-service-and-should-you-disable-it/">Neowin</a>, <a href="https://www.pcworld.com/article/3206170/microsoft-denies-viral-rumor-of-windows-11-spying-on-you-every-15-minutes.html">PCWorld</a>, and <a href="https://www.windowslatest.com/2026/08/04/microsoft-denies-windows-11-is-spying-on-desktop-pcs-reveals-what-the-service-actually-does/">Windows Latest</a>. The service is not new, it is not recording your screen, and the traces stay on your disk unless you file them yourself.</p>
+<p>But it appears to me that nobody has really looked at the binary, and that is quite unsatisfying for a reverse engineer.</p>
+<p>So I opened it (well, mostly with <a href="https://dev-docs.binary.ninja/guide/mcp.html">Binary Ninja MCP</a>). It is a perfectly legitimate diagnostics service, and everything it ships does exactly what the name suggests. What surprised me is how it is built: <code>whesvc</code> runs a <strong>Lua interpreter as SYSTEM</strong>, with 84 compiled Lua scripts riding along, and the machinery underneath is considerably more powerful than the job seems to need.</p>
+<p>Everything below is on Windows 11 Pro 26200, with service binaries <code>10.0.26100.8972</code>. The tools I wrote are in the <a href="https://github.com/xusheng6/whesvc-analysis">companion repo</a> if you wish to follow along on your own machine.</p>
+<h2 id="where-do-i-start">Where Do I Start?</h2>
+<p>The service short name is <code>whesvc</code>, and at first glance it is entirely unremarkable:</p>
+<pre tabindex="0"><code>Name        : whesvc
+DisplayName : Windows Health and Optimized Experiences
+Description : Monitors the device for a better user experience
+PathName    : C:\WINDOWS\system32\svchost.exe -k whesvc -p
+StartName   : LocalSystem
+StartMode   : Auto (delayed)
+</code></pre><p>It is a <code>svchost</code> service, so the interesting part is the <code>ServiceDll</code>, which points at <code>C:\Windows\System32\whesvc.dll</code>. That is only 229 KB, and public symbols are available for it, which makes the job much easier.</p>
+<p>The entry point is <code>HealthAndOptimizerService::StartWHEService</code>, and it is short enough to read in one screen:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>HealthAndOptimizerService<span style="color:#f92672">::</span><span style="color:#a6e22e">StartWHEService</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> <span style="color:#a6e22e">RegGetValue</span>(...<span style="color:#960050;background-color:#1e0010">\</span>whesvc, <span style="color:#e6db74">&#34;WaitForDebugger&#34;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> <span style="color:#a6e22e">SetProcessMitigationPolicy</span>(ProcessRedirectionTrustPolicy, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> <span style="color:#a6e22e">InitializeAssetLoader</span>()   <span style="color:#960050;background-color:#1e0010">→</span> <span style="color:#a6e22e">LoadLibraryW</span>(<span style="color:#f92672">%</span>systemroot<span style="color:#f92672">%</span><span style="color:#960050;background-color:#1e0010">\</span>system32<span style="color:#960050;background-color:#1e0010">\</span>whesvc_assets.dll)
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> WinDiag<span style="color:#f92672">::</span><span style="color:#a6e22e">Initialize</span>()     <span style="color:#960050;background-color:#1e0010">→</span> GetSystemDirectoryW <span style="color:#f92672">+</span> <span style="color:#960050;background-color:#1e0010">\</span>windiag.dll
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> OrchestratorSingleton<span style="color:#f92672">::</span><span style="color:#a6e22e">Initialize</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> OrchestratorSingleton<span style="color:#f92672">::</span><span style="color:#a6e22e">RegisterOneSettingsConfigChangeWNF</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">└─</span> <span style="color:#a6e22e">StartWindiagModuleWithUri</span>(<span style="color:#e6db74">&#34;builtin://scenario/init&#34;</span>)
+</span></span></code></pre></div><p>Three things caught my eye here. It loads two other DLLs I had never heard of, <code>whesvc_assets.dll</code> and <code>windiag.dll</code>. It registers for OneSettings configuration changes, so Microsoft can adjust its behavior remotely. And the last thing it does is start a <em>module</em> named by a URI, <code>builtin://scenario/init</code>.</p>
+<p>That last one is unusual. Services do not normally have modules, and they certainly do not address them by URI. Something else is running the show here, and I will come back to what that module turns out to be.</p>
+<p>In fact, <code>whesvc.dll</code> barely does any work at all. <code>WinDiag::Initialize</code> loads <code>windiag.dll</code> and resolves exactly three exports from it &ndash; <code>WinDiagnosticsRequest</code>, <code>WinDiagnosticsResume</code>, and <code>WinDiagnosticsFree</code>. That is the entire interface. So whatever this service really is, it lives in <code>windiag.dll</code>.</p>
+<h2 id="a-lua-interpreter-in-system32">A Lua Interpreter in system32?</h2>
+<p><code>windiag.dll</code> is 946 KB, and its strings answer the question immediately:</p>
+<pre tabindex="0"><code>$LuaVersion: Lua 5.4.7  Copyright (C) 1994-2024 Lua.org, PUC-Rio $
+</code></pre><p>I had not seen this before &ndash; Windows ships a <strong>Lua interpreter</strong> in <code>system32</code>, and a service runs it as SYSTEM.</p>
+<p>To be fair, Lua is a sensible choice for this kind of job. It is tiny, it is fast, and embedding it is easy. That is exactly why games and embedded devices use it. It is still a little surprising to see Windows take on a new language dependency inside a system service.</p>
+<p>Now, what about the other new DLL? <code>whesvc_assets.dll</code> turns out to be even stranger, because it contains no code at all. Its section table is just <code>.rdata</code> and <code>.rsrc</code>, there is no <code>.text</code>, and consequently there is no PDB for it either &ndash; there was nothing to compile. Everything is in the resources:</p>
+<pre tabindex="0"><code>== TYPE LUALIBM ==   61 resources   (libraries)
+== TYPE LUAMOD ==    23 resources   (scenarios)
+== TYPE PROFILE ==    5 resources   (WPRP trace profile XML)
+</code></pre><p><code>LUAMOD</code> and <code>LUALIBM</code> are the Lua. So there are 84 scripts in here, and their names read like a table of contents: <code>SCENARIO/HANG_TRACE</code>, <code>SCENARIO/SLOW_APP_LAUNCH</code>, <code>SCENARIO/NOISY_FAN</code>, <code>CORE/REG</code>, <code>CORE/SECURITY</code>, <code>MISC/ARTIFACT_MANAGER</code>.</p>
+<h2 id="what-could-the-scripts-do">What Could the Scripts Do?</h2>
+<p>When you find a scripting engine inside a program, the bridge between the script and the native world is the half worth looking at first. It sets the ceiling: a script can never do more than the bridge allows.</p>
+<p>Here the bridge is a global table called <code>wdg</code>, and every <code>CORE/*</code> library is a thin wrapper that re-exports part of it. So I wrote a small pass over the bytecode that tracks which registers hold that table and collects every field read from it. That gives 79 native functions.</p>
+<p>Sixty of them are grouped into twelve libraries:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Library</th>
+					<th>What it exposes</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>core/reg</code></td>
+					<td>Full registry read <strong>and write</strong>, all hives: <code>create_key</code>, <code>delete_key</code>, <code>delete_value</code>, <code>set_*</code>, <code>get_*</code>, <code>enum_*</code></td>
+			</tr>
+			<tr>
+					<td><code>core/file</code></td>
+					<td><code>read_data</code>, <code>write_data</code>, <code>copy</code>, <code>move</code>, <code>remove</code>, <code>mkdir</code>, <code>rmdir</code>, <code>enum</code>, and <code>grep_init</code>/<code>grep_next</code> for searching file contents</td>
+			</tr>
+			<tr>
+					<td><code>core/security</code></td>
+					<td><code>create_process</code>, <code>impersonate_process</code>, <code>revert_impersonation</code>, <code>token_info</code>, <code>code_integrity</code>, <code>process_protection</code></td>
+			</tr>
+			<tr>
+					<td><code>core/etw</code></td>
+					<td>Start and stop WPR traces, realtime sessions, provider and keyword control</td>
+			</tr>
+			<tr>
+					<td><code>core/wmi</code></td>
+					<td><code>wmi_query</code> <strong>and <code>wmi_method</code></strong> &ndash; <code>Win32_Process</code>, <code>Win32_Service</code>, <code>Win32_NTLogEvent</code>, <code>MSFT_MpComputerStatus</code>, <code>MSFT_MpPreference</code></td>
+			</tr>
+			<tr>
+					<td><code>core/wnf</code></td>
+					<td>Create, update, query, and delete WNF state names</td>
+			</tr>
+			<tr>
+					<td><code>core/native</code></td>
+					<td><code>invoke</code> &ndash; a general FFI, with typed buffers and DLL/file/registry/kernel/SCM handles</td>
+			</tr>
+			<tr>
+					<td><code>core/power</code></td>
+					<td>Battery, power schemes, thermal and fan sensors, EMI, processor info</td>
+			</tr>
+			<tr>
+					<td><code>core/net</code></td>
+					<td><code>http_req</code></td>
+			</tr>
+			<tr>
+					<td><code>core/sym</code></td>
+					<td>Symbol download, <code>sym_decode_stack</code></td>
+			</tr>
+			<tr>
+					<td><code>core/ai</code></td>
+					<td>A local language model &ndash; <code>Summarize</code>, <code>Rewrite</code>, <code>TextToTable</code></td>
+			</tr>
+			<tr>
+					<td><code>core/utc</code>, <code>core/oset</code>, <code>core/cabinet</code></td>
+					<td>DiagTrack scenario state, OneSettings config, <code>.cab</code> creation</td>
+			</tr>
+	</tbody>
+</table>
+<p>The remaining nineteen do not belong to any library. <code>core/global.lua</code> injects them directly into the environment of every script, so they are available without importing anything: <code>getpid</code>, <code>getcmd</code>, <code>getcwd</code>, <code>process_info</code>, <code>system_info</code>, <code>system_times</code>, <code>sessionid</code>, <code>thread_name</code>, <code>create_guid</code>, <code>sleep</code>, <code>event_write</code>, and a handful of timing primitives.</p>
+<p>Registry write, arbitrary file I/O, process creation, WMI <em>method</em> invocation, and a general-purpose FFI. That is roughly the capability set of a systems administration language. It is quite a lot for a program whose job is to notice that your laptop is running hot.</p>
+<p>The file access surprised me the most, because it has no restriction whatsoever. This is the whole of <code>write_data</code>, at line 9 of <code>core/file.lua</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">write_data</span>(path, data)
+</span></span><span style="display:flex;"><span>    assert(io.open(path, <span style="color:#e6db74">&#34;wb&#34;</span>)):write(data)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><p>No prefix check, no allowlist, no canonicalization. And before you assume <code>io</code> here is some hardened Microsoft replacement, it is not &ndash; <code>windiag.pdb</code> exports <code>luaopen_io</code>, <code>luaopen_os</code>, and <code>luaopen_package</code> unmodified, so this is the stock PUC-Rio <code>liolib</code> calling <code>fopen</code>.</p>
+<p>This is the part the viral post got backwards, so let me be clear. <strong>None of the shipped scripts do anything questionable with this.</strong> They read sensors and write JSON into their own directories, which is exactly what a diagnostics service should do. The engine underneath would simply let them do much more, and what keeps them in their lane is that Microsoft wrote them that way.</p>
+<p>It is worth seeing what the sharper capabilities are actually used for, because the answer is mundane in every case.</p>
+<p><strong>File I/O.</strong> <code>scenario/system_summary</code> writes its result to a temporary file, and <code>misc/artifact_manager</code> later publishes it into <code>%ProgramData%\Whesvc\</code> and enforces the retention limits:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span><span style="color:#66d9ef">local</span> path <span style="color:#f92672">=</span> env.expand(<span style="color:#e6db74">&#34;%TEMP%</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">&#34;</span>) <span style="color:#f92672">..</span> name <span style="color:#f92672">..</span> <span style="color:#e6db74">&#34;_summary.json&#34;</span>
+</span></span><span style="display:flex;"><span>file.write_data(path, json.stringify(summary))
+</span></span></code></pre></div><p><strong>Registry.</strong> <code>scenario/perftrack_monitor</code> keeps its counters under whesvc&rsquo;s own key so they survive a restart. On my machine one of those entries looks like this:</p>
+<pre tabindex="0"><code>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\whesvc\scenarios\29783662:1
+    id                a92c2390-587f-4ee7-af5b-d1e05402e98a
+    number            29783662
+    on_ac             1
+    total_count       5
+    bucket_ms         2
+    last_update_time  134309573839635035
+</code></pre><p>The only write that leaves whesvc&rsquo;s own keys is <code>misc/driver_info</code>, which can set <code>VerifyDrivers</code>, <code>VerifyDriverLevel</code>, <code>VerifyMode</code>, and <code>VerifierOptions</code> under <code>Session Manager\Memory Management</code>. That is Driver Verifier configuration, used by <code>memory_monitor</code> for pool tracking, and it is gated behind <code>WINDIAG_DRIVER_TELEMETRY_ENABLED</code>. It is easily the most invasive thing any of these scripts can do to a machine.</p>
+<p><strong>Process creation.</strong> Exactly one script spawns a process through <code>security.create_process</code>, and it runs an in-box Windows tool:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span><span style="color:#66d9ef">local</span> opts <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    cmd_line   <span style="color:#f92672">=</span> sysdir <span style="color:#f92672">..</span> <span style="color:#e6db74">&#34;/powercfg.exe /sleepstudy /output </span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">..</span> outfile <span style="color:#f92672">..</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">&#34;</span>,
+</span></span><span style="display:flex;"><span>    redirected <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    console    <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">local</span> proc <span style="color:#f92672">=</span> security.create_process(opts)
+</span></span></code></pre></div><p>That is <code>misc/sleep_study</code> asking <code>powercfg</code> for a sleep study report and then reading its output. Interestingly, there is a second process-spawning path that does not use this binding at all: <code>core/etw</code> shells out to <code>wpr.exe -merge</code> through <code>io_popen</code>. Two mechanisms for the same job, in the same codebase.</p>
+<h2 id="getting-the-scripts-out">Getting the Scripts Out</h2>
+<p>Now I can go read them. Except the resources are not plain Lua, and this is probably why nobody had looked inside: running <code>strings</code> on <code>whesvc_assets.dll</code> shows nothing resembling a script.</p>
+<p>Each resource starts with a small header:</p>
+<pre tabindex="0"><code>0x00  u32  magic 0xC0E5510A
+0x04  u16  header size (0x18)
+0x06  u16  tag
+0x08  u64  uncompressed size
+0x10  u64  uncompressed size (again)
+0x18  u32  compressed size
+0x1C  ...  &#39;CK&#39; + raw DEFLATE
+</code></pre><p>That <code>CK</code> is the giveaway: MSZIP, which is deflate with a two-byte signature in front, so the unpacker is four lines of Python. No encryption, and no hash or MAC anywhere in the header either, which will matter later.</p>
+<p>Underneath the compression is Lua 5.4 bytecode. And here is the part I did not expect:</p>
+<table>
+	<thead>
+			<tr>
+					<th></th>
+					<th></th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Modules carrying debug info</td>
+					<td>105 / 105</td>
+			</tr>
+			<tr>
+					<td>Named local variables</td>
+					<td>6,069</td>
+			</tr>
+			<tr>
+					<td>Named upvalues</td>
+					<td>2,149</td>
+			</tr>
+			<tr>
+					<td>Line-number entries</td>
+					<td>47,688</td>
+			</tr>
+			<tr>
+					<td>Distinct source paths</td>
+					<td>86 (<code>@lualib\core\net.lua</code>, <code>@luamod\scenario\ecp.lua</code>, &hellip;)</td>
+			</tr>
+	</tbody>
+</table>
+<p><strong>Nothing was stripped.</strong> The header sentinels are the stock values (<code>LUAC_INT = 0x5678</code>, <code>LUAC_NUM = 370.5</code>), and the opcode table is unmodified upstream ordering. I wrote a disassembler against the plain Lua 5.4 opcode list and it decoded every module correctly on the first attempt.</p>
+<p>Why keep the debug info? I suspect it is deliberate. The engine formats its errors as <code>file(line)!address</code>, and the WIL telemetry logs failures with call context. If you strip the symbols, you blind yourself to your own field failures. There are even <code>lua_debugger_enabled</code> and <code>vscode_debugger_enabled</code> hooks sitting in the sandbox script.</p>
+<h2 id="so-what-is-keeping-this-in-check">So What Is Keeping This In Check?</h2>
+<p>Two things are supposed to, and both are worth a look.</p>
+<p>The first is a sandbox. It lives in a <code>LUASB</code> resource plus <code>core/global.lua</code>, and before any scenario script runs it deletes a list of globals from the environment: <code>debug</code>, <code>require</code>, <code>os</code>, <code>package</code>, <code>loadfile</code>, <code>dofile</code>, <code>load</code>, <code>getmetatable</code>, <code>setmetatable</code>, and <code>collectgarbage</code>.</p>
+<p>That accomplishes one thing, and it is the important one. With <code>load</code>, <code>loadfile</code>, <code>dofile</code>, and <code>require</code> all gone, a scenario script <strong>cannot load code that did not ship in the signed DLL</strong>. There is a path that loads Lua from the filesystem through a <code>WINDIAG_LUALIB_PATH</code> environment variable, but it is gated on the host process being <code>windiag.exe</code>, a separate developer tool, so that door is closed too.</p>
+<p>Beyond that it does not do much. <code>io</code> was never on the block list, and <code>io.popen</code> is deliberately re-exported as <code>io_popen</code> &ndash; <code>core/etw.lua</code> uses it to shell out to <code>wpr.exe -merge</code> &ndash; so removing <code>os</code> does not remove the ability to run commands. The core libraries also grab what they need before the strip happens, and <code>core/global</code> keeps an upvalue named, with admirable honesty, <code>sandbox_stripped_refs</code>. It is namespace hygiene rather than confinement.</p>
+<p>The second thing is the signature on <code>whesvc_assets.dll</code>, since that is the DLL holding the code that actually runs. Except there is no check. Neither DLL imports <code>WinVerifyTrust</code>, the process never sets <code>MicrosoftSignedOnly</code>, and there is no hash or MAC in the container header either. The file is validly signed, and nothing looks at that signature when it is loaded.</p>
+<p>But that does not really matter, because of who is allowed to write the file:</p>
+<pre tabindex="0"><code>C:\Windows\System32\whesvc_assets.dll
+    NT SERVICE\TrustedInstaller:(F)
+    BUILTIN\Administrators:(RX)
+    NT AUTHORITY\SYSTEM:(RX)
+    BUILTIN\Users:(RX)
+</code></pre><p>TrustedInstaller has full control, and everybody else &ndash; including SYSTEM and Administrators &ndash; gets read and execute only. Anyone who can replace this file is already an administrator, and administrator to SYSTEM is not a boundary Windows defends anyway. <strong>So this is fine.</strong></p>
+<p>So what actually keeps this engine in bounds is not the sandbox and not the signature. It is a file permission, plus the set of scripts Microsoft chose to ship. That is enough in practice, but it is worth knowing that is what the safety rests on.</p>
+<h2 id="so-what-do-the-scripts-actually-do">So What Do the Scripts Actually Do?</h2>
+<p>Now I can finally answer the question I left hanging earlier: what is <code>builtin://scenario/init</code>?</p>
+<p>The <code>builtin://</code> scheme is handled inside <code>windiag.dll</code>, and it simply names a resource. <code>scenario/init</code> becomes the <code>LUAMOD</code> resource called <code>SCENARIO/INIT</code>, which is 536 bytes on disk and unpacks to 777 bytes of bytecode. The debug info calls it <code>@luamod\scenario\init.lua</code>, and it is 48 instructions in total, so I can show the whole thing:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span>disable_global_variables()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">local</span> opts <span style="color:#f92672">=</span> module_options{
+</span></span><span style="display:flex;"><span>    disabled_modules <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">local</span> workflow  <span style="color:#f92672">=</span> reflib(<span style="color:#e6db74">&#34;misc/module_workflow&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">local</span> telemetry <span style="color:#f92672">=</span> reflib(<span style="color:#e6db74">&#34;misc/utc_telemetry&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>telemetry.event_write(<span style="color:#e6db74">&#34;FeatureStates&#34;</span>, feature_states())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>workflow.start_feature_modules({
+</span></span><span style="display:flex;"><span>    { module_uri <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/housekeeper&#34;</span> },
+</span></span><span style="display:flex;"><span>    { module_uri <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/rtsmon&#34;</span> },
+</span></span><span style="display:flex;"><span>    { module_uri <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/devicehot&#34;</span> },
+</span></span><span style="display:flex;"><span>    { feature_name    <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ECP&#34;</span>,
+</span></span><span style="display:flex;"><span>      module_uri      <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/ecp&#34;</span>,
+</span></span><span style="display:flex;"><span>      on_battery_only <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span> },
+</span></span><span style="display:flex;"><span>    { feature_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;MemoryLeakDetection&#34;</span>,
+</span></span><span style="display:flex;"><span>      module_uri   <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/memory_handle_leak&#34;</span> },
+</span></span><span style="display:flex;"><span>    { module_uri <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/noisy_fan&#34;</span> },
+</span></span><span style="display:flex;"><span>}, <span style="color:#e6db74">&#34;init&#34;</span>, opts.disabled_modules)
+</span></span></code></pre></div><p>That is the entire entry point. It locks down the environment, pulls in two helper libraries, emits one telemetry event recording which feature flags are on, and hands six modules to the workflow starter. No logic of its own beyond that.</p>
+<p>From there the structure is easy to follow. Of the 23 scenario modules, 21 start by default. Those six above are the first wave, and one of them, <code>rtsmon</code>, opens a realtime ETW session and starts fourteen more. Thirteen run unconditionally, six sit behind Windows feature flags that Microsoft controls server-side, and one needs a battery to be present.</p>
+<p>Roughly, they fall into four groups.</p>
+<p><strong>Responsiveness.</strong> <code>hang_trace</code> waits on <code>WerHangTraceSignal</code> and captures a trace when an application stops responding. <code>input_delays</code> and <code>output_delays</code> watch input latency and display glitches. <code>slow_app_launch</code> fires when an app takes too long to start. <code>svc_start_stop</code> flags services stuck in a pending state. And <code>hotkey_trace</code> is the interesting one, because it captures a full trace when <em>you</em> press a hotkey. That is the manual reproduction path, for when you can trigger the problem yourself.</p>
+<p><strong>Power and thermals.</strong> <code>ecp</code> decides between <code>LowerPower</code>, <code>NoChange</code>, and <code>HigherPower</code>, and then applies the result. <code>excessive_power_drain</code> looks for sustained drain and badly behaved background apps. <code>fast_battery_drain_improvement</code> is a small state machine that engages QoS separation and CPU frequency throttling when drain stays high. <code>sleep_offenders</code> works out what kept the machine awake, and shells out to <code>powercfg /sleepstudy</code> to do it.</p>
+<p><strong>Memory.</strong> <code>memory_monitor</code> takes heap snapshots. <code>memory_handle_leak</code> does real leak detection: it tracks per-process memory and handle counts across intervals, and uses consecutive-increase counts together with a linear regression slope to tell a leak apart from normal growth. That is more statistics than I expected to find in a shipped diagnostic script.</p>
+<p><strong>Aggregation.</strong> <code>system_summary</code> is where the famous 15 minutes comes from. It reads <code>WINDIAG_SYSTEM_SUMMARY_FLUSH_SEC</code>, which defaults to <code>900</code>. The artifacts on my own machine agree:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{<span style="color:#f92672">&#34;start_time&#34;</span>:<span style="color:#e6db74">&#34;2026-08-11 21:02:16.727114&#34;</span>,
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;end_time&#34;</span>:<span style="color:#e6db74">&#34;2026-08-11 21:17:56.930144&#34;</span>,
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;elapsed_time&#34;</span>:<span style="color:#e6db74">&#34;00:15:40.203030&#34;</span>, <span style="color:#960050;background-color:#1e0010">...</span>}
+</span></span></code></pre></div><p>So the 15 minutes is a real number. The question is what happens when the timer fires, and the answer is that it writes a JSON file into <code>C:\ProgramData\Whesvc\</code> and emits one small ETW telemetry event. Here is an entire crash record, from my machine:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{<span style="color:#f92672">&#34;app_name&#34;</span>:<span style="color:#e6db74">&#34;binaryninja.exe&#34;</span>,<span style="color:#f92672">&#34;mod_name&#34;</span>:<span style="color:#e6db74">&#34;TTDReplay.dll&#34;</span>,
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;exception_code&#34;</span>:<span style="color:#e6db74">&#34;0xC0000005&#34;</span>,<span style="color:#f92672">&#34;exception_offset&#34;</span>:<span style="color:#e6db74">&#34;0x994EA&#34;</span>,
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;app_version&#34;</span>:<span style="color:#e6db74">&#34;5.4.10219.0&#34;</span>,<span style="color:#f92672">&#34;count&#34;</span>:<span style="color:#ae81ff">1</span>}
+</span></span></code></pre></div><p>That is the payload everybody was worried about. It is a crash summary, and in this case it is my own debugger crashing on me during development.</p>
+<p>The network side is similarly undramatic. Across all 84 scripts the only URL is <code>symweb.azurefd.net</code>, which is Microsoft&rsquo;s public symbol server, and it is gated behind a <code>WINDIAG_SYM_CLOUD_TOKEN</code> environment variable that is not set on a retail machine. No scenario module makes an HTTP request at all. <code>windiag.dll</code> imports three WinINet functions and zero socket functions. The running service holds no TCP or UDP endpoints.</p>
+<p>Two controls deserve more credit than the discussion gave Microsoft. Heavy trace capture checks <code>AllowTelemetry</code> and requires it to be 3, meaning full or optional diagnostic data, and returns false when the value cannot be read at all &ndash; so it fails closed. And auto-escalation, the one mechanism that can hand data to the telemetry pipeline without you filing feedback, is off by default in all ten automatic scenarios. It is on in exactly one: <code>hotkey_trace</code>, the one you trigger yourself.</p>
+<h2 id="how-does-it-know-the-fan-is-loud">How Does It Know the Fan Is Loud?</h2>
+<p><code>SCENARIO/NOISY_FAN</code> was actually the first module I opened, because I could not immediately think of a non-alarming way to detect a noisy fan. I have <a href="/posts/reversing/reverse_engineering_and_fixing_a_fan/main/">taken a fan apart on this blog before</a>, so I felt some obligation to check this one.</p>
+<p>Happily, it is not listening to anything. I went through the full import tables of both binaries, and there are no audio APIs anywhere.</p>
+<p>What it does instead is read RPM. The platform&rsquo;s thermal stack exposes a fan descriptor that sorts RPM into four zones, each with a maximum RPM and an accumulated time spent in that zone:</p>
+<pre tabindex="0"><code>FanNoiseZoneLow  FanNoiseZoneMedium  FanNoiseZoneMediumHigh  FanNoiseZoneHigh
+</code></pre><p>The module polls on an interval, and then does exactly one comparison:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> time_per_impact[FanNoiseZoneHigh].seconds_in_zone <span style="color:#f92672">&gt;</span> high_impact_sec_threshold <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>    device_health.signal_problem{ problem_area <span style="color:#f92672">=</span> Power, source <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;NoisyFan&#34;</span> }
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><p>So &ldquo;noisy&rdquo; means the fan has spent more than N accumulated seconds above an RPM threshold that the OEM declared. It is a proxy for noise rather than a measurement of it, which is a sensible way to do this without a microphone. And if your machine has no fan telemetry at all, the module exits immediately with <code>Fan sensors not supported on device</code>, which is what happens on most desktops.</p>
+<h2 id="there-was-already-a-cve">There Was Already a CVE</h2>
+<p>While writing this up, I found that this service has already produced a real vulnerability: <a href="https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-59241">CVE-2025-59241</a>, a local elevation of privilege with CVSS 7.8, fixed in builds <code>26100.6899</code> and <code>26200.6899</code> back in October 2025. Microsoft classified it as improper link resolution before file access. (<a href="https://www.tenable.com/cve/CVE-2025-59241">Tenable</a> has a more readable summary than the MSRC page.)</p>
+<p>Which rather punctures my earlier line about nobody having opened this binary. Somebody clearly had, and they walked away with a CVE while I walked away with a blog post. I will console myself with the belief that I am at least the first to write the thing up in this much detail.</p>
+<p>Microsoft published one sentence about it, and I could not find a pre-patch binary on my machine to diff against, so what follows is the shape of the problem rather than a confirmed account of the exact reported case.</p>
+<p>The ingredients are still visible. The service creates <code>C:\ProgramData\Whesvc\&lt;artifact_type&gt;\</code> if it does not exist and writes a file inside it, as SYSTEM, with no path validation. The type names are hardcoded and predictable, and <code>system_summary</code> guarantees a write every fifteen minutes. Meanwhile, look at who can write into that tree:</p>
+<pre tabindex="0"><code>icacls C:\ProgramData\Whesvc
+    BUILTIN\Users:(I)(CI)(WD,AD,WEA,WA)      &lt;- create files and directories
+    CREATOR OWNER:(I)(OI)(CI)(IO)(F)
+</code></pre><p>Every entry is marked <code>(I)</code>, meaning inherited &ndash; the service never sets its own DACL, it just accepts whatever <code>C:\ProgramData</code> hands down. Once an unprivileged user can create a directory a SYSTEM process will later write into, the classic move is to make it a junction pointing somewhere else. The retention logic, which deletes old artifacts, offers the same trick in reverse.</p>
+<p>The fix is visible in the current binaries, and I like it. Remember that <code>SetProcessMitigationPolicy(ProcessRedirectionTrustPolicy, 1)</code> at the very top of <code>StartWHEService</code>? That tells the kernel to refuse to follow junctions and symlinks created by less-trusted principals. It kills the entire class of bug rather than patching one path, and it is set declaratively in the svchost group configuration as well. There is a second and narrower guard in <code>core/file.lua</code>, where the recursive directory walker refuses to descend into reparse points:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> file.is_directory(entry) <span style="color:#f92672">and</span> <span style="color:#f92672">not</span> file.is_reparse_point(entry) <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>    table.insert(q, entry.path)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><p>This is the only call to <code>is_reparse_point</code> in all 84 modules, which tells you plainly what it was added for.</p>
+<p>The artifact directory still inherits its permissive DACL rather than setting its own, so the defense rests on that one kernel mitigation. It is a good mitigation and it does the job, but an explicit DACL would have made it two layers instead of one.</p>
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>The viral claim was wrong on essentially every count. The service is not new, it does not upload your traces, and it is not recording anything. The 15 minutes is a real number attached to a thoroughly boring event, and Hanselman&rsquo;s description matches the code right down to the directory path he quoted.</p>
+<p>What is worth talking about is the machinery rather than the behavior. The scripts read sensors and write JSON files, while the engine underneath would let them write any file, set any registry key, spawn processes, and call arbitrary native functions through an FFI, all as SYSTEM. None of that is being misused &ndash; I went looking for something dodgy and did not find it. It is simply more capability than the task calls for, and CVE-2025-59241 is a fair illustration of what that can cost. Windows Health and Optimized Experiences is not spyware; it is a legitimate diagnostics service built on a general-purpose scripting runtime, and that is a different thing to threat model than a program which reads a fan sensor.</p>
+<hr>
+<p>The tooling I wrote for this &ndash; the PE resource extractor, the MSZIP container unpacker, and the Lua 5.4 disassembler &ndash; is on <a href="https://github.com/xusheng6/whesvc-analysis">GitHub</a>, together with instructions for unpacking the scripts from your own copy of Windows.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>How Sogou Browser Rewrites Search Affiliate Codes</title>
+            <link>/posts/reversing/sogou_affiliate_rewrite/main/</link>
+            <pubDate>Tue, 11 Aug 2026 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/sogou_affiliate_rewrite/main/</guid>
+            <description>&lt;p&gt;I recently poked at &lt;a href=&#34;https://ie.sogou.com/&#34;&gt;Sogou Browser&lt;/a&gt; (version &lt;code&gt;13.9.6121.400&lt;/code&gt;) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.&lt;/p&gt;
+&lt;h2 id=&#34;affiliate-codes-briefly&#34;&gt;Affiliate codes, briefly&lt;/h2&gt;
+&lt;p&gt;If you have looked closely at a Baidu search URL you have seen something like this:&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>I recently poked at <a href="https://ie.sogou.com/">Sogou Browser</a> (version <code>13.9.6121.400</code>) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.</p>
 <h2 id="affiliate-codes-briefly">Affiliate codes, briefly</h2>
 <p>If you have looked closely at a Baidu search URL you have seen something like this:</p>
 <pre tabindex="0"><code>https://www.baidu.com/s?wd=something&amp;tn=47018152_13_dg&amp;ie=utf-8
@@ -80,8 +374,17 @@ tn=93139410_hao_pg   tn=02049043_30_pg
 	</tbody>
 </table>
 <p>You might be curious why Sogou is doing this. There are many possible reasons, and I will leave that to interested readers.</p>
-]]></content></item><item><title>Freeing Dev Hunter from Excel 2000</title><link>/posts/reversing/dev_hunter/readme/</link><pubDate>Sun, 19 Jul 2026 00:00:00 +0000</pubDate><guid>/posts/reversing/dev_hunter/readme/</guid><description>&lt;p&gt;Dev Hunter is a small game hidden inside Microsoft Excel 2000. It was one of the few pastimes I had during the dull computer classes I sat through in high school, and, like all adults who grow nostalgic for the things they had when they were young, I eventually went looking for it again.&lt;/p&gt;
-&lt;p&gt;This post is the whole story of chasing it down: first getting the game to run on its own outside of Excel, and then — years later — freeing it completely, into a standalone program that carries nothing of Excel with it at all.&lt;/p&gt;</description><content type="html"><![CDATA[<p>Dev Hunter is a small game hidden inside Microsoft Excel 2000. It was one of the few pastimes I had during the dull computer classes I sat through in high school, and, like all adults who grow nostalgic for the things they had when they were young, I eventually went looking for it again.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Freeing Dev Hunter from Excel 2000</title>
+            <link>/posts/reversing/dev_hunter/readme/</link>
+            <pubDate>Sun, 19 Jul 2026 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/dev_hunter/readme/</guid>
+            <description>&lt;p&gt;Dev Hunter is a small game hidden inside Microsoft Excel 2000. It was one of the few pastimes I had during the dull computer classes I sat through in high school, and, like all adults who grow nostalgic for the things they had when they were young, I eventually went looking for it again.&lt;/p&gt;
+&lt;p&gt;This post is the whole story of chasing it down: first getting the game to run on its own outside of Excel, and then — years later — freeing it completely, into a standalone program that carries nothing of Excel with it at all.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>Dev Hunter is a small game hidden inside Microsoft Excel 2000. It was one of the few pastimes I had during the dull computer classes I sat through in high school, and, like all adults who grow nostalgic for the things they had when they were young, I eventually went looking for it again.</p>
 <p>This post is the whole story of chasing it down: first getting the game to run on its own outside of Excel, and then — years later — freeing it completely, into a standalone program that carries nothing of Excel with it at all.</p>
 <p><img src="../imgs/gameplay.gif" alt="Dev Hunter running as a standalone program"></p>
 <h2 id="what-dev-hunter-is">What Dev Hunter is</h2>
@@ -137,9 +440,18 @@ tn=93139410_hao_pg   tn=02049043_30_pg
 <h2 id="what-i-take-away-from-it">What I take away from it</h2>
 <p>The lesson I take away is about the limits of static reverse engineering. Even with a capable AI agent driving it, reading the disassembly got the port perhaps 90% of the way, and then stalled — the remaining errors simply were not visible in the code it was reading. Debugging is the right way to close the gap.</p>
 <p>And at the end of it, Dev Hunter is out. A little game that spent twenty-five years locked inside an office suite that barely runs anymore is now a few hundred kilobytes you can clone, compile, and play in a window. I doubt the developers who hid their names in that road ever expected someone to come along, decades later, and rewrite the whole thing.</p>
-]]></content></item><item><title>What is LG Monitor App Manager actually doing?</title><link>/posts/reversing/lg_monitor_app_manager/readme/</link><pubDate>Sat, 18 Jul 2026 00:00:00 +0000</pubDate><guid>/posts/reversing/lg_monitor_app_manager/readme/</guid><description>&lt;p&gt;I recently bought an LG 34-inch UltraWide monitor. The screen itself works great — no complaints there. But a little while after setting it up, I started to notice this &lt;code&gt;LGMonitorAppManager&lt;/code&gt; thing on my machine:&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/1.png" alt="LG Monitor App Installer"&gt;&lt;/p&gt;
-&lt;p&gt;It showed up on its own — I never went to LG&amp;rsquo;s website and downloaded anything. It just appeared one day, offering to install &amp;ldquo;Dual Controller&amp;rdquo; and a few other LG utilities. I did not think about it too much at the time; I clicked the little &lt;code&gt;x&lt;/code&gt; and moved on with my life.&lt;/p&gt;</description><content type="html"><![CDATA[<p>I recently bought an LG 34-inch UltraWide monitor. The screen itself works great — no complaints there. But a little while after setting it up, I started to notice this <code>LGMonitorAppManager</code> thing on my machine:</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>What is LG Monitor App Manager actually doing?</title>
+            <link>/posts/reversing/lg_monitor_app_manager/readme/</link>
+            <pubDate>Sat, 18 Jul 2026 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/lg_monitor_app_manager/readme/</guid>
+            <description>&lt;p&gt;I recently bought an LG 34-inch UltraWide monitor. The screen itself works great — no complaints there. But a little while after setting it up, I started to notice this &lt;code&gt;LGMonitorAppManager&lt;/code&gt; thing on my machine:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/1.png&#34; alt=&#34;LG Monitor App Installer&#34;&gt;&lt;/p&gt;
+&lt;p&gt;It showed up on its own — I never went to LG&amp;rsquo;s website and downloaded anything. It just appeared one day, offering to install &amp;ldquo;Dual Controller&amp;rdquo; and a few other LG utilities. I did not think about it too much at the time; I clicked the little &lt;code&gt;x&lt;/code&gt; and moved on with my life.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>I recently bought an LG 34-inch UltraWide monitor. The screen itself works great — no complaints there. But a little while after setting it up, I started to notice this <code>LGMonitorAppManager</code> thing on my machine:</p>
 <p><img src="../imgs/1.png" alt="LG Monitor App Installer"></p>
 <p>It showed up on its own — I never went to LG&rsquo;s website and downloaded anything. It just appeared one day, offering to install &ldquo;Dual Controller&rdquo; and a few other LG utilities. I did not think about it too much at the time; I clicked the little <code>x</code> and moved on with my life.</p>
 <p>Then, more recently, I came across a few X posts reporting the exact same thing, for example <a href="https://x.com/wexosu/status/2078183359335874940">this one</a>, and even a <a href="https://www.youtube.com/watch?v=Q9uefFYe6bM">Gamers Nexus video</a> digging into how LG ships this software through Windows Update. The consensus was some flavor of &ldquo;LG is installing bloatware/adware on your PC without asking.&rdquo; That matches my experience, and it is a fair complaint.</p>
@@ -282,11 +594,20 @@ https://lmu.lge.com/ExternalService/LGMonitorAppInstaller/McAfee_MonitorAppInfo.
 <h2 id="conclusion">Conclusion</h2>
 <p>So what is LG Monitor App Manager? Honestly, it is fairly ordinary adware. It detects your LG monitor, phones home for a list of LG apps and promotions, nudges you to install them, quietly bundles a McAfee referral, and plants a tracked shortcut to an ad-supported streaming service. Nothing here is malware, nothing exfiltrates your files, and it is all signed by LG. As adware goes, it is tame.</p>
 <p>What still surprises me is the <em>delivery</em>. I did not install this. I did not visit lg.com. I plugged in a monitor, and Windows Update — by way of a signed driver and the Hardware Support App mechanism above — installed a Store app that then set itself to run at every boot and started offering to install more software. The HSA part is a legitimate Windows feature and works as designed; what unsettles me is what LG chose to put at the end of it. Shipping an auto-updating, self-starting software distribution channel to people simply because they bought your monitor — and wiring up its final stage with no signature checks on the payloads — is a lot of trust to ask for a brightness-control utility. If you have an LG monitor and would rather not have this, uninstalling the &ldquo;LG Monitor&rdquo; software, deleting the shortcut from your Startup folder, and disabling the corresponding StartupTask will get rid of it, at least until the next time you reconnect the monitor.</p>
-]]></content></item><item><title>Solving a VM Challenge Using BinaryNinja</title><link>/posts/reversing/kata_vm/readme/</link><pubDate>Sun, 18 Apr 2021 00:00:00 +0000</pubDate><guid>/posts/reversing/kata_vm/readme/</guid><description>&lt;p&gt;Recently, my friend &lt;a href="https://crackmes.one/user/Towel"&gt;Towel&lt;/a&gt; created a &lt;a href="https://crackmes.one/crackme/605443e333c5d42c3d016f59"&gt;VM challenge&lt;/a&gt;. I have not done any VM crackmes in the last year and decided to try this one. Towel says the challenge should be easy and serves mostly as an introduction for VM crackmes. More importantly, this one has no anti-debugging or static obfuscation, to allow the solver to concentrate on the VM itself.&lt;/p&gt;
-&lt;h2 id="preliminary"&gt;Preliminary&lt;/h2&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>Solving a VM Challenge Using BinaryNinja</title>
+            <link>/posts/reversing/kata_vm/readme/</link>
+            <pubDate>Sun, 18 Apr 2021 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/kata_vm/readme/</guid>
+            <description>&lt;p&gt;Recently, my friend &lt;a href=&#34;https://crackmes.one/user/Towel&#34;&gt;Towel&lt;/a&gt; created a &lt;a href=&#34;https://crackmes.one/crackme/605443e333c5d42c3d016f59&#34;&gt;VM challenge&lt;/a&gt;. I have not done any VM crackmes in the last year and decided to try this one. Towel says the challenge should be easy and serves mostly as an introduction for VM crackmes. More importantly, this one has no anti-debugging or static obfuscation, to allow the solver to concentrate on the VM itself.&lt;/p&gt;
+&lt;h2 id=&#34;preliminary&#34;&gt;Preliminary&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;main()&lt;/code&gt; function is actually quite simple:&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/1.png" alt=""&gt;&lt;/p&gt;
-&lt;p&gt;Just one function call and a branch, which decides if the player succeeds. The &lt;code&gt;core&lt;/code&gt; function looks like what a VM should be:&lt;/p&gt;</description><content type="html"><![CDATA[<p>Recently, my friend <a href="https://crackmes.one/user/Towel">Towel</a> created a <a href="https://crackmes.one/crackme/605443e333c5d42c3d016f59">VM challenge</a>. I have not done any VM crackmes in the last year and decided to try this one. Towel says the challenge should be easy and serves mostly as an introduction for VM crackmes. More importantly, this one has no anti-debugging or static obfuscation, to allow the solver to concentrate on the VM itself.</p>
+&lt;p&gt;&lt;img src=&#34;../imgs/1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Just one function call and a branch, which decides if the player succeeds. The &lt;code&gt;core&lt;/code&gt; function looks like what a VM should be:&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>Recently, my friend <a href="https://crackmes.one/user/Towel">Towel</a> created a <a href="https://crackmes.one/crackme/605443e333c5d42c3d016f59">VM challenge</a>. I have not done any VM crackmes in the last year and decided to try this one. Towel says the challenge should be easy and serves mostly as an introduction for VM crackmes. More importantly, this one has no anti-debugging or static obfuscation, to allow the solver to concentrate on the VM itself.</p>
 <h2 id="preliminary">Preliminary</h2>
 <p>The <code>main()</code> function is actually quite simple:</p>
 <p><img src="../imgs/1.png" alt=""></p>
@@ -481,15 +802,33 @@ End
 </span></span><span style="display:flex;"><span>&gt;&gt; xNVa2_N07_t3aAlg
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>+<span style="color:#f92672">]</span> Correct!
-</span></span></code></pre></div>]]></content></item><item><title>International Grand Master</title><link>/posts/grandmaster/</link><pubDate>Sat, 13 Feb 2021 19:44:00 +0800</pubDate><guid>/posts/grandmaster/</guid><description>&lt;p&gt;I was awarded the title of &lt;code&gt;International Grand Master&lt;/code&gt; for Xiangqi in late 2020. I am very excited about this title!&lt;/p&gt;
-&lt;p&gt;I earned this title since I am the &lt;a href="http://www.naxf.org/wp/wp-content/uploads/2018/11/ranking.txt"&gt;Champnion&lt;/a&gt; of the 8th North American Cup. Game records can be viewed &lt;a href="http://www.naxf.org/wp/8th/"&gt;online&lt;/a&gt;.&lt;/p&gt;
+</span></span></code></pre></div>]]></content>
+        </item>
+        
+        <item>
+            <title>International Grand Master</title>
+            <link>/posts/grandmaster/</link>
+            <pubDate>Sat, 13 Feb 2021 19:44:00 +0800</pubDate>
+            <guid>/posts/grandmaster/</guid>
+            <description>&lt;p&gt;I was awarded the title of &lt;code&gt;International Grand Master&lt;/code&gt; for Xiangqi in late 2020. I am very excited about this title!&lt;/p&gt;
+&lt;p&gt;I earned this title since I am the &lt;a href=&#34;http://www.naxf.org/wp/wp-content/uploads/2018/11/ranking.txt&#34;&gt;Champnion&lt;/a&gt; of the 8th North American Cup. Game records can be viewed &lt;a href=&#34;http://www.naxf.org/wp/8th/&#34;&gt;online&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;The certificate is shown here:&lt;/p&gt;
-&lt;p&gt;&lt;img src="../grandmaster.jpg" alt=""&gt;&lt;/p&gt;</description><content type="html"><![CDATA[<p>I was awarded the title of <code>International Grand Master</code> for Xiangqi in late 2020. I am very excited about this title!</p>
+&lt;p&gt;&lt;img src=&#34;../grandmaster.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>I was awarded the title of <code>International Grand Master</code> for Xiangqi in late 2020. I am very excited about this title!</p>
 <p>I earned this title since I am the <a href="http://www.naxf.org/wp/wp-content/uploads/2018/11/ranking.txt">Champnion</a> of the 8th North American Cup. Game records can be viewed <a href="http://www.naxf.org/wp/8th/">online</a>.</p>
 <p>The certificate is shown here:</p>
 <p><img src="../grandmaster.jpg" alt=""></p>
-]]></content></item><item><title>Photo Works</title><link>/posts/photos/</link><pubDate>Sat, 13 Feb 2021 00:00:00 +0000</pubDate><guid>/posts/photos/</guid><description>&lt;p&gt;I used to be a keen photographer. I treat photography as a way of expressing my views toward the world. My photos capture both the beauty and absurdity of this world.&lt;/p&gt;
-&lt;p&gt;However, I have not taken very few photos in recent years. One excuse is I become busy and get obsessed with reverse engineering. But a more convincing reason is I am less interested in this world. The situation might change in the future, though.&lt;/p&gt;</description><content type="html"><![CDATA[<p>I used to be a keen photographer. I treat photography as a way of expressing my views toward the world. My photos capture both the beauty and absurdity of this world.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Photo Works</title>
+            <link>/posts/photos/</link>
+            <pubDate>Sat, 13 Feb 2021 00:00:00 +0000</pubDate>
+            <guid>/posts/photos/</guid>
+            <description>&lt;p&gt;I used to be a keen photographer. I treat photography as a way of expressing my views toward the world. My photos capture both the beauty and absurdity of this world.&lt;/p&gt;
+&lt;p&gt;However, I have not taken very few photos in recent years. One excuse is I become busy and get obsessed with reverse engineering. But a more convincing reason is I am less interested in this world. The situation might change in the future, though.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>I used to be a keen photographer. I treat photography as a way of expressing my views toward the world. My photos capture both the beauty and absurdity of this world.</p>
 <p>However, I have not taken very few photos in recent years. One excuse is I become busy and get obsessed with reverse engineering. But a more convincing reason is I am less interested in this world. The situation might change in the future, though.</p>
 <p> 
  </p>
@@ -809,11 +1148,29 @@ End
             <a href = "/imgs/fd61030e47405f5e43cb20b0b9a1fb9b.jpg"   data-ngThumb = "/imgs/fd61030e47405f5e43cb20b0b9a1fb9b-thumb.jpg" > </a>
     
 </div>
-]]></content></item><item><title>My New Blog is Ready!</title><link>/posts/my_new_blog/</link><pubDate>Thu, 11 Feb 2021 18:46:24 +0800</pubDate><guid>/posts/my_new_blog/</guid><description>&lt;p&gt;I spent some time with &lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt; and now my blog is hosted on GitHub. Feel free to visit it at &lt;a href="https://xusheng.dev"&gt;xusheng.dev&lt;/a&gt;!&lt;/p&gt;
-&lt;p&gt;I will write about reversing, coding, Xiangqi, and other stuff.&lt;/p&gt;</description><content type="html"><![CDATA[<p>I spent some time with <a href="https://gohugo.io/">Hugo</a> and now my blog is hosted on GitHub. Feel free to visit it at <a href="https://xusheng.dev">xusheng.dev</a>!</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>My New Blog is Ready!</title>
+            <link>/posts/my_new_blog/</link>
+            <pubDate>Thu, 11 Feb 2021 18:46:24 +0800</pubDate>
+            <guid>/posts/my_new_blog/</guid>
+            <description>&lt;p&gt;I spent some time with &lt;a href=&#34;https://gohugo.io/&#34;&gt;Hugo&lt;/a&gt; and now my blog is hosted on GitHub. Feel free to visit it at &lt;a href=&#34;https://xusheng.dev&#34;&gt;xusheng.dev&lt;/a&gt;!&lt;/p&gt;
+&lt;p&gt;I will write about reversing, coding, Xiangqi, and other stuff.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>I spent some time with <a href="https://gohugo.io/">Hugo</a> and now my blog is hosted on GitHub. Feel free to visit it at <a href="https://xusheng.dev">xusheng.dev</a>!</p>
 <p>I will write about reversing, coding, Xiangqi, and other stuff.</p>
-]]></content></item><item><title>How to Avoid Writing a Bad Crackme</title><link>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</link><pubDate>Tue, 29 Dec 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</guid><description>&lt;p&gt;Recently, I was promoted to a reviewer on crackmes.one (along with @zed). I am so honored with this and I appreciate the recognition and trust from @stan (creator of crackmes.one) and the entire community. The task for a reviewer is interesting, that I read submitted solutions and verify new crackmes. This allows me to grasp the latest trend on the website.&lt;/p&gt;
-&lt;p&gt;I did not tally the statistics, but there is a fairly good amount of new submissions (of both crackmes and solutions) every week. And most of them are nice! For me, crackmes.one is a place for reversers to exchange knowledge and joyfulness. So I am very glad that we see a steady flow of input. Now that we have three reviewers, and I hope an increase in the reviewing speed will shorten the feedback loop for contributors, which, in turn, will lead to more contributions from the community.&lt;/p&gt;</description><content type="html"><![CDATA[<p>Recently, I was promoted to a reviewer on crackmes.one (along with @zed). I am so honored with this and I appreciate the recognition and trust from @stan (creator of crackmes.one) and the entire community. The task for a reviewer is interesting, that I read submitted solutions and verify new crackmes. This allows me to grasp the latest trend on the website.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>How to Avoid Writing a Bad Crackme</title>
+            <link>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</link>
+            <pubDate>Tue, 29 Dec 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</guid>
+            <description>&lt;p&gt;Recently, I was promoted to a reviewer on crackmes.one (along with @zed). I am so honored with this and I appreciate the recognition and trust from @stan (creator of crackmes.one) and the entire community. The task for a reviewer is interesting, that I read submitted solutions and verify new crackmes. This allows me to grasp the latest trend on the website.&lt;/p&gt;
+&lt;p&gt;I did not tally the statistics, but there is a fairly good amount of new submissions (of both crackmes and solutions) every week. And most of them are nice! For me, crackmes.one is a place for reversers to exchange knowledge and joyfulness. So I am very glad that we see a steady flow of input. Now that we have three reviewers, and I hope an increase in the reviewing speed will shorten the feedback loop for contributors, which, in turn, will lead to more contributions from the community.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>Recently, I was promoted to a reviewer on crackmes.one (along with @zed). I am so honored with this and I appreciate the recognition and trust from @stan (creator of crackmes.one) and the entire community. The task for a reviewer is interesting, that I read submitted solutions and verify new crackmes. This allows me to grasp the latest trend on the website.</p>
 <p>I did not tally the statistics, but there is a fairly good amount of new submissions (of both crackmes and solutions) every week. And most of them are nice! For me, crackmes.one is a place for reversers to exchange knowledge and joyfulness. So I am very glad that we see a steady flow of input. Now that we have three reviewers, and I hope an increase in the reviewing speed will shorten the feedback loop for contributors, which, in turn, will lead to more contributions from the community.</p>
 <p>Nevertheless, some of the submissions did not meet our standards and got rejected. The reasons vary, but many of them are using existing obfuscator/protector. Among them, many have a dull verification algorithm and the sole challenge is to get past the obfuscator. We welcome the use of protectors/obfuscators, but we do not like the use of existing ones, especially commercial ones, e.g., VMP, WinLicense. These protectors are definitely breakable (trust me), but it is too hard for a crackme and it will take very long to solve. For folks who can do it, they would probably invest the time in some more important/interesting things, rather than spending a long time on it to break the protector, and only to find the actual algorithm is just on XOR.</p>
 <p>Meanwhile, using existing tools deviates from the spirit of crackmes.one. As I wrote above, I believe this is a place for us reversers to <code>&quot;exchange knowledge and joyfulness&quot;</code>. We not only practice and improve our reversing skills but also share and obtain knowledge. However, using an existing tool does not help the author learn anything, beyond how to execute the tool, which is relatively simple. Conversely, if the author digs deep into an existing (open-source) tool, understands how it works, makes certain changes to defeat existing tools, s/he would learn more.</p>
@@ -846,8 +1203,17 @@ End
 <li>Most crackmes can be solved instantly, or in a few seconds. I think a max 1-minute time limit is a reasonable recommended maximum.</li>
 <li>Do not blindly add layers of protection, unless they form a cohesive unity. If protections are duplicated in large numbers, there should be a way to automatically tackle it.</li>
 </ol>
-]]></content></item><item><title>Solving Two OCaml Crackmes Without Knowing Much about OCaml</title><link>/posts/reversing/ocaml_crackmes/readme/</link><pubDate>Sun, 13 Dec 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/ocaml_crackmes/readme/</guid><description>&lt;p&gt;Earlier this year, my friend &lt;a href="https://crackmes.one/user/Towel"&gt;Towel&lt;/a&gt; uploaded two OCaml crackmes to crackmes.one. One of them is &lt;a href="https://crackmes.one/crackme/5f600af333c5d4357b3b01d6"&gt;&lt;code&gt;Baby OCaml&lt;/code&gt;&lt;/a&gt;, and the other one is called &lt;a href="https://crackmes.one/crackme/5f600b9933c5d4357b3b01d7"&gt;&lt;code&gt;Teenager OCaml&lt;/code&gt;&lt;/a&gt;. Well, interesting names!&lt;/p&gt;
-&lt;p&gt;This is not the first time Towel came up with OCaml crackmes. &lt;a href="https://crackmes.one/crackme/5ec1b82133c5d449d91ae539"&gt;&lt;code&gt;Qt Scanner&lt;/code&gt;&lt;/a&gt;, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3. Nevertheless, we cannot hide from challenges forever, so I decided to try it last week. And the outcome is good, I managed to solve them without digging deep into the OCaml runtime.&lt;/p&gt;</description><content type="html"><![CDATA[<p>Earlier this year, my friend <a href="https://crackmes.one/user/Towel">Towel</a> uploaded two OCaml crackmes to crackmes.one. One of them is <a href="https://crackmes.one/crackme/5f600af333c5d4357b3b01d6"><code>Baby OCaml</code></a>, and the other one is called <a href="https://crackmes.one/crackme/5f600b9933c5d4357b3b01d7"><code>Teenager OCaml</code></a>. Well, interesting names!</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Solving Two OCaml Crackmes Without Knowing Much about OCaml</title>
+            <link>/posts/reversing/ocaml_crackmes/readme/</link>
+            <pubDate>Sun, 13 Dec 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/ocaml_crackmes/readme/</guid>
+            <description>&lt;p&gt;Earlier this year, my friend &lt;a href=&#34;https://crackmes.one/user/Towel&#34;&gt;Towel&lt;/a&gt; uploaded two OCaml crackmes to crackmes.one. One of them is &lt;a href=&#34;https://crackmes.one/crackme/5f600af333c5d4357b3b01d6&#34;&gt;&lt;code&gt;Baby OCaml&lt;/code&gt;&lt;/a&gt;, and the other one is called &lt;a href=&#34;https://crackmes.one/crackme/5f600b9933c5d4357b3b01d7&#34;&gt;&lt;code&gt;Teenager OCaml&lt;/code&gt;&lt;/a&gt;. Well, interesting names!&lt;/p&gt;
+&lt;p&gt;This is not the first time Towel came up with OCaml crackmes. &lt;a href=&#34;https://crackmes.one/crackme/5ec1b82133c5d449d91ae539&#34;&gt;&lt;code&gt;Qt Scanner&lt;/code&gt;&lt;/a&gt;, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3. Nevertheless, we cannot hide from challenges forever, so I decided to try it last week. And the outcome is good, I managed to solve them without digging deep into the OCaml runtime.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>Earlier this year, my friend <a href="https://crackmes.one/user/Towel">Towel</a> uploaded two OCaml crackmes to crackmes.one. One of them is <a href="https://crackmes.one/crackme/5f600af333c5d4357b3b01d6"><code>Baby OCaml</code></a>, and the other one is called <a href="https://crackmes.one/crackme/5f600b9933c5d4357b3b01d7"><code>Teenager OCaml</code></a>. Well, interesting names!</p>
 <p>This is not the first time Towel came up with OCaml crackmes. <a href="https://crackmes.one/crackme/5ec1b82133c5d449d91ae539"><code>Qt Scanner</code></a>, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3. Nevertheless, we cannot hide from challenges forever, so I decided to try it last week. And the outcome is good, I managed to solve them without digging deep into the OCaml runtime.</p>
 <h2 id="baby-ocaml">Baby OCaml</h2>
 <p>OCaml is an interpretive language, but it can be compiled to native code. This is in contrast to Python/PyInstaller, where the script is just packaged into the generated binary and we can restore the original source of it. The OCaml compiler generates native code based on the source code, and the source is not present within the generated binary. Worse still, when we deal with new programming languages, e.g., OCaml, Go, Rust, we are likely to encounter some novel things we do not expect. For example, Rust has a very different way of passing parameters and return values of a function. We need to first get familiar with it, then start reversing the actual code logic.</p>
@@ -974,8 +1340,17 @@ End
 </span></span></code></pre></div><p>This reminds me of the description of the challenge:</p>
 <pre tabindex="0"><code>A slightly harder OCaml challenge to get practice with OCaml integer representations.
 </code></pre><p>So, it seems that I solved without knowing anything about OCaml integer representation.</p>
-]]></content></item><item><title>Deciphering a Windows Anti-debugging Challenge</title><link>/posts/reversing/reverseme3/readme/</link><pubDate>Sun, 29 Nov 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/reverseme3/readme/</guid><description>&lt;p&gt;It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.&lt;/p&gt;
-&lt;p&gt;This time I am writing about the challenge &lt;code&gt;ReverseMe3&lt;/code&gt; from &lt;code&gt;jochen_&lt;/code&gt;. The challenge can be found on &lt;a href="https://crackmes.one/crackme/5fb1642933c5d424269a1850"&gt;crackmes.one&lt;/a&gt;. The password to unzip is &amp;ldquo;crackmes.one&amp;rdquo;.&lt;/p&gt;</description><content type="html"><![CDATA[<p>It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Deciphering a Windows Anti-debugging Challenge</title>
+            <link>/posts/reversing/reverseme3/readme/</link>
+            <pubDate>Sun, 29 Nov 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/reverseme3/readme/</guid>
+            <description>&lt;p&gt;It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.&lt;/p&gt;
+&lt;p&gt;This time I am writing about the challenge &lt;code&gt;ReverseMe3&lt;/code&gt; from &lt;code&gt;jochen_&lt;/code&gt;. The challenge can be found on &lt;a href=&#34;https://crackmes.one/crackme/5fb1642933c5d424269a1850&#34;&gt;crackmes.one&lt;/a&gt;. The password to unzip is &amp;ldquo;crackmes.one&amp;rdquo;.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.</p>
 <p>This time I am writing about the challenge <code>ReverseMe3</code> from <code>jochen_</code>. The challenge can be found on <a href="https://crackmes.one/crackme/5fb1642933c5d424269a1850">crackmes.one</a>. The password to unzip is &ldquo;crackmes.one&rdquo;.</p>
 <p>The description given on the challenge page says the program will show a message box when it not running under a debugger. And the goal is to make it also show the message box when it is running under a debugger. Basically, to circumvent the anti-debugging techniques.</p>
 <p>Interestingly, the author mentions the program only runs properly on <code>3 latest builds of Windows 10. 1909 2004 and 20H2</code>. And if we were to conquer it inside a VM, we have to bypass one more check. So maybe the program uses some new feature that is introduced in the latest versions? Or it might be relying on low-level/un-documented features that only work on these versions. I do not have a VM that has the proper Windows build version, so I decide to solve it statically.</p>
@@ -1217,9 +1592,18 @@ I simply need to restore it to 0xcc, and update the &#34;original value&#34; of 
 <p>And manually set the value of <code>object_type.TotalNumberOfObjects</code> and <code>thread_hide_from_debugger</code> to 1. Then press F9 to run the program, and the MessageBox pops up:</p>
 <p><img src="../imgs/23.png" alt=""></p>
 <p>Nice, I have COMPLETELY analyzed the program and explained lots of details in it. I hope you like this write-up! And feel free to get in touch with me if you have any questions or suggestions.</p>
-]]></content></item><item><title>Dealing with Manipulated ELF Binary and Manually Resolving Import Functions</title><link>/posts/reversing/elf_format/readme/</link><pubDate>Sun, 30 Aug 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/elf_format/readme/</guid><description>&lt;p&gt;Unfortunately, this writeup is delayed for almost a week because I am super busy recently. Please take my apologies and I will try my best to keep the weekly challenge going, forever!&lt;/p&gt;
-&lt;p&gt;The challenge can be downloaded at &lt;a href="https://crackmes.one/crackme/5e727daa33c5d4439bb2decd"&gt;https://crackmes.one/crackme/5e727daa33c5d4439bb2decd&lt;/a&gt;. It is created by user BinaryNewbie, who is NOT a newbie for binary reversing.&lt;/p&gt;
-&lt;p&gt;We will discuss an important topic in this writeup: how to mutate binary executable to obstruct reverse engineering tools. Specifically, these techniques aim to fool the binary parsers so that they fail to parse the binary or the parsing result is missing important information. In the worst case, the binary crashes the analysis tool. For convenience, we will call these techniques &lt;code&gt;Executable Format Manipulation (EFP)&lt;/code&gt;.&lt;/p&gt;</description><content type="html"><![CDATA[<p>Unfortunately, this writeup is delayed for almost a week because I am super busy recently. Please take my apologies and I will try my best to keep the weekly challenge going, forever!</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Dealing with Manipulated ELF Binary and Manually Resolving Import Functions</title>
+            <link>/posts/reversing/elf_format/readme/</link>
+            <pubDate>Sun, 30 Aug 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/elf_format/readme/</guid>
+            <description>&lt;p&gt;Unfortunately, this writeup is delayed for almost a week because I am super busy recently. Please take my apologies and I will try my best to keep the weekly challenge going, forever!&lt;/p&gt;
+&lt;p&gt;The challenge can be downloaded at &lt;a href=&#34;https://crackmes.one/crackme/5e727daa33c5d4439bb2decd&#34;&gt;https://crackmes.one/crackme/5e727daa33c5d4439bb2decd&lt;/a&gt;. It is created by user BinaryNewbie, who is NOT a newbie for binary reversing.&lt;/p&gt;
+&lt;p&gt;We will discuss an important topic in this writeup: how to mutate binary executable to obstruct reverse engineering tools. Specifically, these techniques aim to fool the binary parsers so that they fail to parse the binary or the parsing result is missing important information. In the worst case, the binary crashes the analysis tool. For convenience, we will call these techniques &lt;code&gt;Executable Format Manipulation (EFP)&lt;/code&gt;.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>Unfortunately, this writeup is delayed for almost a week because I am super busy recently. Please take my apologies and I will try my best to keep the weekly challenge going, forever!</p>
 <p>The challenge can be downloaded at <a href="https://crackmes.one/crackme/5e727daa33c5d4439bb2decd">https://crackmes.one/crackme/5e727daa33c5d4439bb2decd</a>. It is created by user BinaryNewbie, who is NOT a newbie for binary reversing.</p>
 <p>We will discuss an important topic in this writeup: how to mutate binary executable to obstruct reverse engineering tools. Specifically, these techniques aim to fool the binary parsers so that they fail to parse the binary or the parsing result is missing important information. In the worst case, the binary crashes the analysis tool. For convenience, we will call these techniques <code>Executable Format Manipulation (EFP)</code>.</p>
 <p>These scenarios are especially discouraging for reversers since they cannot even get started easily. That said, these techniques are not resilient to determined reversers since they can study the file format and figure out what has caused the issue, and fix the binary to allow a better analysis, or improve the binary parser if it is open-source.</p>
@@ -1506,9 +1890,18 @@ I simply need to restore it to 0xcc, and update the &#34;original value&#34; of 
 <li><a href="https://ypl.coffee/dl-resolve/">Understanding _dl_runtime_resolve</a></li>
 <li><a href="http://michalmalik.github.io/elf-dynamic-segment-struggles">ELF: dynamic struggles</a></li>
 </ul>
-]]></content></item><item><title>Making and solving a Reversing Challenge Based-on x86 ISA Encoding</title><link>/posts/reversing/x86/readme/</link><pubDate>Sun, 02 Aug 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/x86/readme/</guid><description>&lt;p&gt;This time the writeup is a little bit different &amp;ndash; I am the maker of this challenge so the narrative is from a different perspective. I will first cover how I made it, and then show two possible ways to solve it.&lt;/p&gt;
-&lt;h2 id="the-plan"&gt;The Plan&lt;/h2&gt;
-&lt;p&gt;I have always been hoping to make some reversing challenges based-on the encoding of the x86 instruction set. It does not have to be super hard, maybe just explore some interesting aspects of the x86, which goes lower than the disassembly. Recently, thanks to my intern task that lifts x86 instructions, as well as reading this &lt;a href="https://www.msreverseengineering.com/blog/2015/6/9/x86-trivia-for-nerds"&gt;blog post&lt;/a&gt;, I decided to do it rather than set it for the future (indefinitely).&lt;/p&gt;</description><content type="html"><![CDATA[<p>This time the writeup is a little bit different &ndash; I am the maker of this challenge so the narrative is from a different perspective. I will first cover how I made it, and then show two possible ways to solve it.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Making and solving a Reversing Challenge Based-on x86 ISA Encoding</title>
+            <link>/posts/reversing/x86/readme/</link>
+            <pubDate>Sun, 02 Aug 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/x86/readme/</guid>
+            <description>&lt;p&gt;This time the writeup is a little bit different &amp;ndash; I am the maker of this challenge so the narrative is from a different perspective. I will first cover how I made it, and then show two possible ways to solve it.&lt;/p&gt;
+&lt;h2 id=&#34;the-plan&#34;&gt;The Plan&lt;/h2&gt;
+&lt;p&gt;I have always been hoping to make some reversing challenges based-on the encoding of the x86 instruction set. It does not have to be super hard, maybe just explore some interesting aspects of the x86, which goes lower than the disassembly. Recently, thanks to my intern task that lifts x86 instructions, as well as reading this &lt;a href=&#34;https://www.msreverseengineering.com/blog/2015/6/9/x86-trivia-for-nerds&#34;&gt;blog post&lt;/a&gt;, I decided to do it rather than set it for the future (indefinitely).&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>This time the writeup is a little bit different &ndash; I am the maker of this challenge so the narrative is from a different perspective. I will first cover how I made it, and then show two possible ways to solve it.</p>
 <h2 id="the-plan">The Plan</h2>
 <p>I have always been hoping to make some reversing challenges based-on the encoding of the x86 instruction set. It does not have to be super hard, maybe just explore some interesting aspects of the x86, which goes lower than the disassembly. Recently, thanks to my intern task that lifts x86 instructions, as well as reading this <a href="https://www.msreverseengineering.com/blog/2015/6/9/x86-trivia-for-nerds">blog post</a>, I decided to do it rather than set it for the future (indefinitely).</p>
 <p>There are several ways to do it, and I think it is not a bad idea to mutate the executable code according to the user input. It is interesting because, for most reversing challenges, the solver is not expected to change (patch) the code. However, we can take the user input and explicitly use it, in certain ways, to modify the code.</p>
@@ -1692,9 +2085,18 @@ Well done!
 <h2 id="solving-it-with-divide-and-conquer">Solving it with Divide-and-Conquer</h2>
 <p>Z3 is good enough. However, there is another way to solve it. We can use divide-and-conquer to accelerate the brute-force. We can try the first 16 bits, which make up (2 ^ 16 = 65536) possibilities. We take note of the values we get. After that, we do the same thing for the latter 16 bits and do the same. Now we compare the two sets and compare if there are any matches. This allows us to find solutions in a faster way. Also, this can help us find ALL the solutions to this challenge.</p>
 <p>I am too lazy to do it by myself. I will leave it for interested readers!</p>
-]]></content></item><item><title>Solving a Recursive Crackme by Automating GDB</title><link>/posts/reversing/automating-gdb/readme/</link><pubDate>Mon, 27 Jul 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/automating-gdb/readme/</guid><description>&lt;p&gt;The last week&amp;rsquo;s challenge is called &lt;a href="https://0x00sec.org/t/reverseme-recursion/21802"&gt;&lt;code&gt;Recursion&lt;/code&gt;&lt;/a&gt;. From the name we already expect to do some automation &amp;ndash; manually solving stuff recursively is not a wise idea.&lt;/p&gt;
-&lt;h2 id="first-impression"&gt;First Impression&lt;/h2&gt;
-&lt;p&gt;The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &amp;ldquo;Paste From&amp;rdquo; -&amp;gt; &amp;ldquo;Base64&amp;rdquo;. Then you are done!&lt;/p&gt;</description><content type="html"><![CDATA[<p>The last week&rsquo;s challenge is called <a href="https://0x00sec.org/t/reverseme-recursion/21802"><code>Recursion</code></a>. From the name we already expect to do some automation &ndash; manually solving stuff recursively is not a wise idea.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Solving a Recursive Crackme by Automating GDB</title>
+            <link>/posts/reversing/automating-gdb/readme/</link>
+            <pubDate>Mon, 27 Jul 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/automating-gdb/readme/</guid>
+            <description>&lt;p&gt;The last week&amp;rsquo;s challenge is called &lt;a href=&#34;https://0x00sec.org/t/reverseme-recursion/21802&#34;&gt;&lt;code&gt;Recursion&lt;/code&gt;&lt;/a&gt;. From the name we already expect to do some automation &amp;ndash; manually solving stuff recursively is not a wise idea.&lt;/p&gt;
+&lt;h2 id=&#34;first-impression&#34;&gt;First Impression&lt;/h2&gt;
+&lt;p&gt;The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &amp;ldquo;Paste From&amp;rdquo; -&amp;gt; &amp;ldquo;Base64&amp;rdquo;. Then you are done!&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>The last week&rsquo;s challenge is called <a href="https://0x00sec.org/t/reverseme-recursion/21802"><code>Recursion</code></a>. From the name we already expect to do some automation &ndash; manually solving stuff recursively is not a wise idea.</p>
 <h2 id="first-impression">First Impression</h2>
 <p>The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &ldquo;Paste From&rdquo; -&gt; &ldquo;Base64&rdquo;. Then you are done!</p>
 <p><img src="../imgs/1.png" alt=""></p>
@@ -1816,11 +2218,20 @@ Well done!
 <p><code>b __libc_start_main</code>.</p>
 <p>This is because, if we do not do it, the attempt to set a breakpoint on <code>__libc_start_main</code> will produce an error. And it only happens before we run the binary. So in other words, if we first run the binary in GDB for at least once, and then directly set a breakpoint on <code>__libc_start_main</code>, it will succeed. That is because GDB has seen that function once, and it knows to wait for it. However, since we are automating GDB, every time it bootstraps cleanly and it does not know there exists a <code>__libc_start_main</code>, hence the error. I am not familiar enough with the GDB source code so I cannot speculate why it happens, but probably there are some reasons behind it. Anyway, <code>set breakpoint pending on</code> is the correct way to deal with it.</p>
 <p>The author also released his/her own <a href="https://0x00sec.org/t/reverseme-recursion/21802/4?u=xusheng">writeup</a>, which needs to be decrypted by the correct flag. I suggest you to have a look at it, espcially the mutation part.</p>
-]]></content></item><item><title>Solving an Obfuscated Crackme with BinaryNinja and Triton</title><link>/posts/reversing/obfuscation/readme/</link><pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/obfuscation/readme/</guid><description>&lt;p&gt;The last week&amp;rsquo;s &lt;a href="https://yurichev.com/blog/58/"&gt;challenge&lt;/a&gt; was created by &lt;a href="https://yurichev.com/"&gt;Dennis Yurichev&lt;/a&gt;. It is also hosted on &lt;a href="https://crackmes.one/crackme/5ab77f6233c5d40ad448c9e4"&gt;crackmes.one&lt;/a&gt;. The challenge is compiled by a modified &lt;a href="https://bellard.org/tcc/"&gt;Tiny C Compiler (TCC)&lt;/a&gt; which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.&lt;/p&gt;
-&lt;h2 id="first-impression"&gt;First Impression&lt;/h2&gt;
-&lt;p&gt;The target (&lt;a href="../keygenme4.zip"&gt;keygenme4.exe&lt;/a&gt;) is a PE. The entry point looks like this:&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/1.png" alt=""&gt;&lt;/p&gt;
-&lt;p&gt;There are several things which we can notice easily:&lt;/p&gt;</description><content type="html"><![CDATA[<p>The last week&rsquo;s <a href="https://yurichev.com/blog/58/">challenge</a> was created by <a href="https://yurichev.com/">Dennis Yurichev</a>. It is also hosted on <a href="https://crackmes.one/crackme/5ab77f6233c5d40ad448c9e4">crackmes.one</a>. The challenge is compiled by a modified <a href="https://bellard.org/tcc/">Tiny C Compiler (TCC)</a> which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Solving an Obfuscated Crackme with BinaryNinja and Triton</title>
+            <link>/posts/reversing/obfuscation/readme/</link>
+            <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/obfuscation/readme/</guid>
+            <description>&lt;p&gt;The last week&amp;rsquo;s &lt;a href=&#34;https://yurichev.com/blog/58/&#34;&gt;challenge&lt;/a&gt; was created by &lt;a href=&#34;https://yurichev.com/&#34;&gt;Dennis Yurichev&lt;/a&gt;. It is also hosted on &lt;a href=&#34;https://crackmes.one/crackme/5ab77f6233c5d40ad448c9e4&#34;&gt;crackmes.one&lt;/a&gt;. The challenge is compiled by a modified &lt;a href=&#34;https://bellard.org/tcc/&#34;&gt;Tiny C Compiler (TCC)&lt;/a&gt; which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.&lt;/p&gt;
+&lt;h2 id=&#34;first-impression&#34;&gt;First Impression&lt;/h2&gt;
+&lt;p&gt;The target (&lt;a href=&#34;../keygenme4.zip&#34;&gt;keygenme4.exe&lt;/a&gt;) is a PE. The entry point looks like this:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;There are several things which we can notice easily:&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>The last week&rsquo;s <a href="https://yurichev.com/blog/58/">challenge</a> was created by <a href="https://yurichev.com/">Dennis Yurichev</a>. It is also hosted on <a href="https://crackmes.one/crackme/5ab77f6233c5d40ad448c9e4">crackmes.one</a>. The challenge is compiled by a modified <a href="https://bellard.org/tcc/">Tiny C Compiler (TCC)</a> which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.</p>
 <h2 id="first-impression">First Impression</h2>
 <p>The target (<a href="../keygenme4.zip">keygenme4.exe</a>) is a PE. The entry point looks like this:</p>
 <p><img src="../imgs/1.png" alt=""></p>
@@ -2155,15 +2566,24 @@ licensed name=jeff
 sn=12348765
 featureset=0123
 expiration=12342981
-</code></pre>]]></content></item><item><title>Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl</title><link>/posts/reversing/shl_undefined_behavior/writeup/</link><pubDate>Sat, 20 Jun 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/shl_undefined_behavior/writeup/</guid><description>&lt;h2 id="encountering-a-weird-issue"&gt;Encountering a Weird Issue&lt;/h2&gt;
+</code></pre>]]></content>
+        </item>
+        
+        <item>
+            <title>Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl</title>
+            <link>/posts/reversing/shl_undefined_behavior/writeup/</link>
+            <pubDate>Sat, 20 Jun 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/shl_undefined_behavior/writeup/</guid>
+            <description>&lt;h2 id=&#34;encountering-a-weird-issue&#34;&gt;Encountering a Weird Issue&lt;/h2&gt;
 &lt;p&gt;Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input &lt;code&gt;n&lt;/code&gt; is in the range of 0-64 (both side include).&lt;/p&gt;
 &lt;p&gt;The first idea is to use left shift and then minus 1:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-C" data-lang="C"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;uint64_t&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;getBitMask&lt;/span&gt;(&lt;span style="color:#66d9ef"&gt;size_t&lt;/span&gt; n)
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;uint64_t&lt;/span&gt; ret &lt;span style="color:#f92672"&gt;=&lt;/span&gt; (&lt;span style="color:#ae81ff"&gt;1UL&lt;/span&gt; &lt;span style="color:#f92672"&gt;&amp;lt;&amp;lt;&lt;/span&gt; n) &lt;span style="color:#f92672"&gt;-&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;1&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; ret;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This works well when n is in the range of 0-63. However, when n is 64, the code returns 0 instead of 0xffffffffffffffff.&lt;/p&gt;</description><content type="html"><![CDATA[<h2 id="encountering-a-weird-issue">Encountering a Weird Issue</h2>
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-C&#34; data-lang=&#34;C&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;uint64_t&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;getBitMask&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;size_t&lt;/span&gt; n)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;uint64_t&lt;/span&gt; ret &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (&lt;span style=&#34;color:#ae81ff&#34;&gt;1UL&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; n) &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; ret;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This works well when n is in the range of 0-63. However, when n is 64, the code returns 0 instead of 0xffffffffffffffff.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<h2 id="encountering-a-weird-issue">Encountering a Weird Issue</h2>
 <p>Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input <code>n</code> is in the range of 0-64 (both side include).</p>
 <p>The first idea is to use left shift and then minus 1:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">uint64_t</span> <span style="color:#a6e22e">getBitMask</span>(<span style="color:#66d9ef">size_t</span> n)
@@ -2220,9 +2640,18 @@ expiration=12342981
 <p><img src="../imgs/3.png" alt=""></p>
 <p>Since 48 = 0b110000, and only the lowest 5 bits are involved in the calculation, we are effectively left shifting 16 bits. That is why we get 0xffff as the output.</p>
 <p>Last but not least, what would we get if we compile the above code with <code>-O2</code>? The result is surprising to me at first sight, followed by an aha moment.</p>
-]]></content></item><item><title>Solving an ARM challenge with z3</title><link>/posts/reversing/armageddon/solve/</link><pubDate>Thu, 18 Jun 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/armageddon/solve/</guid><description>&lt;h2 id="first-impression"&gt;First Impression&lt;/h2&gt;
-&lt;p&gt;The last week&amp;rsquo;s challenge is hosted at &lt;a href="https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b"&gt;https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b&lt;/a&gt;. It is authored by Towel and it is a real challenge in UMDCTF 2019.&lt;/p&gt;
-&lt;p&gt;Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is &lt;code&gt;armageddon&lt;/code&gt;. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember.&lt;/p&gt;</description><content type="html"><![CDATA[<h2 id="first-impression">First Impression</h2>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Solving an ARM challenge with z3</title>
+            <link>/posts/reversing/armageddon/solve/</link>
+            <pubDate>Thu, 18 Jun 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/armageddon/solve/</guid>
+            <description>&lt;h2 id=&#34;first-impression&#34;&gt;First Impression&lt;/h2&gt;
+&lt;p&gt;The last week&amp;rsquo;s challenge is hosted at &lt;a href=&#34;https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b&#34;&gt;https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b&lt;/a&gt;. It is authored by Towel and it is a real challenge in UMDCTF 2019.&lt;/p&gt;
+&lt;p&gt;Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is &lt;code&gt;armageddon&lt;/code&gt;. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<h2 id="first-impression">First Impression</h2>
 <p>The last week&rsquo;s challenge is hosted at <a href="https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b">https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b</a>. It is authored by Towel and it is a real challenge in UMDCTF 2019.</p>
 <p>Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is <code>armageddon</code>. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember.</p>
 <p>BinaryNinja has no problem recognizing the <code>__libc_start_main</code> and I can get to <code>main</code> easily. The first thing I find is that <code>main</code> is a <strong>long</strong> function.</p>
@@ -2428,9 +2857,18 @@ write(1,27008,1) = 0
 exit_group(0)
 </code></pre><p>So after we supply the correct code, it simply prints <code>Code validated successfully!\n</code>.</p>
 <p>LoL! I forget that it does not tell us the code is correct yet. Well, not bad, since playing with Qiling is quite painless.</p>
-]]></content></item><item><title>Debugging and Solving an Android Challenge</title><link>/posts/reversing/quarkslab_android_crackme/main/</link><pubDate>Sat, 30 May 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/quarkslab_android_crackme/main/</guid><description>&lt;p&gt;Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.&lt;/p&gt;
-&lt;h2 id="first-impression"&gt;First Impression&lt;/h2&gt;
-&lt;p&gt;The &lt;a href="https://blog.quarkslab.com/android-challenge.html"&gt;challenge&lt;/a&gt; is created by Quarkslab. The &lt;strong&gt;crackme-telegram.apk&lt;/strong&gt; is ~25MB in size which is larger than a typical crackme. One of the challenges in real-world reverse engineering is the huge size of the binary. There are too many possible places to hide the crucial code so even finding it is non-trivial in the first place.&lt;/p&gt;</description><content type="html"><![CDATA[<p>Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Debugging and Solving an Android Challenge</title>
+            <link>/posts/reversing/quarkslab_android_crackme/main/</link>
+            <pubDate>Sat, 30 May 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/quarkslab_android_crackme/main/</guid>
+            <description>&lt;p&gt;Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.&lt;/p&gt;
+&lt;h2 id=&#34;first-impression&#34;&gt;First Impression&lt;/h2&gt;
+&lt;p&gt;The &lt;a href=&#34;https://blog.quarkslab.com/android-challenge.html&#34;&gt;challenge&lt;/a&gt; is created by Quarkslab. The &lt;strong&gt;crackme-telegram.apk&lt;/strong&gt; is ~25MB in size which is larger than a typical crackme. One of the challenges in real-world reverse engineering is the huge size of the binary. There are too many possible places to hide the crucial code so even finding it is non-trivial in the first place.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.</p>
 <h2 id="first-impression">First Impression</h2>
 <p>The <a href="https://blog.quarkslab.com/android-challenge.html">challenge</a> is created by Quarkslab. The <strong>crackme-telegram.apk</strong> is ~25MB in size which is larger than a typical crackme. One of the challenges in real-world reverse engineering is the huge size of the binary. There are too many possible places to hide the crucial code so even finding it is non-trivial in the first place.</p>
 <p>Unzipping the apk gives us a folder that has <strong>classes.dex</strong> and sub-folder <strong>lib</strong> in it. The code for an Android app can be either in the .dex file or the native libraries. the .dex file is typically produced from Java whereas the native libraries are mostly complied from C/C++. And they require different reverse engineering skills. Nevertheless, here I want to share a heuristic: <strong>if an android crackme has native libraries, almost certainly the important code sits in these  libs.</strong> Well, this is not 100% reliable and the situation could change since I publish this, but it works very well for now.</p>
@@ -2573,10 +3011,19 @@ modulus = eax - quotient * n
 </span></span><span style="display:flex;"><span>print(flag)
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># the flag is:</span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># 1110222419205493626651</span>
-</span></span></code></pre></div>]]></content></item><item><title>Solving a Reversing Challenge with Mitmproxy and OCR</title><link>/posts/reversing/client_houseplant_ctf_2020/solve/</link><pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/client_houseplant_ctf_2020/solve/</guid><description>&lt;p&gt;Over the weekend I had some fun with the &lt;a href="https://houseplant.riceteacatpanda.wtf/home"&gt;Houseplant CTF&lt;/a&gt;. Among the reversing challenges, the &lt;a href="https://houseplant.riceteacatpanda.wtf/challenge?id=8"&gt;&lt;strong&gt;RTCP Trivia&lt;/strong&gt;&lt;/a&gt; is particularly interesting and I would like to share my unconventional way of solving it.&lt;/p&gt;
-&lt;h2 id="first-impression"&gt;First Impression&lt;/h2&gt;
-&lt;p&gt;We get a &lt;a href="../client.zip"&gt;&lt;strong&gt;client.apk&lt;/strong&gt;&lt;/a&gt; after downloading the challenge. I have no Android phones so I ran it in an emulator. It has no ARM native library so it runs well in x86 emulators.&lt;/p&gt;
-&lt;p&gt;After asking for a user name, the app presents a multiple-choice problem with four options (shown below). The problem itself is not difficult. However, there is a ten-second countdown and we must answer it before the time elapses. The challenge description says that we need to correctly answer 1000 such problems. So manual solving is probably not a wise idea.&lt;/p&gt;</description><content type="html"><![CDATA[<p>Over the weekend I had some fun with the <a href="https://houseplant.riceteacatpanda.wtf/home">Houseplant CTF</a>. Among the reversing challenges, the <a href="https://houseplant.riceteacatpanda.wtf/challenge?id=8"><strong>RTCP Trivia</strong></a> is particularly interesting and I would like to share my unconventional way of solving it.</p>
+</span></span></code></pre></div>]]></content>
+        </item>
+        
+        <item>
+            <title>Solving a Reversing Challenge with Mitmproxy and OCR</title>
+            <link>/posts/reversing/client_houseplant_ctf_2020/solve/</link>
+            <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/client_houseplant_ctf_2020/solve/</guid>
+            <description>&lt;p&gt;Over the weekend I had some fun with the &lt;a href=&#34;https://houseplant.riceteacatpanda.wtf/home&#34;&gt;Houseplant CTF&lt;/a&gt;. Among the reversing challenges, the &lt;a href=&#34;https://houseplant.riceteacatpanda.wtf/challenge?id=8&#34;&gt;&lt;strong&gt;RTCP Trivia&lt;/strong&gt;&lt;/a&gt; is particularly interesting and I would like to share my unconventional way of solving it.&lt;/p&gt;
+&lt;h2 id=&#34;first-impression&#34;&gt;First Impression&lt;/h2&gt;
+&lt;p&gt;We get a &lt;a href=&#34;../client.zip&#34;&gt;&lt;strong&gt;client.apk&lt;/strong&gt;&lt;/a&gt; after downloading the challenge. I have no Android phones so I ran it in an emulator. It has no ARM native library so it runs well in x86 emulators.&lt;/p&gt;
+&lt;p&gt;After asking for a user name, the app presents a multiple-choice problem with four options (shown below). The problem itself is not difficult. However, there is a ten-second countdown and we must answer it before the time elapses. The challenge description says that we need to correctly answer 1000 such problems. So manual solving is probably not a wise idea.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>Over the weekend I had some fun with the <a href="https://houseplant.riceteacatpanda.wtf/home">Houseplant CTF</a>. Among the reversing challenges, the <a href="https://houseplant.riceteacatpanda.wtf/challenge?id=8"><strong>RTCP Trivia</strong></a> is particularly interesting and I would like to share my unconventional way of solving it.</p>
 <h2 id="first-impression">First Impression</h2>
 <p>We get a <a href="../client.zip"><strong>client.apk</strong></a> after downloading the challenge. I have no Android phones so I ran it in an emulator. It has no ARM native library so it runs well in x86 emulators.</p>
 <p>After asking for a user name, the app presents a multiple-choice problem with four options (shown below). The problem itself is not difficult. However, there is a ten-second countdown and we must answer it before the time elapses. The challenge description says that we need to correctly answer 1000 such problems. So manual solving is probably not a wise idea.</p>
@@ -2649,9 +3096,18 @@ modulus = eax - quotient * n
 <p><img src="../imgs/3.png" alt=""></p>
 <p>I actually recorded a <a href="https://youtu.be/Acp8PDbsvQk">video</a> to demonstrate the solving.</p>
 <p><a href="https://youtu.be/Acp8PDbsvQk" title="Video"><img src="../imgs/video.png" alt="Video"></a></p>
-]]></content></item><item><title>Reverse Engineering and Repairing a Fan</title><link>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</link><pubDate>Sun, 26 Apr 2020 00:00:00 +0000</pubDate><guid>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</guid><description>&lt;p&gt;Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&amp;rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.&lt;/p&gt;
-&lt;h2 id="a-broken-fan"&gt;A Broken Fan&lt;/h2&gt;
-&lt;p&gt;I have a fan &amp;ndash; an eight-year-old fan &amp;ndash; that is NOT smart or IoT. It is just a simple fan. One day it fell from the table to the ground and stopped working. &lt;em&gt;RIP&lt;/em&gt;. It accompanied me for several summers and I love it. I decided to take it apart and see what is indeed broken, before saying farewell to my friend.&lt;/p&gt;</description><content type="html"><![CDATA[<p>Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Reverse Engineering and Repairing a Fan</title>
+            <link>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</link>
+            <pubDate>Sun, 26 Apr 2020 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</guid>
+            <description>&lt;p&gt;Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&amp;rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.&lt;/p&gt;
+&lt;h2 id=&#34;a-broken-fan&#34;&gt;A Broken Fan&lt;/h2&gt;
+&lt;p&gt;I have a fan &amp;ndash; an eight-year-old fan &amp;ndash; that is NOT smart or IoT. It is just a simple fan. One day it fell from the table to the ground and stopped working. &lt;em&gt;RIP&lt;/em&gt;. It accompanied me for several summers and I love it. I decided to take it apart and see what is indeed broken, before saying farewell to my friend.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.</p>
 <h2 id="a-broken-fan">A Broken Fan</h2>
 <p>I have a fan &ndash; an eight-year-old fan &ndash; that is NOT smart or IoT. It is just a simple fan. One day it fell from the table to the ground and stopped working. <em>RIP</em>. It accompanied me for several summers and I love it. I decided to take it apart and see what is indeed broken, before saying farewell to my friend.</p>
 <p>I know little about electronics, but a fan should not be too complex. It looks like this after I opened it:</p>
@@ -2727,7 +3183,15 @@ modulus = eax - quotient * n
 	</tbody>
 </table>
 <p>Of course, this analogy is not meant to be complete or always accurate. For example, debugging is only one of the ways to test the hypothesis. And we do not explicitly use symbolic execution and constraint solving every time we reverse. An interesting fact is, when we reason about a piece of code, we probably symbolically executed it many times <strong>in our mind</strong> without using any external tools like Triton or angr.</p>
-]]></content></item><item><title>排局-20</title><link>/posts/xiangqi/2018-05-06-endgame-20/</link><pubDate>Sun, 06 May 2018 16:19:08 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-20/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-24.png" alt=""&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-20</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-20/</link>
+            <pubDate>Sun, 06 May 2018 16:19:08 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-20/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-24.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;车八退一 士４进５&lt;/li&gt;
 &lt;li&gt;车八平六 士５进４&lt;/li&gt;
@@ -2738,7 +3202,8 @@ modulus = eax - quotient * n
 &lt;li&gt;炮八进三 象３进５&lt;/li&gt;
 &lt;li&gt;兵五进一 将４进１&lt;/li&gt;
 &lt;li&gt;炮八退一&lt;/li&gt;
-&lt;/ol&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-24.png" alt=""></p>
+&lt;/ol&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-24.png" alt=""></p>
 <ol>
 <li>车八退一 士４进５</li>
 <li>车八平六 士５进４</li>
@@ -2750,18 +3215,35 @@ modulus = eax - quotient * n
 <li>兵五进一 将４进１</li>
 <li>炮八退一</li>
 </ol>
-]]></content></item><item><title>排局-19</title><link>/posts/xiangqi/2018-05-06-endgame-19/</link><pubDate>Sun, 06 May 2018 16:10:59 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-19/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-1-3.png" alt=""&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-19</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-19/</link>
+            <pubDate>Sun, 06 May 2018 16:10:59 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-19/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-1-3.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;炮六平八 士４进５&lt;/li&gt;
 &lt;li&gt;马四进五! 士５进４&lt;/li&gt;
 &lt;li&gt;马五进六!&lt;/li&gt;
-&lt;/ol&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-1-3.png" alt=""></p>
+&lt;/ol&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-1-3.png" alt=""></p>
 <ol>
 <li>炮六平八 士４进５</li>
 <li>马四进五! 士５进４</li>
 <li>马五进六!</li>
 </ol>
-]]></content></item><item><title>排局-18</title><link>/posts/xiangqi/2018-05-06-endgame-18/</link><pubDate>Sun, 06 May 2018 16:06:56 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-18/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-21.png" alt=""&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-18</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-18/</link>
+            <pubDate>Sun, 06 May 2018 16:06:56 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-18/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-21.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;兵六平五 炮７平５&lt;/li&gt;
 &lt;li&gt;兵三平四 马５退６&lt;/li&gt;
@@ -2771,14 +3253,14 @@ modulus = eax - quotient * n
 &lt;li&gt;炮七退七&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;由此红方转为进攻黑方底士，此亦本局取名《峰回路转》之意。&lt;/p&gt;
-&lt;ol start="6"&gt;
+&lt;ol start=&#34;6&#34;&gt;
 &lt;li&gt;&amp;hellip;&amp;hellip;        车７平８&lt;/li&gt;
 &lt;li&gt;炮七平六 车８进６&lt;/li&gt;
 &lt;li&gt;炮六平二 马８退７&lt;/li&gt;
 &lt;li&gt;炮二进一 马７进９&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;如马7退6，炮二平四，困毙红胜&lt;/p&gt;
-&lt;ol start="10"&gt;
+&lt;ol start=&#34;10&#34;&gt;
 &lt;li&gt;炮二平六 马９进７&lt;/li&gt;
 &lt;li&gt;帅四退一 马７退８&lt;/li&gt;
 &lt;li&gt;帅四进一 马８退７&lt;/li&gt;
@@ -2787,7 +3269,8 @@ modulus = eax - quotient * n
 &lt;li&gt;炮六进一 马４退３&lt;/li&gt;
 &lt;li&gt;炮六进三 马３退２&lt;/li&gt;
 &lt;li&gt;炮六进二 红胜&lt;/li&gt;
-&lt;/ol&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-21.png" alt=""></p>
+&lt;/ol&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-21.png" alt=""></p>
 <ol>
 <li>兵六平五 炮７平５</li>
 <li>兵三平四 马５退６</li>
@@ -2814,7 +3297,15 @@ modulus = eax - quotient * n
 <li>炮六进三 马３退２</li>
 <li>炮六进二 红胜</li>
 </ol>
-]]></content></item><item><title>排局-17</title><link>/posts/xiangqi/2018-05-06-endgame-17/</link><pubDate>Sun, 06 May 2018 15:31:13 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-17/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-20.png" alt=""&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-17</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-17/</link>
+            <pubDate>Sun, 06 May 2018 15:31:13 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-17/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-20.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;帅六退一 士５进６&lt;/li&gt;
 &lt;li&gt;兵五平四 将４退１&lt;/li&gt;
@@ -2825,7 +3316,8 @@ modulus = eax - quotient * n
 &lt;li&gt;兵四平五 士５退６&lt;/li&gt;
 &lt;li&gt;炮五进一 士６进５&lt;/li&gt;
 &lt;li&gt;炮五平六&lt;/li&gt;
-&lt;/ol&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-20.png" alt=""></p>
+&lt;/ol&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-20.png" alt=""></p>
 <ol>
 <li>帅六退一 士５进６</li>
 <li>兵五平四 将４退１</li>
@@ -2837,7 +3329,15 @@ modulus = eax - quotient * n
 <li>炮五进一 士６进５</li>
 <li>炮五平六</li>
 </ol>
-]]></content></item><item><title>排局-16</title><link>/posts/xiangqi/2018-05-06-endgame-16/</link><pubDate>Sun, 06 May 2018 15:30:08 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-16/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-18.png" alt=""&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-16</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-16/</link>
+            <pubDate>Sun, 06 May 2018 15:30:08 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-16/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-18.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;兵九平八 将４进１&lt;/li&gt;
 &lt;li&gt;兵八平七 将４退１&lt;/li&gt;
@@ -2852,7 +3352,8 @@ modulus = eax - quotient * n
 &lt;li&gt;兵六平五 车４退２&lt;/li&gt;
 &lt;li&gt;马四进二&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-19.png" alt=""&gt;&lt;/p&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-18.png" alt=""></p>
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-19.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-18.png" alt=""></p>
 <ol>
 <li>兵九平八 将４进１</li>
 <li>兵八平七 将４退１</li>
@@ -2868,10 +3369,27 @@ modulus = eax - quotient * n
 <li>马四进二</li>
 </ol>
 <p><img src="../imgs/2018/05/capture-19.png" alt=""></p>
-]]></content></item><item><title>排局-15</title><link>/posts/xiangqi/2018-05-06-endgame-15/</link><pubDate>Sun, 06 May 2018 15:27:58 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-15/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-16.png" alt=""&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-17.png" alt=""&gt;&lt;/p&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-16.png" alt=""></p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-15</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-15/</link>
+            <pubDate>Sun, 06 May 2018 15:27:58 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-15/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-16.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-17.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-16.png" alt=""></p>
 <p><img src="../imgs/2018/05/capture-17.png" alt=""></p>
-]]></content></item><item><title>排局-14</title><link>/posts/xiangqi/2018-05-06-endgame-14/</link><pubDate>Sun, 06 May 2018 15:25:19 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-14/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-14-1.png" alt=""&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-14</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-14/</link>
+            <pubDate>Sun, 06 May 2018 15:25:19 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-14/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-14-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;车四平六 将４平５&lt;/li&gt;
 &lt;li&gt;车六平五 将５平６&lt;/li&gt;
@@ -2888,7 +3406,8 @@ modulus = eax - quotient * n
 &lt;li&gt;车二进六 将６进１&lt;/li&gt;
 &lt;li&gt;车二退一 将６退１&lt;/li&gt;
 &lt;li&gt;车二平八&lt;/li&gt;
-&lt;/ol&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-14-1.png" alt=""></p>
+&lt;/ol&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-14-1.png" alt=""></p>
 <ol>
 <li>车四平六 将４平５</li>
 <li>车六平五 将５平６</li>
@@ -2906,7 +3425,15 @@ modulus = eax - quotient * n
 <li>车二退一 将６退１</li>
 <li>车二平八</li>
 </ol>
-]]></content></item><item><title>排局-13</title><link>/posts/xiangqi/2018-05-06-endgame-13/</link><pubDate>Sun, 06 May 2018 15:23:59 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-13/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-13-1.png" alt=""&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-13</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-13/</link>
+            <pubDate>Sun, 06 May 2018 15:23:59 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-13/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-13-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;炮九平六 士５进４&lt;/li&gt;
 &lt;li&gt;仕六退五 车４平５&lt;/li&gt;
@@ -2924,7 +3451,8 @@ modulus = eax - quotient * n
 &lt;li&gt;炮八退四 将６进１&lt;/li&gt;
 &lt;li&gt;仕五退四 车５平６&lt;/li&gt;
 &lt;li&gt;炮八平四&lt;/li&gt;
-&lt;/ol&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-13-1.png" alt=""></p>
+&lt;/ol&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-13-1.png" alt=""></p>
 <ol>
 <li>炮九平六 士５进４</li>
 <li>仕六退五 车４平５</li>
@@ -2943,7 +3471,15 @@ modulus = eax - quotient * n
 <li>仕五退四 车５平６</li>
 <li>炮八平四</li>
 </ol>
-]]></content></item><item><title>排局-12</title><link>/posts/xiangqi/2018-05-06-endgame-12/</link><pubDate>Sun, 06 May 2018 15:21:12 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-12/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-12-1.png" alt=""&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-12</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-12/</link>
+            <pubDate>Sun, 06 May 2018 15:21:12 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-12/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-12-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;马七退五 将６退１&lt;/li&gt;
 &lt;li&gt;马五进三 将６进１&lt;/li&gt;
@@ -2963,7 +3499,8 @@ modulus = eax - quotient * n
 &lt;li&gt;马二退四 象５退３&lt;/li&gt;
 &lt;li&gt;马四退五 象７退９&lt;/li&gt;
 &lt;li&gt;马五进七&lt;/li&gt;
-&lt;/ol&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-12-1.png" alt=""></p>
+&lt;/ol&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-12-1.png" alt=""></p>
 <ol>
 <li>马七退五 将６退１</li>
 <li>马五进三 将６进１</li>
@@ -2984,7 +3521,15 @@ modulus = eax - quotient * n
 <li>马四退五 象７退９</li>
 <li>马五进七</li>
 </ol>
-]]></content></item><item><title>排局-11</title><link>/posts/xiangqi/2018-05-06-endgame-11/</link><pubDate>Sun, 06 May 2018 15:19:51 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-11/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-11-1.png" alt=""&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-11</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-11/</link>
+            <pubDate>Sun, 06 May 2018 15:19:51 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-11/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-11-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;马六退七 将５退１&lt;/li&gt;
 &lt;li&gt;马七进八 象１进３&lt;/li&gt;
@@ -3003,7 +3548,8 @@ modulus = eax - quotient * n
 &lt;li&gt;马六退五 象３进５&lt;/li&gt;
 &lt;li&gt;马五进三 将５平６&lt;/li&gt;
 &lt;li&gt;炮五进八&lt;/li&gt;
-&lt;/ol&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-11-1.png" alt=""></p>
+&lt;/ol&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-11-1.png" alt=""></p>
 <ol>
 <li>马六退七 将５退１</li>
 <li>马七进八 象１进３</li>
@@ -3023,7 +3569,16 @@ modulus = eax - quotient * n
 <li>马五进三 将５平６</li>
 <li>炮五进八</li>
 </ol>
-]]></content></item><item><title>排局-10</title><link>/posts/xiangqi/2018-05-06-endgame-10/</link><pubDate>Sun, 06 May 2018 15:09:32 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-10/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-3-2.png" alt=""&gt;&lt;/p&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-3-2.png" alt=""></p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-10</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-10/</link>
+            <pubDate>Sun, 06 May 2018 15:09:32 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-10/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-3-2.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-3-2.png" alt=""></p>
 <ol>
 <li>车七平四 将６平５</li>
 <li>车四平二 马３退２</li>
@@ -3137,14 +3692,22 @@ modulus = eax - quotient * n
 <li>车六平五 将５平４</li>
 <li>帅五进一 车９平５</li>
 <li>车五进三</li>
-</ol>]]></content></item><item><title>排局-09</title><link>/posts/xiangqi/2018-05-06-endgame-09/</link><pubDate>Sun, 06 May 2018 15:05:02 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-09/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-1-2.png" alt=""&gt;&lt;/p&gt;
+</ol>]]></content>
+        </item>
+        
+        <item>
+            <title>排局-09</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-09/</link>
+            <pubDate>Sun, 06 May 2018 15:05:02 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-09/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-1-2.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-2-2.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-2-2.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;车五退一 炮５进６&lt;/li&gt;
 &lt;li&gt;兵五平四 卒９平８&lt;/li&gt;
@@ -3153,7 +3716,8 @@ modulus = eax - quotient * n
 &lt;li&gt;后兵进一 卒６平５&lt;/li&gt;
 &lt;li&gt;帅五平四&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;第一步只有车五退一可以获胜&lt;/p&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-1-2.png" alt=""></p>
+&lt;p&gt;第一步只有车五退一可以获胜&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-1-2.png" alt=""></p>
 <p> 
  </p>
 <p> 
@@ -3170,8 +3734,16 @@ modulus = eax - quotient * n
 <li>帅五平四</li>
 </ol>
 <p>第一步只有车五退一可以获胜</p>
-]]></content></item><item><title>排局-08</title><link>/posts/xiangqi/2018-05-06-endgame-08/</link><pubDate>Sun, 06 May 2018 15:01:11 +0800</pubDate><guid>/posts/xiangqi/2018-05-06-endgame-08/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-14.png" alt=""&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p%20w"&gt;2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p w&lt;/a&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-08</title>
+            <link>/posts/xiangqi/2018-05-06-endgame-08/</link>
+            <pubDate>Sun, 06 May 2018 15:01:11 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-06-endgame-08/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-14.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p%20w&#34;&gt;2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图形势，红方当然可以连续打掉两个黑卒。但这样黑方得以调整阵型，红方无法取胜。&lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
@@ -3186,14 +3758,14 @@ modulus = eax - quotient * n
 &lt;li&gt;仕五退四 将４平５&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;如改走将4退1，则帅四平五，红必得象，胜定。&lt;/p&gt;
-&lt;ol start="4"&gt;
+&lt;ol start=&#34;4&#34;&gt;
 &lt;li&gt;相三退五 将５平４&lt;/li&gt;
 &lt;li&gt;相五进七 将４平５&lt;/li&gt;
 &lt;li&gt;仕四进五 将５平４&lt;/li&gt;
 &lt;li&gt;炮五平七&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;驱黑象到边线。&lt;/p&gt;
-&lt;ol start="7"&gt;
+&lt;ol start=&#34;7&#34;&gt;
 &lt;li&gt;&amp;hellip;&amp;hellip;        象３进１&lt;/li&gt;
 &lt;li&gt;炮七平六 将４平５&lt;/li&gt;
 &lt;li&gt;炮六平五 将５平４&lt;/li&gt;
@@ -3203,7 +3775,7 @@ modulus = eax - quotient * n
 &lt;li&gt;帅五平六&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;红帅移行换位。&lt;/p&gt;
-&lt;ol start="13"&gt;
+&lt;ol start=&#34;13&#34;&gt;
 &lt;li&gt;&amp;hellip;&amp;hellip;        将５平４&lt;/li&gt;
 &lt;li&gt;相五进三 将４平５&lt;/li&gt;
 &lt;li&gt;仕六退五 将５平６&lt;/li&gt;
@@ -3214,10 +3786,11 @@ modulus = eax - quotient * n
 &lt;li&gt;炮五平三 象７退９&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;再驱另一象到边线。&lt;/p&gt;
-&lt;ol start="21"&gt;
+&lt;ol start=&#34;21&#34;&gt;
 &lt;li&gt;帅六进一 将６退１&lt;/li&gt;
 &lt;li&gt;帅六平五 红胜。&lt;/li&gt;
-&lt;/ol&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-14.png" alt=""></p>
+&lt;/ol&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-14.png" alt=""></p>
 <p><a href="https://www.chessdb.cn/query/?2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p%20w">2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p w</a></p>
 <p>如图形势，红方当然可以连续打掉两个黑卒。但这样黑方得以调整阵型，红方无法取胜。</p>
 <p> 
@@ -3265,8 +3838,16 @@ modulus = eax - quotient * n
 <li>帅六进一 将６退１</li>
 <li>帅六平五 红胜。</li>
 </ol>
-]]></content></item><item><title>排局-07</title><link>/posts/xiangqi/2018-05-05-endgame-07/</link><pubDate>Sat, 05 May 2018 23:18:22 +0800</pubDate><guid>/posts/xiangqi/2018-05-05-endgame-07/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-4-1.png" alt=""&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c%20w"&gt;4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c w&lt;/a&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-07</title>
+            <link>/posts/xiangqi/2018-05-05-endgame-07/</link>
+            <pubDate>Sat, 05 May 2018 23:18:22 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-05-endgame-07/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-4-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c%20w&#34;&gt;4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图形势，红方仅有双炮做攻，似乎难以进取。&lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
@@ -3274,7 +3855,8 @@ modulus = eax - quotient * n
  &lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
-&lt;p&gt;第一步的进攻方向很是重要，如果沉底叫将，则与胜利失之交臂。&lt;/p&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-4-1.png" alt=""></p>
+&lt;p&gt;第一步的进攻方向很是重要，如果沉底叫将，则与胜利失之交臂。&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-4-1.png" alt=""></p>
 <p><a href="https://www.chessdb.cn/query/?4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c%20w">4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c w</a></p>
 <p>如图形势，红方仅有双炮做攻，似乎难以进取。</p>
 <p> 
@@ -3284,8 +3866,16 @@ modulus = eax - quotient * n
 <p> 
  </p>
 <p>第一步的进攻方向很是重要，如果沉底叫将，则与胜利失之交臂。</p>
-]]></content></item><item><title>排局-06</title><link>/posts/xiangqi/2018-05-05-endgame-06/</link><pubDate>Sat, 05 May 2018 22:21:07 +0800</pubDate><guid>/posts/xiangqi/2018-05-05-endgame-06/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-13.png" alt=""&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5%20w%22"&gt;3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5 w&lt;/a&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-06</title>
+            <link>/posts/xiangqi/2018-05-05-endgame-06/</link>
+            <pubDate>Sat, 05 May 2018 22:21:07 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-05-endgame-06/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-13.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5%20w%22&#34;&gt;3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5 w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图形式，红方双炮巧妙腾挪，迫使黑方子力自相堵塞，最终一举获胜。&lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
@@ -3299,27 +3889,27 @@ modulus = eax - quotient * n
 &lt;li&gt;炮五退六！&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;红方退炮引而不发，伏有士六进五， 将5平4，炮四平六，士4退5，炮五平六重炮杀。黑方只有先将5平4才能解杀，红方则士六进五追杀：&lt;/p&gt;
-&lt;ol start="2"&gt;
+&lt;ol start=&#34;2&#34;&gt;
 &lt;li&gt;&amp;hellip;&amp;hellip;        将５平４&lt;/li&gt;
 &lt;li&gt;仕六进五 士４退５&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;黑方退士也是仅有的解着。如图形式，直观的攻法是架炮做杀，但均难以奏效。试演两变如下：&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-1-1.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-1-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;a.&lt;/p&gt;
-&lt;ol start="4"&gt;
+&lt;ol start=&#34;4&#34;&gt;
 &lt;li&gt;炮四平六 将４进１&lt;/li&gt;
 &lt;li&gt;帅四进一 车４平３&lt;/li&gt;
 &lt;li&gt;帅四平五 车３进９&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;红方无杀，黑方胜势&lt;/p&gt;
 &lt;p&gt;b.&lt;/p&gt;
-&lt;ol start="4"&gt;
+&lt;ol start=&#34;4&#34;&gt;
 &lt;li&gt;炮五平六 将４进１&lt;/li&gt;
 &lt;li&gt;仕五进六 将４平５&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;红方无杀，黑方胜势&lt;/p&gt;
 &lt;p&gt;正确的走法是先士五进六做准备。细看之下，其实这是叫杀，演变如下：&lt;/p&gt;
-&lt;ol start="4"&gt;
+&lt;ol start=&#34;4&#34;&gt;
 &lt;li&gt;仕五进六 车４平３？&lt;/li&gt;
 &lt;li&gt;炮五平六 士５进４&lt;/li&gt;
 &lt;li&gt;仕六退五 将４平５&lt;/li&gt;
@@ -3329,26 +3919,27 @@ modulus = eax - quotient * n
 &lt;/ol&gt;
 &lt;p&gt;此路攻法虽是连杀，但需要来回运炮，粗看之下不易发现，可以算作此局的核心。&lt;/p&gt;
 &lt;p&gt;仕五进六扬士之后，黑方无暇挪车。最顽强的防守是先将4进1，当然红方辗转腾挪，攻势依然紧凑：&lt;/p&gt;
-&lt;ol start="4"&gt;
+&lt;ol start=&#34;4&#34;&gt;
 &lt;li&gt;仕五进六 将４进１&lt;/li&gt;
 &lt;li&gt;帅四平五！ 将４退１&lt;/li&gt;
 &lt;li&gt;炮五平六 士５进４&lt;/li&gt;
 &lt;li&gt;帅五平四！&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-2-1.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-2-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;以上着法，红方先进帅做杀，逼黑方下将，而后平炮打将，待黑方扬士时候再出帅，次序井然。注意此时红方仍然威胁士六退五然后连杀。&lt;/p&gt;
-&lt;ol start="7"&gt;
+&lt;ol start=&#34;7&#34;&gt;
 &lt;li&gt;&amp;hellip;&amp;hellip;        将４平５&lt;/li&gt;
 &lt;li&gt;仕六退五 将５退１&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-3-1.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-3-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;红方出帅，黑方顺势占中解杀。然而红方一手士六退五继续做杀，此时四六两路均已被控制，黑方只有坐将求生，但仍难免被重炮：&lt;/p&gt;
-&lt;ol start="9"&gt;
+&lt;ol start=&#34;9&#34;&gt;
 &lt;li&gt;炮六平五 士６退５&lt;/li&gt;
 &lt;li&gt;仕五退六 士５进６&lt;/li&gt;
 &lt;li&gt;炮四平五&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;从开始的局面看，谁又能想到最后黑将会在原位被擒住呢？&lt;/p&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-13.png" alt=""></p>
+&lt;p&gt;从开始的局面看，谁又能想到最后黑将会在原位被擒住呢？&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-13.png" alt=""></p>
 <p><a href="https://www.chessdb.cn/query/?3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5%20w%22">3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5 w</a></p>
 <p>如图形式，红方双炮巧妙腾挪，迫使黑方子力自相堵塞，最终一举获胜。</p>
 <p> 
@@ -3413,8 +4004,16 @@ modulus = eax - quotient * n
 <li>炮四平五</li>
 </ol>
 <p>从开始的局面看，谁又能想到最后黑将会在原位被擒住呢？</p>
-]]></content></item><item><title>排局-05</title><link>/posts/xiangqi/2018-05-04-endgame-05/</link><pubDate>Fri, 04 May 2018 17:13:21 +0800</pubDate><guid>/posts/xiangqi/2018-05-04-endgame-05/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-4.png" alt=""&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3%20w"&gt;6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3 w&lt;/a&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-05</title>
+            <link>/posts/xiangqi/2018-05-04-endgame-05/</link>
+            <pubDate>Fri, 04 May 2018 17:13:21 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-04-endgame-05/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-4.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3%20w&#34;&gt;6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3 w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图，红方似乎可以车三退三叫杀得车．可红方的取胜之路真的如此简单嘛？&lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
@@ -3427,57 +4026,58 @@ modulus = eax - quotient * n
 &lt;li&gt;车三退三 车５退１!&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;一着花心车龟缩防守，红方也暂时无计可施．此时平车打将会自找麻烦，因为黑方平将躲避后会形成兑车，红方反而不好处理．不过借打将之机调整炮位，进而扬士叫杀似乎是可行之策．&lt;/p&gt;
-&lt;ol start="2"&gt;
+&lt;ol start=&#34;2&#34;&gt;
 &lt;li&gt;车三进一 车５进１&lt;/li&gt;
 &lt;li&gt;炮四进五 车５退１&lt;/li&gt;
 &lt;li&gt;炮四退六 车５进１&lt;/li&gt;
 &lt;li&gt;车三退一 车５退１&lt;/li&gt;
 &lt;li&gt;仕五进六&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-5.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-5.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;此时红方伏有炮四平六，将４平５，车三平五的杀着．黑方不能车５平６牵炮，因为红方车三进一绝杀．其他解杀手段均会丢４路车．看似红方已经取得了胜利，但这真的是黑方最顽强的抵抗嘛？非也！惯性思维导致黑方在第５回合还是退花心车，但此时红炮的位置已经挡住了自己的老帅，所以黑方可以车５平８反杀！&lt;/p&gt;
 &lt;p&gt;５．　　　　车５平８！&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-6.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-6.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;此时红方无暇抽车，只有借打将之机先占中路，然后进帅做杀：&lt;/p&gt;
-&lt;ol start="6"&gt;
+&lt;ol start=&#34;6&#34;&gt;
 &lt;li&gt;车三平六 将４平５&lt;/li&gt;
 &lt;li&gt;车六平五 将５平４&lt;/li&gt;
 &lt;li&gt;帅四平五&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-8.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-8.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;此时黑方有两种防守方法，均难逃一败：&lt;/p&gt;
 &lt;p&gt;a.&lt;/p&gt;
-&lt;ol start="8"&gt;
+&lt;ol start=&#34;8&#34;&gt;
 &lt;li&gt;&amp;hellip;&amp;hellip;        车４平８&lt;/li&gt;
 &lt;li&gt;仕五退四 前车进１&lt;/li&gt;
 &lt;li&gt;车五进一 将４退１&lt;/li&gt;
 &lt;li&gt;炮四平六 前车进５&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-9.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-9.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;此路变化黑方双车并线，与红方邀兑．无奈红方借先手打将，进而运炮卡位，胜势已成．前车进５是比较顽强的防守．如果后车进１？则车五进一！将４退１，车五退四，红胜定．注意这里车五进一的过们是必须的，如果直接车五退三，黑方有前车进２！红方车五平六，黑有后车平４，反而节外生枝．&lt;/p&gt;
-&lt;ol start="12"&gt;
+&lt;ol start=&#34;12&#34;&gt;
 &lt;li&gt;仕六进五 后车进５&lt;/li&gt;
 &lt;li&gt;车五退一 后车退４&lt;/li&gt;
 &lt;li&gt;车五退三&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;以上几步红方顿挫井然，如下图形势，黑方如果动前车，则红方士五进六得车胜．黑方如果动将或者移动后车，如将４退１，红方仍有士五进六，弃炮绝杀！以下黑方前车平４，车五平六，车８平４，车六进四绝杀红胜．&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-10.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-10.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;此路变化，黑方竖向连车难以抵挡红方进攻，如果改为横向会怎样呢？&lt;/p&gt;
 &lt;p&gt;b.&lt;/p&gt;
-&lt;ol start="8"&gt;
+&lt;ol start=&#34;8&#34;&gt;
 &lt;li&gt;&amp;hellip;&amp;hellip;        车４平７&lt;/li&gt;
 &lt;li&gt;仕五退四 将４退１&lt;/li&gt;
 &lt;li&gt;炮四平六 车７进１&lt;/li&gt;
 &lt;li&gt;车五平六 车７平４&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-12.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-12.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;此路变化黑车会被红方栓住，但以炮换车红方只能得到和局，所以红方并不会轻易交换．&lt;/p&gt;
-&lt;ol start="12"&gt;
+&lt;ol start=&#34;12&#34;&gt;
 &lt;li&gt;仕六进五 车８平５&lt;/li&gt;
 &lt;li&gt;炮六退一　红胜定&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;红方士六进五，暗伏车六进一，将４进１，士五进六绝杀．黑方不能简单车８进１弃车解杀，否则仍是车六进一，将４进１，士五进六，红得车亦胜．&lt;/p&gt;
-&lt;p&gt;从最初的车三退三看似一步即胜，到后来的占中，架炮，红方的取胜之路可谓曲折．&lt;/p&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-4.png" alt=""></p>
+&lt;p&gt;从最初的车三退三看似一步即胜，到后来的占中，架炮，红方的取胜之路可谓曲折．&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-4.png" alt=""></p>
 <p><a href="https://www.chessdb.cn/query/?6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3%20w">6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3 w</a></p>
 <p>如图，红方似乎可以车三退三叫杀得车．可红方的取胜之路真的如此简单嘛？</p>
 <p> 
@@ -3542,8 +4142,16 @@ modulus = eax - quotient * n
 </ol>
 <p>红方士六进五，暗伏车六进一，将４进１，士五进六绝杀．黑方不能简单车８进１弃车解杀，否则仍是车六进一，将４进１，士五进六，红得车亦胜．</p>
 <p>从最初的车三退三看似一步即胜，到后来的占中，架炮，红方的取胜之路可谓曲折．</p>
-]]></content></item><item><title>排局-04</title><link>/posts/xiangqi/2018-05-04-endgame-04/</link><pubDate>Fri, 04 May 2018 16:00:41 +0800</pubDate><guid>/posts/xiangqi/2018-05-04-endgame-04/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/05/capture-04252018.png" alt=""&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9%20w"&gt;1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9 w&lt;/a&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-04</title>
+            <link>/posts/xiangqi/2018-05-04-endgame-04/</link>
+            <pubDate>Fri, 04 May 2018 16:00:41 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-05-04-endgame-04/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-04252018.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9%20w&#34;&gt;1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9 w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图形势，红方进攻子力仅有一车，如何才能利用黑车的位置取得胜利？&lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
@@ -3565,17 +4173,17 @@ modulus = eax - quotient * n
 &lt;li&gt;车八退六&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;此时黑方虽然没有丢车之虞，但也无法疏通子力．当然不能回中象，否则红方车八进七绝杀．将５平４躲避会被红方车八平六先手带将吃掉卒，上将则会送车．所以黑方只有躲卒．这里有一个小陷阱，就是黑方卒８平７送吃：&lt;/p&gt;
-&lt;ol start="2"&gt;
+&lt;ol start=&#34;2&#34;&gt;
 &lt;li&gt;&amp;hellip;&amp;hellip;        卒８平７&lt;/li&gt;
 &lt;li&gt;车八平三 象３退５&lt;/li&gt;
 &lt;li&gt;车三平八 将５平４&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;红方无法取胜，和棋&lt;/p&gt;
 &lt;p&gt;红方急于吃卒，但车被自己的高相挡住，黑方侥幸某得和局．细看之下，死卒不急吃，红方没有必要立刻杀卒，可以先落边相给车通头．&lt;/p&gt;
-&lt;ol start="3"&gt;
+&lt;ol start=&#34;3&#34;&gt;
 &lt;li&gt;相三退一&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;接下来，黑卒走投无路，红方可以将其吃掉并且保持车通头，已成胜势．具体的胜方可以参考后文着法．&lt;/p&gt;
 &lt;p&gt;黑方较为顽强的抵抗是卒８进１沉底：&lt;/p&gt;
 &lt;ol&gt;
@@ -3585,31 +4193,32 @@ modulus = eax - quotient * n
 &lt;li&gt;相三退一 卒７平６！&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;黑方先将卒沉底，然后平移进入红方九宫，如入无人之境．红方为了保持车通头，竟然不能简单将其杀掉．如下图形势，红方如帅四退一捉卒，黑方可以卒６平５占中！红方车八平五杀卒叫将则象３退５，进而某得和局．&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-2.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-2.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;那红方怎样才能取得胜利呢？这里红方需要切换一下进攻思路，不再用车捉卒，而是采用排局中常见的捉弄底卒的方式来将其擒获．正着初看之下有点不可思议，红方不仅不吃卒，还主动抬车；并且抬车的方式必须是车八进三或进四，连看起来更有威胁的车八进六都不行：&lt;/p&gt;
-&lt;ol start="5"&gt;
+&lt;ol start=&#34;5&#34;&gt;
 &lt;li&gt;车八进三 卒６平５&lt;/li&gt;
 &lt;li&gt;相一进三 卒５平４&lt;/li&gt;
 &lt;li&gt;相三退五 卒４平５&lt;/li&gt;
 &lt;li&gt;帅四退一 卒５平４&lt;/li&gt;
 &lt;li&gt;帅四退一&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/05/capture-3.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-3.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;以上着法对于排局爱好者并不陌生，首先运相回中路让黑卒无法离开九宫，然后下帅挤掉其仅有的活动空间．此时黑方只有动将，而对红方来说，取得胜利已经不再困难：&lt;/p&gt;
-&lt;ol start="9"&gt;
+&lt;ol start=&#34;9&#34;&gt;
 &lt;li&gt;&amp;hellip;&amp;hellip;        将５平４&lt;/li&gt;
 &lt;li&gt;车八平六 将４平５&lt;/li&gt;
 &lt;li&gt;车六进三 卒４平５&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;红方叫将后进车点穴，黑方无子可动．其实黑方的高象也是有意为之，如果黑方是底象，没有这一手塞象眼，红方还是无法取得胜利．此时只有方弃卒一搏，不过仍难免一败：&lt;/p&gt;
-&lt;ol start="12"&gt;
+&lt;ol start=&#34;12&#34;&gt;
 &lt;li&gt;帅四平五 将５平６&lt;/li&gt;
 &lt;li&gt;车六平四 将６平５&lt;/li&gt;
 &lt;li&gt;帅五平四 将５平４&lt;/li&gt;
 &lt;li&gt;车四平六 将４平５&lt;/li&gt;
 &lt;li&gt;相五进七　红胜定&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;如果黑方先出将，则红方先车八平六叫将然后车六进三点穴．黑卒还是会被困死．细心的读者可能已经发现前面为什么只能车八进三或进四，不能直接进六．否则，由于不需要进车点穴，差了一步棋．换句话说，最后单双步不对，并不能困死黑卒．&lt;/p&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-04252018.png" alt=""></p>
+&lt;p&gt;如果黑方先出将，则红方先车八平六叫将然后车六进三点穴．黑卒还是会被困死．细心的读者可能已经发现前面为什么只能车八进三或进四，不能直接进六．否则，由于不需要进车点穴，差了一步棋．换句话说，最后单双步不对，并不能困死黑卒．&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-04252018.png" alt=""></p>
 <p><a href="https://www.chessdb.cn/query/?1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9%20w">1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9 w</a></p>
 <p>如图形势，红方进攻子力仅有一车，如何才能利用黑车的位置取得胜利？</p>
 <p> 
@@ -3678,8 +4287,16 @@ modulus = eax - quotient * n
 </ol>
 <p>如果黑方先出将，则红方先车八平六叫将然后车六进三点穴．黑卒还是会被困死．细心的读者可能已经发现前面为什么只能车八进三或进四，不能直接进六．否则，由于不需要进车点穴，差了一步棋．换句话说，最后单双步不对，并不能困死黑卒．</p>
 <p>本局的精妙之处在于借捉卒之机另其自陷虎口，转而运相退帅将其困毙，颇有声动击西之妙．现在看来，最开始的那句＂红方进攻子力仅有一车＂也需商榷，因为在排局中，士相甚至老帅都可以用来进攻．</p>
-]]></content></item><item><title>排局-03</title><link>/posts/xiangqi/2018-01-18-endgame-03/</link><pubDate>Thu, 18 Jan 2018 20:47:50 +0800</pubDate><guid>/posts/xiangqi/2018-01-18-endgame-03/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/01/5.png" alt=""&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9%20w"&gt;2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9 w&lt;/a&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-03</title>
+            <link>/posts/xiangqi/2018-01-18-endgame-03/</link>
+            <pubDate>Thu, 18 Jan 2018 20:47:50 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-01-18-endgame-03/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/01/5.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9%20w&#34;&gt;2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9 w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图，黑方将位不安，且双车略背，红方如何凭借先行之利取胜？&lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
@@ -3695,13 +4312,13 @@ modulus = eax - quotient * n
 &lt;li&gt;兵六平五 将６退１&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;红方平兵继续叫杀，黑方当然不能直接车5进3砍兵，否则红方顺势车五进一吃掉之后即是绝杀。黑如车3进4弃车解杀，则红方兵五平四之后吃掉底车，仍是胜势。黑方下将正着，红如兵五进一，黑方便可以车5进2某得和局。&lt;/p&gt;
-&lt;ol start="5"&gt;
+&lt;ol start=&#34;5&#34;&gt;
 &lt;li&gt;车五平四 将６平５&lt;/li&gt;
 &lt;li&gt;兵五进一 将５平４&lt;/li&gt;
 &lt;li&gt;车四进三 将４退１&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;红劣黑胜&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/01/6.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/01/6.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;黑方下将是一步容易被忽略的着法。最初算到这里的时候我以为黑方只能落士，红兵五进一之后由于黑车低头，形成巧胜。不料黑方有此着躲避，从而反败为胜。
 所以红方正确的攻法是打两将之后平兵叫杀：&lt;/p&gt;
 &lt;ol&gt;
@@ -3710,31 +4327,31 @@ modulus = eax - quotient * n
 &lt;li&gt;兵六平五 将６退１&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;黑方当然不能士4退5打将，否则红方帅六平五占中之后，黑方速败。&lt;/p&gt;
-&lt;ol start="4"&gt;
+&lt;ol start=&#34;4&#34;&gt;
 &lt;li&gt;兵五进一 将６退１&lt;/li&gt;
 &lt;li&gt;车五平四 将６平５&lt;/li&gt;
 &lt;li&gt;车四平二 将５平６&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;此时红方走不到兵五平四做杀，因为黑方可以士4退5带将抽掉。又不能帅六平五，否则黑方车3进5弃车杀相可以谋和。红方攻势暂时受阻，怎样才能打开局面呢？&lt;/p&gt;
-&lt;ol start="7"&gt;
+&lt;ol start=&#34;7&#34;&gt;
 &lt;li&gt;车二进四 将６进１&lt;/li&gt;
 &lt;li&gt;车二退五 将６退１&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;红方借叫杀之机保住自己的高相，使得黑方杀相谋和的计划落空。但此时平帅黑方还是可以车3进4通头，下步即可以抢占中路，红方似乎还是难有进取。&lt;/p&gt;
-&lt;ol start="9"&gt;
+&lt;ol start=&#34;9&#34;&gt;
 &lt;li&gt;帅六平五 车３进４&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;如图形势，红方有两路较为直观的攻法，但都难以奏效：&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/01/9.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/01/9.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;a.&lt;/p&gt;
-&lt;ol start="10"&gt;
+&lt;ol start=&#34;10&#34;&gt;
 &lt;li&gt;兵五平四 车４平５！&lt;/li&gt;
 &lt;li&gt;相七退五 车３进４&lt;/li&gt;
 &lt;li&gt;帅五退一 车５进７ 黑胜&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;黑方车4平5妙手，粉碎了红方的攻势，一举反败为胜&lt;/p&gt;
 &lt;p&gt;b.&lt;/p&gt;
-&lt;ol start="10"&gt;
+&lt;ol start=&#34;10&#34;&gt;
 &lt;li&gt;车二平四 将６平５&lt;/li&gt;
 &lt;li&gt;帅五平四 士４退５&lt;/li&gt;
 &lt;li&gt;车四进四 车３平６!&lt;/li&gt;
@@ -3743,7 +4360,8 @@ modulus = eax - quotient * n
 &lt;li&gt;相七退五 车５进１!&lt;/li&gt;
 &lt;li&gt;帅四退一 车５退２&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;黑方弃车照将的手法颇有排局味道，且即使红方落相盖车，黑方还是有沉底车的冷手，最终谋得和局。&lt;/p&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/01/5.png" alt=""></p>
+&lt;p&gt;黑方弃车照将的手法颇有排局味道，且即使红方落相盖车，黑方还是有沉底车的冷手，最终谋得和局。&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/01/5.png" alt=""></p>
 <p><a href="https://www.chessdb.cn/query/?2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9%20w">2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9 w</a></p>
 <p>如图，黑方将位不安，且双车略背，红方如何凭借先行之利取胜？</p>
 <p> 
@@ -3843,8 +4461,16 @@ modulus = eax - quotient * n
 <li>帅五平四 红胜定</li>
 </ol>
 <p>回看全局，红方打将顿挫保相而后进帅落相，可谓手筋，值得玩味。</p>
-]]></content></item><item><title>排局-02</title><link>/posts/xiangqi/2018-01-11-endgame-02/</link><pubDate>Thu, 11 Jan 2018 23:08:29 +0800</pubDate><guid>/posts/xiangqi/2018-01-11-endgame-02/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/01/3.png" alt="rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w"&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4%20w"&gt;rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w&lt;/a&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-02</title>
+            <link>/posts/xiangqi/2018-01-11-endgame-02/</link>
+            <pubDate>Thu, 11 Jan 2018 23:08:29 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-01-11-endgame-02/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/01/3.png&#34; alt=&#34;rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4%20w&#34;&gt;rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图，双方子力不多，且黑方双车通头，红方怎样才能借先行之利取胜？&lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
@@ -3873,22 +4499,23 @@ modulus = eax - quotient * n
 &lt;li&gt;车九平三 车２进７&lt;/li&gt;
 &lt;li&gt;帅四退一 车１进９&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/01/3.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/01/3.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;黑方一手车1进9（亦可车2进2），明为送，实为捉，红方不能炮五平九，否则车2进1抽车黑速胜。因炮被牵制，士六进五也不成，所以红方只能车三进八借打将之机先吃一车。&lt;/p&gt;
-&lt;ol start="3"&gt;
+&lt;ol start=&#34;3&#34;&gt;
 &lt;li&gt;车三进八 将５进１&lt;/li&gt;
 &lt;li&gt;炮五平九&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;此时红方不仅净多一炮，且底车先捉黑士，怎么看黑方也是败势难逃。但黑方自有妙计：&lt;/p&gt;
-&lt;ol start="4"&gt;
+&lt;ol start=&#34;4&#34;&gt;
 &lt;li&gt;&amp;hellip;&amp;hellip;        车２进１&lt;/li&gt;
 &lt;li&gt;帅四进一 车２进１&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;黑方车2进1打将，迫使红帅定位。红方如果帅四退一下帅，黑方则车2进1捉双，随后车2平4吃士，然后车4平5占中成单车守和车炮之势。红方不肯，只好帅上三楼。黑方随即再度进车捉双。为什么黑方不直接车2进2捉双呢？这里按下不表，稍后揭晓。&lt;/p&gt;
-&lt;ol start="6"&gt;
+&lt;ol start=&#34;6&#34;&gt;
 &lt;li&gt;炮九进九 车２平４&lt;/li&gt;
 &lt;li&gt;车三平五 将５平４&lt;/li&gt;
-&lt;/ol&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/01/3.png" alt="rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w"></p>
+&lt;/ol&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/01/3.png" alt="rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w"></p>
 <p><a href="https://www.chessdb.cn/query/?rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4%20w">rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w</a></p>
 <p>如图，双方子力不多，且黑方双车通头，红方怎样才能借先行之利取胜？</p>
 <p> 
@@ -3934,8 +4561,16 @@ modulus = eax - quotient * n
 <li>炮九进九 车２平４</li>
 <li>车三平五 将５平４</li>
 </ol>
-]]></content></item><item><title>排局-01</title><link>/posts/xiangqi/2018-01-11-endgame-01/</link><pubDate>Thu, 11 Jan 2018 23:04:07 +0800</pubDate><guid>/posts/xiangqi/2018-01-11-endgame-01/</guid><description>&lt;p&gt;&lt;img src="../imgs/2018/01/1.png" alt="9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w"&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://www.chessdb.cn/query/?9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc%20w"&gt;9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w&lt;/a&gt;&lt;/p&gt;
+]]></content>
+        </item>
+        
+        <item>
+            <title>排局-01</title>
+            <link>/posts/xiangqi/2018-01-11-endgame-01/</link>
+            <pubDate>Thu, 11 Jan 2018 23:04:07 +0800</pubDate>
+            <guid>/posts/xiangqi/2018-01-11-endgame-01/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/01/1.png&#34; alt=&#34;9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc%20w&#34;&gt;9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图局面，是我不久前从残局库中发现的一个挺有意思的局面，红先胜。&lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
@@ -3968,15 +4603,15 @@ modulus = eax - quotient * n
 &lt;li&gt;帅五退一 捉死炮胜&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;当然，这则排局并非如此简单。黑方炮9退1不是应对帅六进一的最顽强走法。黑方有一手将6退1可以某得和局。下将后，红方当然不能急于炮二平四打将，否则黑方可以从容炮9平8再炮8退7防守。于是红方只有先飞相，但无论红相往哪边去，黑方都有妙手化解。&lt;/p&gt;
-&lt;p&gt;&lt;img src="../imgs/2018/01/2.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../imgs/2018/01/2.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;如图形势，如红飞三七高相，则黑方炮击底士，而后绕回防守，红方无计可施：&lt;/p&gt;
-&lt;ol start="2"&gt;
+&lt;ol start=&#34;2&#34;&gt;
 &lt;li&gt;相五进七 炮９平４&lt;/li&gt;
 &lt;li&gt;炮二平四 将６平５&lt;/li&gt;
 &lt;li&gt;炮四平五 炮４平２&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;如红落相，黑方当然不能打士（否则炮被困死）。正确走法是将6平5占中：&lt;/p&gt;
-&lt;ol start="2"&gt;
+&lt;ol start=&#34;2&#34;&gt;
 &lt;li&gt;相五退七 将６平５&lt;/li&gt;
 &lt;li&gt;仕六进五 炮９平３&lt;/li&gt;
 &lt;li&gt;炮二平五 将５平６&lt;/li&gt;
@@ -3990,7 +4625,8 @@ modulus = eax - quotient * n
 &lt;li&gt;相五进三 将６平５&lt;/li&gt;
 &lt;li&gt;仕六进五 将５平６&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;红方直接上帅并不能奏效，但这里如果46路的子力调换一下，红帅在4路，士和黑将在6路，则黑方无法借助炮9平8防守。但红方怎样才能调整阵型，达到上述目标呢？且看后续着法：&lt;/p&gt;</description><content type="html"><![CDATA[<p><img src="../imgs/2018/01/1.png" alt="9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w"></p>
+&lt;p&gt;红方直接上帅并不能奏效，但这里如果46路的子力调换一下，红帅在4路，士和黑将在6路，则黑方无法借助炮9平8防守。但红方怎样才能调整阵型，达到上述目标呢？且看后续着法：&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="../imgs/2018/01/1.png" alt="9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w"></p>
 <p><a href="https://www.chessdb.cn/query/?9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc%20w">9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w</a></p>
 <p>如图局面，是我不久前从残局库中发现的一个挺有意思的局面，红先胜。</p>
 <p> 
@@ -4061,4 +4697,8 @@ modulus = eax - quotient * n
 <li>帅四平五 红胜定</li>
 </ol>
 <p>本局独特之处在于，红方的攻法不仅是隔步杀，而且心中需要有一个明确的目标。离开这个目标，红方的着法都没有意义。一位好友指出，这局有些像数学题。我觉得在这局棋里，更多的是推理和排除，而不是传统意义上的计算。说来也巧，我们都是数学专业出身，所以对这类题目情有独钟。后续我还会发布几则类似味道的局面，欢迎大家批评指正。</p>
-]]></content></item></channel></rss>
+]]></content>
+        </item>
+        
+    </channel>
+</rss>

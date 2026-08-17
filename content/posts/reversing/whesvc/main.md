@@ -81,7 +81,7 @@ Now, what about the other new DLL? `whesvc_assets.dll` turns out to be even stra
 
 ## What Could the Scripts Do?
 
-When you find a scripting engine inside a program, the scripts themselves are only half the story. The other half is the bridge between the script and the native world, because that bridge defines the ceiling. A script can never do more than the bridge allows.
+When you find a scripting engine inside a program, the bridge between the script and the native world is the half worth looking at first. It sets the ceiling: a script can never do more than the bridge allows.
 
 Here the bridge is a global table called `wdg`, and every `CORE/*` library is a thin wrapper that re-exports part of it. So I wrote a small pass over the bytecode that tracks which registers hold that table and collects every field read from it. That gives 79 native functions.
 
@@ -116,7 +116,7 @@ end
 
 No prefix check, no allowlist, no canonicalization. And before you assume `io` here is some hardened Microsoft replacement, it is not -- `windiag.pdb` exports `luaopen_io`, `luaopen_os`, and `luaopen_package` unmodified, so this is the stock PUC-Rio `liolib` calling `fopen`.
 
-I want to be clear about what this does and does not mean, because it is the part the viral post got backwards. **None of the shipped scripts do anything questionable with this.** They read sensors and write JSON files into their own directories, which is exactly what a diagnostics service should do. The observation is only that the engine underneath would happily let them do much more, and the reason they stay in their lane is that Microsoft wrote them that way.
+This is the part the viral post got backwards, so let me be clear. **None of the shipped scripts do anything questionable with this.** They read sensors and write JSON into their own directories, which is exactly what a diagnostics service should do. The engine underneath would simply let them do much more, and what keeps them in their lane is that Microsoft wrote them that way.
 
 It is worth seeing what the sharper capabilities are actually used for, because the answer is mundane in every case.
 
@@ -170,7 +170,7 @@ Each resource starts with a small header:
 0x1C  ...  'CK' + raw DEFLATE
 ```
 
-That `CK` at the end is the giveaway. It is MSZIP, which is just deflate with a two-byte signature in front, so the unpacker is four lines of Python. There is no encryption here. There is also no hash and no MAC anywhere in the header, which will matter later.
+That `CK` is the giveaway: MSZIP, which is deflate with a two-byte signature in front, so the unpacker is four lines of Python. No encryption, and no hash or MAC anywhere in the header either, which will matter later.
 
 Underneath the compression is Lua 5.4 bytecode. And here is the part I did not expect:
 
@@ -210,7 +210,7 @@ C:\Windows\System32\whesvc_assets.dll
 
 TrustedInstaller has full control, and everybody else -- including SYSTEM and Administrators -- gets read and execute only. Anyone who can replace this file is already an administrator, and administrator to SYSTEM is not a boundary Windows defends anyway. **So this is fine.**
 
-So the thing actually keeping this engine in bounds is not the sandbox and not the signature. It is a file permission, plus the set of scripts Microsoft chose to ship. That turns out to be enough in practice, and it is worth knowing that it is what the safety rests on.
+So what actually keeps this engine in bounds is not the sandbox and not the signature. It is a file permission, plus the set of scripts Microsoft chose to ship. That is enough in practice, but it is worth knowing that is what the safety rests on.
 
 ## So What Do the Scripts Actually Do?
 
@@ -243,7 +243,7 @@ workflow.start_feature_modules({
 }, "init", opts.disabled_modules)
 ```
 
-That is the entire entry point. It locks down the environment, pulls in two helper libraries, emits one telemetry event recording which feature flags are on, and then hands a list of six modules to the workflow starter. There is no logic of its own beyond that.
+That is the entire entry point. It locks down the environment, pulls in two helper libraries, emits one telemetry event recording which feature flags are on, and hands six modules to the workflow starter. No logic of its own beyond that.
 
 From there the structure is easy to follow. Of the 23 scenario modules, 21 start by default. Those six above are the first wave, and one of them, `rtsmon`, opens a realtime ETW session and starts fourteen more. Thirteen run unconditionally, six sit behind Windows feature flags that Microsoft controls server-side, and one needs a battery to be present.
 
@@ -275,11 +275,11 @@ That is the payload everybody was worried about. It is a crash summary, and in t
 
 The network side is similarly undramatic. Across all 84 scripts the only URL is `symweb.azurefd.net`, which is Microsoft's public symbol server, and it is gated behind a `WINDIAG_SYM_CLOUD_TOKEN` environment variable that is not set on a retail machine. No scenario module makes an HTTP request at all. `windiag.dll` imports three WinINet functions and zero socket functions. The running service holds no TCP or UDP endpoints.
 
-I also found two controls that I think deserve more credit than the discussion gave Microsoft. Heavy trace capture goes through a check that reads `AllowTelemetry` and requires it to be 3, meaning full or optional diagnostic data, and it returns false when the value cannot be read at all -- so it fails closed. And the automatic escalation path, which is the one mechanism that can hand data to the telemetry pipeline without you filing feedback, is disabled by default in all ten automatic scenarios. It defaults to enabled in exactly one: `hotkey_trace`, the one you trigger yourself.
+Two controls deserve more credit than the discussion gave Microsoft. Heavy trace capture checks `AllowTelemetry` and requires it to be 3, meaning full or optional diagnostic data, and returns false when the value cannot be read at all -- so it fails closed. And auto-escalation, the one mechanism that can hand data to the telemetry pipeline without you filing feedback, is off by default in all ten automatic scenarios. It is on in exactly one: `hotkey_trace`, the one you trigger yourself.
 
 ## How Does It Know the Fan Is Loud?
 
-`SCENARIO/NOISY_FAN` was actually the first module I opened, because I could not immediately think of a non-alarming way to detect a noisy fan. I have [taken a fan apart on this blog before](/posts/reversing/reverse_engineering_and_fixing_a_fan/), so I felt some obligation to check this one.
+`SCENARIO/NOISY_FAN` was actually the first module I opened, because I could not immediately think of a non-alarming way to detect a noisy fan. I have [taken a fan apart on this blog before](/posts/reversing/reverse_engineering_and_fixing_a_fan/main/), so I felt some obligation to check this one.
 
 Happily, it is not listening to anything. I went through the full import tables of both binaries, and there are no audio APIs anywhere.
 
@@ -307,7 +307,7 @@ Which rather punctures my earlier line about nobody having opened this binary. S
 
 Microsoft published one sentence about it, and I could not find a pre-patch binary on my machine to diff against, so what follows is the shape of the problem rather than a confirmed account of the exact reported case.
 
-The ingredients are still visible in the code. The service writes its artifacts into `C:\ProgramData\Whesvc\<artifact_type>\`, creating the directory if it does not exist and then opening a file inside it, as SYSTEM, with no path validation at all. The artifact type names are hardcoded and predictable, and `system_summary` guarantees a write every fifteen minutes. Meanwhile, look at who can write into that tree:
+The ingredients are still visible. The service creates `C:\ProgramData\Whesvc\<artifact_type>\` if it does not exist and writes a file inside it, as SYSTEM, with no path validation. The type names are hardcoded and predictable, and `system_summary` guarantees a write every fifteen minutes. Meanwhile, look at who can write into that tree:
 
 ```
 icacls C:\ProgramData\Whesvc
@@ -315,7 +315,7 @@ icacls C:\ProgramData\Whesvc
     CREATOR OWNER:(I)(OI)(CI)(IO)(F)
 ```
 
-Every entry is marked `(I)`, which means inherited. The service never sets its own DACL; it simply accepts whatever `C:\ProgramData` hands down. Once an unprivileged user can create a directory that a SYSTEM process will later write into, the classic move is to make that directory a junction pointing somewhere else. And the retention logic, which deletes old artifacts, offers the same trick in reverse.
+Every entry is marked `(I)`, meaning inherited -- the service never sets its own DACL, it just accepts whatever `C:\ProgramData` hands down. Once an unprivileged user can create a directory a SYSTEM process will later write into, the classic move is to make it a junction pointing somewhere else. The retention logic, which deletes old artifacts, offers the same trick in reverse.
 
 The fix is visible in the current binaries, and I like it. Remember that `SetProcessMitigationPolicy(ProcessRedirectionTrustPolicy, 1)` at the very top of `StartWHEService`? That tells the kernel to refuse to follow junctions and symlinks created by less-trusted principals. It kills the entire class of bug rather than patching one path, and it is set declaratively in the svchost group configuration as well. There is a second and narrower guard in `core/file.lua`, where the recursive directory walker refuses to descend into reparse points:
 
@@ -331,13 +331,9 @@ The artifact directory still inherits its permissive DACL rather than setting it
 
 ## Final Thoughts
 
-The viral claim was wrong on essentially every count. The service is not new, it does not upload your traces, and it is not recording anything. The 15 minutes is a real number attached to a thoroughly boring event. Hanselman's description matches the code, right down to the directory path he quoted.
+The viral claim was wrong on essentially every count. The service is not new, it does not upload your traces, and it is not recording anything. The 15 minutes is a real number attached to a thoroughly boring event, and Hanselman's description matches the code right down to the directory path he quoted.
 
-The part I find worth talking about is not the behavior but the machinery. What the scripts do is read sensors and write JSON files. What the engine underneath would let them do is write any file on the system, write any registry key, spawn processes, invoke WMI methods, and call arbitrary native functions through an FFI, all as SYSTEM. The sandbox stops new code from being loaded, which is the right thing to stop, but it does not narrow that surface much beyond it.
-
-To be clear, none of this is being misused. Every script that ships today is a reasonable diagnostics script, and I went looking for something dodgy and did not find it. It is simply more capability than the task calls for, and CVE-2025-59241 is a fair illustration of what that costs: a battery and memory diagnostic tool ended up handing a local user SYSTEM, through nothing more exotic than writing a file into a directory whose permissions it inherited rather than set.
-
-So Windows Health and Optimized Experiences is not spyware, and it is not doing anything it should not. It is a legitimate diagnostics service that happens to be built on a general-purpose scripting runtime, and a runtime with that much reach is a different thing to threat model than a program that reads a fan sensor. I would much rather people argued about that than about the 15 minutes.
+What is worth talking about is the machinery rather than the behavior. The scripts read sensors and write JSON files, while the engine underneath would let them write any file, set any registry key, spawn processes, and call arbitrary native functions through an FFI, all as SYSTEM. None of that is being misused -- I went looking for something dodgy and did not find it. It is simply more capability than the task calls for, and CVE-2025-59241 is a fair illustration of what that can cost. Windows Health and Optimized Experiences is not spyware; it is a legitimate diagnostics service built on a general-purpose scripting runtime, and that is a different thing to threat model than a program which reads a fan sensor.
 
 ---
 

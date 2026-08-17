@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Earlier this month, a post on X went viral by claiming Microsoft had quietly slipped a spy into Windows 11:
+MICROSOFT ADDED A NEW BACKGROUND SERVICE TO YOUR PC IN WINDOWS 11. It is called Windows Health and Optimized Experiences. It starts automatically every time you boot. It monitors your CPU, thermals, and battery then sends data to Microsoft every 15 minutes.
+Enough people believed it that Microsoft&rsquo;s Scott Hanselman replied personally:
+" />
+<meta name="keywords" content="Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="/posts/reversing/whesvc/main/" />
+
+
+    <title>
+        
+            Windows&#39; Performance Optimizer Is More Capable Than It Needs to Be :: Xusheng Li 
+        
+    </title>
+
+
+
+
+    
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+
+	<meta itemprop="name" content="Windows&#39; Performance Optimizer Is More Capable Than It Needs to Be">
+	<meta itemprop="description" content="Earlier this month, a post on X went viral by claiming Microsoft had quietly slipped a spy into Windows 11:
+MICROSOFT ADDED A NEW BACKGROUND SERVICE TO YOUR PC IN WINDOWS 11. It is called Windows Health and Optimized Experiences. It starts automatically every time you boot. It monitors your CPU, thermals, and battery then sends data to Microsoft every 15 minutes.
+Enough people believed it that Microsoft’s Scott Hanselman replied personally:">
+	<meta itemprop="datePublished" content="2026-08-16T00:00:00+00:00">
+	<meta itemprop="dateModified" content="2026-08-16T00:00:00+00:00">
+	<meta itemprop="wordCount" content="3551">
+	<meta itemprop="image" content="/">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="/">
+	<meta name="twitter:title" content="Windows&#39; Performance Optimizer Is More Capable Than It Needs to Be">
+	<meta name="twitter:description" content="Earlier this month, a post on X went viral by claiming Microsoft had quietly slipped a spy into Windows 11:
+MICROSOFT ADDED A NEW BACKGROUND SERVICE TO YOUR PC IN WINDOWS 11. It is called Windows Health and Optimized Experiences. It starts automatically every time you boot. It monitors your CPU, thermals, and battery then sends data to Microsoft every 15 minutes.
+Enough people believed it that Microsoft’s Scott Hanselman replied personally:">
+
+
+
+    <meta property="og:url" content="/posts/reversing/whesvc/main/">
+	<meta property="og:site_name" content="Xusheng Li">
+	<meta property="og:title" content="Windows&#39; Performance Optimizer Is More Capable Than It Needs to Be">
+	<meta property="og:description" content="Earlier this month, a post on X went viral by claiming Microsoft had quietly slipped a spy into Windows 11:
+MICROSOFT ADDED A NEW BACKGROUND SERVICE TO YOUR PC IN WINDOWS 11. It is called Windows Health and Optimized Experiences. It starts automatically every time you boot. It monitors your CPU, thermals, and battery then sends data to Microsoft every 15 minutes.
+Enough people believed it that Microsoft’s Scott Hanselman replied personally:">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-08-16T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-08-16T00:00:00+00:00">
+		<meta property="og:image" content="/">
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2026-08-16 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">Xusheng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li><li><a href="/cv.pdf">CV</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        17 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="/posts/reversing/whesvc/main/">Windows&rsquo; Performance Optimizer Is More Capable Than It Needs to Be</a>
+      </h1>
+
+      
+
+      
+
+      <div class="post-content">
+        <p>Earlier this month, <a href="https://x.com/x1lly/status/2083229864862056532">a post on X</a> went viral by claiming Microsoft had quietly slipped a spy into Windows 11:</p>
+<blockquote>
+<p>MICROSOFT ADDED A NEW BACKGROUND SERVICE TO YOUR PC IN WINDOWS 11. It is called Windows Health and Optimized Experiences. It starts automatically every time you boot. It monitors your CPU, thermals, and battery then sends data to Microsoft every 15 minutes.</p>
+</blockquote>
+<p>Enough people believed it that Microsoft&rsquo;s Scott Hanselman <a href="https://x.com/shanselman/status/2083959057845727702">replied personally</a>:</p>
+<blockquote>
+<p>This was added in 2025 and is for Performance-diagnostic capture: When Windows detects slow or sluggish behavior, it can record targeted performance traces locally under <code>%SystemRoot%\Temp\DiagOutputDir\Whesvc</code> that can be filed with Feedback Hub. It&rsquo;s not laptop specific. SAYING THINGS IN ALL CAPS FOR DRAMA DOESN&rsquo;T MAKE THEM DRAMATIC</p>
+</blockquote>
+<p>He is right, and so are the fact-checks that followed on <a href="https://www.neowin.net/reports/what-is-the-viral-whesvc-service-and-should-you-disable-it/">Neowin</a>, <a href="https://www.pcworld.com/article/3206170/microsoft-denies-viral-rumor-of-windows-11-spying-on-you-every-15-minutes.html">PCWorld</a>, and <a href="https://www.windowslatest.com/2026/08/04/microsoft-denies-windows-11-is-spying-on-desktop-pcs-reveals-what-the-service-actually-does/">Windows Latest</a>. The service is not new, it is not recording your screen, and the traces stay on your disk unless you file them yourself.</p>
+<p>But it appears to me that nobody has really looked at the binary, and that is quite unsatisfying for a reverse engineer.</p>
+<p>So I opened it (well, mostly with <a href="https://dev-docs.binary.ninja/guide/mcp.html">Binary Ninja MCP</a>). It is a perfectly legitimate diagnostics service, and everything it ships does exactly what the name suggests. What surprised me is how it is built: <code>whesvc</code> runs a <strong>Lua interpreter as SYSTEM</strong>, with 84 compiled Lua scripts riding along, and the machinery underneath is considerably more powerful than the job seems to need.</p>
+<p>Everything below is on Windows 11 Pro 26200, with service binaries <code>10.0.26100.8972</code>. The tools I wrote are in the <a href="https://github.com/xusheng6/whesvc-analysis">companion repo</a> if you wish to follow along on your own machine.</p>
+<h2 id="where-do-i-start">Where Do I Start?</h2>
+<p>The service short name is <code>whesvc</code>, and at first glance it is entirely unremarkable:</p>
+<pre tabindex="0"><code>Name        : whesvc
+DisplayName : Windows Health and Optimized Experiences
+Description : Monitors the device for a better user experience
+PathName    : C:\WINDOWS\system32\svchost.exe -k whesvc -p
+StartName   : LocalSystem
+StartMode   : Auto (delayed)
+</code></pre><p>It is a <code>svchost</code> service, so the interesting part is the <code>ServiceDll</code>, which points at <code>C:\Windows\System32\whesvc.dll</code>. That is only 229 KB, and public symbols are available for it, which makes the job much easier.</p>
+<p>The entry point is <code>HealthAndOptimizerService::StartWHEService</code>, and it is short enough to read in one screen:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>HealthAndOptimizerService<span style="color:#f92672">::</span><span style="color:#a6e22e">StartWHEService</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> <span style="color:#a6e22e">RegGetValue</span>(...<span style="color:#960050;background-color:#1e0010">\</span>whesvc, <span style="color:#e6db74">&#34;WaitForDebugger&#34;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> <span style="color:#a6e22e">SetProcessMitigationPolicy</span>(ProcessRedirectionTrustPolicy, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> <span style="color:#a6e22e">InitializeAssetLoader</span>()   <span style="color:#960050;background-color:#1e0010">→</span> <span style="color:#a6e22e">LoadLibraryW</span>(<span style="color:#f92672">%</span>systemroot<span style="color:#f92672">%</span><span style="color:#960050;background-color:#1e0010">\</span>system32<span style="color:#960050;background-color:#1e0010">\</span>whesvc_assets.dll)
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> WinDiag<span style="color:#f92672">::</span><span style="color:#a6e22e">Initialize</span>()     <span style="color:#960050;background-color:#1e0010">→</span> GetSystemDirectoryW <span style="color:#f92672">+</span> <span style="color:#960050;background-color:#1e0010">\</span>windiag.dll
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> OrchestratorSingleton<span style="color:#f92672">::</span><span style="color:#a6e22e">Initialize</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">├─</span> OrchestratorSingleton<span style="color:#f92672">::</span><span style="color:#a6e22e">RegisterOneSettingsConfigChangeWNF</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">└─</span> <span style="color:#a6e22e">StartWindiagModuleWithUri</span>(<span style="color:#e6db74">&#34;builtin://scenario/init&#34;</span>)
+</span></span></code></pre></div><p>Three things caught my eye here. It loads two other DLLs I had never heard of, <code>whesvc_assets.dll</code> and <code>windiag.dll</code>. It registers for OneSettings configuration changes, so Microsoft can adjust its behavior remotely. And the last thing it does is start a <em>module</em> named by a URI, <code>builtin://scenario/init</code>.</p>
+<p>That last one is unusual. Services do not normally have modules, and they certainly do not address them by URI. Something else is running the show here, and I will come back to what that module turns out to be.</p>
+<p>In fact, <code>whesvc.dll</code> barely does any work at all. <code>WinDiag::Initialize</code> loads <code>windiag.dll</code> and resolves exactly three exports from it &ndash; <code>WinDiagnosticsRequest</code>, <code>WinDiagnosticsResume</code>, and <code>WinDiagnosticsFree</code>. That is the entire interface. So whatever this service really is, it lives in <code>windiag.dll</code>.</p>
+<h2 id="a-lua-interpreter-in-system32">A Lua Interpreter in system32?</h2>
+<p><code>windiag.dll</code> is 946 KB, and its strings answer the question immediately:</p>
+<pre tabindex="0"><code>$LuaVersion: Lua 5.4.7  Copyright (C) 1994-2024 Lua.org, PUC-Rio $
+</code></pre><p>I had not seen this before &ndash; Windows ships a <strong>Lua interpreter</strong> in <code>system32</code>, and a service runs it as SYSTEM.</p>
+<p>To be fair, Lua is a sensible choice for this kind of job. It is tiny, it is fast, and embedding it is easy. That is exactly why games and embedded devices use it. It is still a little surprising to see Windows take on a new language dependency inside a system service.</p>
+<p>Now, what about the other new DLL? <code>whesvc_assets.dll</code> turns out to be even stranger, because it contains no code at all. Its section table is just <code>.rdata</code> and <code>.rsrc</code>, there is no <code>.text</code>, and consequently there is no PDB for it either &ndash; there was nothing to compile. Everything is in the resources:</p>
+<pre tabindex="0"><code>== TYPE LUALIBM ==   61 resources   (libraries)
+== TYPE LUAMOD ==    23 resources   (scenarios)
+== TYPE PROFILE ==    5 resources   (WPRP trace profile XML)
+</code></pre><p><code>LUAMOD</code> and <code>LUALIBM</code> are the Lua. So there are 84 scripts in here, and their names read like a table of contents: <code>SCENARIO/HANG_TRACE</code>, <code>SCENARIO/SLOW_APP_LAUNCH</code>, <code>SCENARIO/NOISY_FAN</code>, <code>CORE/REG</code>, <code>CORE/SECURITY</code>, <code>MISC/ARTIFACT_MANAGER</code>.</p>
+<h2 id="what-could-the-scripts-do">What Could the Scripts Do?</h2>
+<p>When you find a scripting engine inside a program, the bridge between the script and the native world is the half worth looking at first. It sets the ceiling: a script can never do more than the bridge allows.</p>
+<p>Here the bridge is a global table called <code>wdg</code>, and every <code>CORE/*</code> library is a thin wrapper that re-exports part of it. So I wrote a small pass over the bytecode that tracks which registers hold that table and collects every field read from it. That gives 79 native functions.</p>
+<p>Sixty of them are grouped into twelve libraries:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Library</th>
+					<th>What it exposes</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>core/reg</code></td>
+					<td>Full registry read <strong>and write</strong>, all hives: <code>create_key</code>, <code>delete_key</code>, <code>delete_value</code>, <code>set_*</code>, <code>get_*</code>, <code>enum_*</code></td>
+			</tr>
+			<tr>
+					<td><code>core/file</code></td>
+					<td><code>read_data</code>, <code>write_data</code>, <code>copy</code>, <code>move</code>, <code>remove</code>, <code>mkdir</code>, <code>rmdir</code>, <code>enum</code>, and <code>grep_init</code>/<code>grep_next</code> for searching file contents</td>
+			</tr>
+			<tr>
+					<td><code>core/security</code></td>
+					<td><code>create_process</code>, <code>impersonate_process</code>, <code>revert_impersonation</code>, <code>token_info</code>, <code>code_integrity</code>, <code>process_protection</code></td>
+			</tr>
+			<tr>
+					<td><code>core/etw</code></td>
+					<td>Start and stop WPR traces, realtime sessions, provider and keyword control</td>
+			</tr>
+			<tr>
+					<td><code>core/wmi</code></td>
+					<td><code>wmi_query</code> <strong>and <code>wmi_method</code></strong> &ndash; <code>Win32_Process</code>, <code>Win32_Service</code>, <code>Win32_NTLogEvent</code>, <code>MSFT_MpComputerStatus</code>, <code>MSFT_MpPreference</code></td>
+			</tr>
+			<tr>
+					<td><code>core/wnf</code></td>
+					<td>Create, update, query, and delete WNF state names</td>
+			</tr>
+			<tr>
+					<td><code>core/native</code></td>
+					<td><code>invoke</code> &ndash; a general FFI, with typed buffers and DLL/file/registry/kernel/SCM handles</td>
+			</tr>
+			<tr>
+					<td><code>core/power</code></td>
+					<td>Battery, power schemes, thermal and fan sensors, EMI, processor info</td>
+			</tr>
+			<tr>
+					<td><code>core/net</code></td>
+					<td><code>http_req</code></td>
+			</tr>
+			<tr>
+					<td><code>core/sym</code></td>
+					<td>Symbol download, <code>sym_decode_stack</code></td>
+			</tr>
+			<tr>
+					<td><code>core/ai</code></td>
+					<td>A local language model &ndash; <code>Summarize</code>, <code>Rewrite</code>, <code>TextToTable</code></td>
+			</tr>
+			<tr>
+					<td><code>core/utc</code>, <code>core/oset</code>, <code>core/cabinet</code></td>
+					<td>DiagTrack scenario state, OneSettings config, <code>.cab</code> creation</td>
+			</tr>
+	</tbody>
+</table>
+<p>The remaining nineteen do not belong to any library. <code>core/global.lua</code> injects them directly into the environment of every script, so they are available without importing anything: <code>getpid</code>, <code>getcmd</code>, <code>getcwd</code>, <code>process_info</code>, <code>system_info</code>, <code>system_times</code>, <code>sessionid</code>, <code>thread_name</code>, <code>create_guid</code>, <code>sleep</code>, <code>event_write</code>, and a handful of timing primitives.</p>
+<p>Registry write, arbitrary file I/O, process creation, WMI <em>method</em> invocation, and a general-purpose FFI. That is roughly the capability set of a systems administration language. It is quite a lot for a program whose job is to notice that your laptop is running hot.</p>
+<p>The file access surprised me the most, because it has no restriction whatsoever. This is the whole of <code>write_data</code>, at line 9 of <code>core/file.lua</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">write_data</span>(path, data)
+</span></span><span style="display:flex;"><span>    assert(io.open(path, <span style="color:#e6db74">&#34;wb&#34;</span>)):write(data)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><p>No prefix check, no allowlist, no canonicalization. And before you assume <code>io</code> here is some hardened Microsoft replacement, it is not &ndash; <code>windiag.pdb</code> exports <code>luaopen_io</code>, <code>luaopen_os</code>, and <code>luaopen_package</code> unmodified, so this is the stock PUC-Rio <code>liolib</code> calling <code>fopen</code>.</p>
+<p>This is the part the viral post got backwards, so let me be clear. <strong>None of the shipped scripts do anything questionable with this.</strong> They read sensors and write JSON into their own directories, which is exactly what a diagnostics service should do. The engine underneath would simply let them do much more, and what keeps them in their lane is that Microsoft wrote them that way.</p>
+<p>It is worth seeing what the sharper capabilities are actually used for, because the answer is mundane in every case.</p>
+<p><strong>File I/O.</strong> <code>scenario/system_summary</code> writes its result to a temporary file, and <code>misc/artifact_manager</code> later publishes it into <code>%ProgramData%\Whesvc\</code> and enforces the retention limits:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span><span style="color:#66d9ef">local</span> path <span style="color:#f92672">=</span> env.expand(<span style="color:#e6db74">&#34;%TEMP%</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">&#34;</span>) <span style="color:#f92672">..</span> name <span style="color:#f92672">..</span> <span style="color:#e6db74">&#34;_summary.json&#34;</span>
+</span></span><span style="display:flex;"><span>file.write_data(path, json.stringify(summary))
+</span></span></code></pre></div><p><strong>Registry.</strong> <code>scenario/perftrack_monitor</code> keeps its counters under whesvc&rsquo;s own key so they survive a restart. On my machine one of those entries looks like this:</p>
+<pre tabindex="0"><code>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\whesvc\scenarios\29783662:1
+    id                a92c2390-587f-4ee7-af5b-d1e05402e98a
+    number            29783662
+    on_ac             1
+    total_count       5
+    bucket_ms         2
+    last_update_time  134309573839635035
+</code></pre><p>The only write that leaves whesvc&rsquo;s own keys is <code>misc/driver_info</code>, which can set <code>VerifyDrivers</code>, <code>VerifyDriverLevel</code>, <code>VerifyMode</code>, and <code>VerifierOptions</code> under <code>Session Manager\Memory Management</code>. That is Driver Verifier configuration, used by <code>memory_monitor</code> for pool tracking, and it is gated behind <code>WINDIAG_DRIVER_TELEMETRY_ENABLED</code>. It is easily the most invasive thing any of these scripts can do to a machine.</p>
+<p><strong>Process creation.</strong> Exactly one script spawns a process through <code>security.create_process</code>, and it runs an in-box Windows tool:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span><span style="color:#66d9ef">local</span> opts <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    cmd_line   <span style="color:#f92672">=</span> sysdir <span style="color:#f92672">..</span> <span style="color:#e6db74">&#34;/powercfg.exe /sleepstudy /output </span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">..</span> outfile <span style="color:#f92672">..</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">&#34;</span>,
+</span></span><span style="display:flex;"><span>    redirected <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    console    <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">local</span> proc <span style="color:#f92672">=</span> security.create_process(opts)
+</span></span></code></pre></div><p>That is <code>misc/sleep_study</code> asking <code>powercfg</code> for a sleep study report and then reading its output. Interestingly, there is a second process-spawning path that does not use this binding at all: <code>core/etw</code> shells out to <code>wpr.exe -merge</code> through <code>io_popen</code>. Two mechanisms for the same job, in the same codebase.</p>
+<h2 id="getting-the-scripts-out">Getting the Scripts Out</h2>
+<p>Now I can go read them. Except the resources are not plain Lua, and this is probably why nobody had looked inside: running <code>strings</code> on <code>whesvc_assets.dll</code> shows nothing resembling a script.</p>
+<p>Each resource starts with a small header:</p>
+<pre tabindex="0"><code>0x00  u32  magic 0xC0E5510A
+0x04  u16  header size (0x18)
+0x06  u16  tag
+0x08  u64  uncompressed size
+0x10  u64  uncompressed size (again)
+0x18  u32  compressed size
+0x1C  ...  &#39;CK&#39; + raw DEFLATE
+</code></pre><p>That <code>CK</code> is the giveaway: MSZIP, which is deflate with a two-byte signature in front, so the unpacker is four lines of Python. No encryption, and no hash or MAC anywhere in the header either, which will matter later.</p>
+<p>Underneath the compression is Lua 5.4 bytecode. And here is the part I did not expect:</p>
+<table>
+	<thead>
+			<tr>
+					<th></th>
+					<th></th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Modules carrying debug info</td>
+					<td>105 / 105</td>
+			</tr>
+			<tr>
+					<td>Named local variables</td>
+					<td>6,069</td>
+			</tr>
+			<tr>
+					<td>Named upvalues</td>
+					<td>2,149</td>
+			</tr>
+			<tr>
+					<td>Line-number entries</td>
+					<td>47,688</td>
+			</tr>
+			<tr>
+					<td>Distinct source paths</td>
+					<td>86 (<code>@lualib\core\net.lua</code>, <code>@luamod\scenario\ecp.lua</code>, &hellip;)</td>
+			</tr>
+	</tbody>
+</table>
+<p><strong>Nothing was stripped.</strong> The header sentinels are the stock values (<code>LUAC_INT = 0x5678</code>, <code>LUAC_NUM = 370.5</code>), and the opcode table is unmodified upstream ordering. I wrote a disassembler against the plain Lua 5.4 opcode list and it decoded every module correctly on the first attempt.</p>
+<p>Why keep the debug info? I suspect it is deliberate. The engine formats its errors as <code>file(line)!address</code>, and the WIL telemetry logs failures with call context. If you strip the symbols, you blind yourself to your own field failures. There are even <code>lua_debugger_enabled</code> and <code>vscode_debugger_enabled</code> hooks sitting in the sandbox script.</p>
+<h2 id="so-what-is-keeping-this-in-check">So What Is Keeping This In Check?</h2>
+<p>Two things are supposed to, and both are worth a look.</p>
+<p>The first is a sandbox. It lives in a <code>LUASB</code> resource plus <code>core/global.lua</code>, and before any scenario script runs it deletes a list of globals from the environment: <code>debug</code>, <code>require</code>, <code>os</code>, <code>package</code>, <code>loadfile</code>, <code>dofile</code>, <code>load</code>, <code>getmetatable</code>, <code>setmetatable</code>, and <code>collectgarbage</code>.</p>
+<p>That accomplishes one thing, and it is the important one. With <code>load</code>, <code>loadfile</code>, <code>dofile</code>, and <code>require</code> all gone, a scenario script <strong>cannot load code that did not ship in the signed DLL</strong>. There is a path that loads Lua from the filesystem through a <code>WINDIAG_LUALIB_PATH</code> environment variable, but it is gated on the host process being <code>windiag.exe</code>, a separate developer tool, so that door is closed too.</p>
+<p>Beyond that it does not do much. <code>io</code> was never on the block list, and <code>io.popen</code> is deliberately re-exported as <code>io_popen</code> &ndash; <code>core/etw.lua</code> uses it to shell out to <code>wpr.exe -merge</code> &ndash; so removing <code>os</code> does not remove the ability to run commands. The core libraries also grab what they need before the strip happens, and <code>core/global</code> keeps an upvalue named, with admirable honesty, <code>sandbox_stripped_refs</code>. It is namespace hygiene rather than confinement.</p>
+<p>The second thing is the signature on <code>whesvc_assets.dll</code>, since that is the DLL holding the code that actually runs. Except there is no check. Neither DLL imports <code>WinVerifyTrust</code>, the process never sets <code>MicrosoftSignedOnly</code>, and there is no hash or MAC in the container header either. The file is validly signed, and nothing looks at that signature when it is loaded.</p>
+<p>But that does not really matter, because of who is allowed to write the file:</p>
+<pre tabindex="0"><code>C:\Windows\System32\whesvc_assets.dll
+    NT SERVICE\TrustedInstaller:(F)
+    BUILTIN\Administrators:(RX)
+    NT AUTHORITY\SYSTEM:(RX)
+    BUILTIN\Users:(RX)
+</code></pre><p>TrustedInstaller has full control, and everybody else &ndash; including SYSTEM and Administrators &ndash; gets read and execute only. Anyone who can replace this file is already an administrator, and administrator to SYSTEM is not a boundary Windows defends anyway. <strong>So this is fine.</strong></p>
+<p>So what actually keeps this engine in bounds is not the sandbox and not the signature. It is a file permission, plus the set of scripts Microsoft chose to ship. That is enough in practice, but it is worth knowing that is what the safety rests on.</p>
+<h2 id="so-what-do-the-scripts-actually-do">So What Do the Scripts Actually Do?</h2>
+<p>Now I can finally answer the question I left hanging earlier: what is <code>builtin://scenario/init</code>?</p>
+<p>The <code>builtin://</code> scheme is handled inside <code>windiag.dll</code>, and it simply names a resource. <code>scenario/init</code> becomes the <code>LUAMOD</code> resource called <code>SCENARIO/INIT</code>, which is 536 bytes on disk and unpacks to 777 bytes of bytecode. The debug info calls it <code>@luamod\scenario\init.lua</code>, and it is 48 instructions in total, so I can show the whole thing:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span>disable_global_variables()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">local</span> opts <span style="color:#f92672">=</span> module_options{
+</span></span><span style="display:flex;"><span>    disabled_modules <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">local</span> workflow  <span style="color:#f92672">=</span> reflib(<span style="color:#e6db74">&#34;misc/module_workflow&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">local</span> telemetry <span style="color:#f92672">=</span> reflib(<span style="color:#e6db74">&#34;misc/utc_telemetry&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>telemetry.event_write(<span style="color:#e6db74">&#34;FeatureStates&#34;</span>, feature_states())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>workflow.start_feature_modules({
+</span></span><span style="display:flex;"><span>    { module_uri <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/housekeeper&#34;</span> },
+</span></span><span style="display:flex;"><span>    { module_uri <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/rtsmon&#34;</span> },
+</span></span><span style="display:flex;"><span>    { module_uri <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/devicehot&#34;</span> },
+</span></span><span style="display:flex;"><span>    { feature_name    <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ECP&#34;</span>,
+</span></span><span style="display:flex;"><span>      module_uri      <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/ecp&#34;</span>,
+</span></span><span style="display:flex;"><span>      on_battery_only <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span> },
+</span></span><span style="display:flex;"><span>    { feature_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;MemoryLeakDetection&#34;</span>,
+</span></span><span style="display:flex;"><span>      module_uri   <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/memory_handle_leak&#34;</span> },
+</span></span><span style="display:flex;"><span>    { module_uri <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;builtin://scenario/noisy_fan&#34;</span> },
+</span></span><span style="display:flex;"><span>}, <span style="color:#e6db74">&#34;init&#34;</span>, opts.disabled_modules)
+</span></span></code></pre></div><p>That is the entire entry point. It locks down the environment, pulls in two helper libraries, emits one telemetry event recording which feature flags are on, and hands six modules to the workflow starter. No logic of its own beyond that.</p>
+<p>From there the structure is easy to follow. Of the 23 scenario modules, 21 start by default. Those six above are the first wave, and one of them, <code>rtsmon</code>, opens a realtime ETW session and starts fourteen more. Thirteen run unconditionally, six sit behind Windows feature flags that Microsoft controls server-side, and one needs a battery to be present.</p>
+<p>Roughly, they fall into four groups.</p>
+<p><strong>Responsiveness.</strong> <code>hang_trace</code> waits on <code>WerHangTraceSignal</code> and captures a trace when an application stops responding. <code>input_delays</code> and <code>output_delays</code> watch input latency and display glitches. <code>slow_app_launch</code> fires when an app takes too long to start. <code>svc_start_stop</code> flags services stuck in a pending state. And <code>hotkey_trace</code> is the interesting one, because it captures a full trace when <em>you</em> press a hotkey. That is the manual reproduction path, for when you can trigger the problem yourself.</p>
+<p><strong>Power and thermals.</strong> <code>ecp</code> decides between <code>LowerPower</code>, <code>NoChange</code>, and <code>HigherPower</code>, and then applies the result. <code>excessive_power_drain</code> looks for sustained drain and badly behaved background apps. <code>fast_battery_drain_improvement</code> is a small state machine that engages QoS separation and CPU frequency throttling when drain stays high. <code>sleep_offenders</code> works out what kept the machine awake, and shells out to <code>powercfg /sleepstudy</code> to do it.</p>
+<p><strong>Memory.</strong> <code>memory_monitor</code> takes heap snapshots. <code>memory_handle_leak</code> does real leak detection: it tracks per-process memory and handle counts across intervals, and uses consecutive-increase counts together with a linear regression slope to tell a leak apart from normal growth. That is more statistics than I expected to find in a shipped diagnostic script.</p>
+<p><strong>Aggregation.</strong> <code>system_summary</code> is where the famous 15 minutes comes from. It reads <code>WINDIAG_SYSTEM_SUMMARY_FLUSH_SEC</code>, which defaults to <code>900</code>. The artifacts on my own machine agree:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{<span style="color:#f92672">&#34;start_time&#34;</span>:<span style="color:#e6db74">&#34;2026-08-11 21:02:16.727114&#34;</span>,
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;end_time&#34;</span>:<span style="color:#e6db74">&#34;2026-08-11 21:17:56.930144&#34;</span>,
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;elapsed_time&#34;</span>:<span style="color:#e6db74">&#34;00:15:40.203030&#34;</span>, <span style="color:#960050;background-color:#1e0010">...</span>}
+</span></span></code></pre></div><p>So the 15 minutes is a real number. The question is what happens when the timer fires, and the answer is that it writes a JSON file into <code>C:\ProgramData\Whesvc\</code> and emits one small ETW telemetry event. Here is an entire crash record, from my machine:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{<span style="color:#f92672">&#34;app_name&#34;</span>:<span style="color:#e6db74">&#34;binaryninja.exe&#34;</span>,<span style="color:#f92672">&#34;mod_name&#34;</span>:<span style="color:#e6db74">&#34;TTDReplay.dll&#34;</span>,
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;exception_code&#34;</span>:<span style="color:#e6db74">&#34;0xC0000005&#34;</span>,<span style="color:#f92672">&#34;exception_offset&#34;</span>:<span style="color:#e6db74">&#34;0x994EA&#34;</span>,
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;app_version&#34;</span>:<span style="color:#e6db74">&#34;5.4.10219.0&#34;</span>,<span style="color:#f92672">&#34;count&#34;</span>:<span style="color:#ae81ff">1</span>}
+</span></span></code></pre></div><p>That is the payload everybody was worried about. It is a crash summary, and in this case it is my own debugger crashing on me during development.</p>
+<p>The network side is similarly undramatic. Across all 84 scripts the only URL is <code>symweb.azurefd.net</code>, which is Microsoft&rsquo;s public symbol server, and it is gated behind a <code>WINDIAG_SYM_CLOUD_TOKEN</code> environment variable that is not set on a retail machine. No scenario module makes an HTTP request at all. <code>windiag.dll</code> imports three WinINet functions and zero socket functions. The running service holds no TCP or UDP endpoints.</p>
+<p>Two controls deserve more credit than the discussion gave Microsoft. Heavy trace capture checks <code>AllowTelemetry</code> and requires it to be 3, meaning full or optional diagnostic data, and returns false when the value cannot be read at all &ndash; so it fails closed. And auto-escalation, the one mechanism that can hand data to the telemetry pipeline without you filing feedback, is off by default in all ten automatic scenarios. It is on in exactly one: <code>hotkey_trace</code>, the one you trigger yourself.</p>
+<h2 id="how-does-it-know-the-fan-is-loud">How Does It Know the Fan Is Loud?</h2>
+<p><code>SCENARIO/NOISY_FAN</code> was actually the first module I opened, because I could not immediately think of a non-alarming way to detect a noisy fan. I have <a href="/posts/reversing/reverse_engineering_and_fixing_a_fan/main/">taken a fan apart on this blog before</a>, so I felt some obligation to check this one.</p>
+<p>Happily, it is not listening to anything. I went through the full import tables of both binaries, and there are no audio APIs anywhere.</p>
+<p>What it does instead is read RPM. The platform&rsquo;s thermal stack exposes a fan descriptor that sorts RPM into four zones, each with a maximum RPM and an accumulated time spent in that zone:</p>
+<pre tabindex="0"><code>FanNoiseZoneLow  FanNoiseZoneMedium  FanNoiseZoneMediumHigh  FanNoiseZoneHigh
+</code></pre><p>The module polls on an interval, and then does exactly one comparison:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> time_per_impact[FanNoiseZoneHigh].seconds_in_zone <span style="color:#f92672">&gt;</span> high_impact_sec_threshold <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>    device_health.signal_problem{ problem_area <span style="color:#f92672">=</span> Power, source <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;NoisyFan&#34;</span> }
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><p>So &ldquo;noisy&rdquo; means the fan has spent more than N accumulated seconds above an RPM threshold that the OEM declared. It is a proxy for noise rather than a measurement of it, which is a sensible way to do this without a microphone. And if your machine has no fan telemetry at all, the module exits immediately with <code>Fan sensors not supported on device</code>, which is what happens on most desktops.</p>
+<h2 id="there-was-already-a-cve">There Was Already a CVE</h2>
+<p>While writing this up, I found that this service has already produced a real vulnerability: <a href="https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-59241">CVE-2025-59241</a>, a local elevation of privilege with CVSS 7.8, fixed in builds <code>26100.6899</code> and <code>26200.6899</code> back in October 2025. Microsoft classified it as improper link resolution before file access. (<a href="https://www.tenable.com/cve/CVE-2025-59241">Tenable</a> has a more readable summary than the MSRC page.)</p>
+<p>Which rather punctures my earlier line about nobody having opened this binary. Somebody clearly had, and they walked away with a CVE while I walked away with a blog post. I will console myself with the belief that I am at least the first to write the thing up in this much detail.</p>
+<p>Microsoft published one sentence about it, and I could not find a pre-patch binary on my machine to diff against, so what follows is the shape of the problem rather than a confirmed account of the exact reported case.</p>
+<p>The ingredients are still visible. The service creates <code>C:\ProgramData\Whesvc\&lt;artifact_type&gt;\</code> if it does not exist and writes a file inside it, as SYSTEM, with no path validation. The type names are hardcoded and predictable, and <code>system_summary</code> guarantees a write every fifteen minutes. Meanwhile, look at who can write into that tree:</p>
+<pre tabindex="0"><code>icacls C:\ProgramData\Whesvc
+    BUILTIN\Users:(I)(CI)(WD,AD,WEA,WA)      &lt;- create files and directories
+    CREATOR OWNER:(I)(OI)(CI)(IO)(F)
+</code></pre><p>Every entry is marked <code>(I)</code>, meaning inherited &ndash; the service never sets its own DACL, it just accepts whatever <code>C:\ProgramData</code> hands down. Once an unprivileged user can create a directory a SYSTEM process will later write into, the classic move is to make it a junction pointing somewhere else. The retention logic, which deletes old artifacts, offers the same trick in reverse.</p>
+<p>The fix is visible in the current binaries, and I like it. Remember that <code>SetProcessMitigationPolicy(ProcessRedirectionTrustPolicy, 1)</code> at the very top of <code>StartWHEService</code>? That tells the kernel to refuse to follow junctions and symlinks created by less-trusted principals. It kills the entire class of bug rather than patching one path, and it is set declaratively in the svchost group configuration as well. There is a second and narrower guard in <code>core/file.lua</code>, where the recursive directory walker refuses to descend into reparse points:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lua" data-lang="lua"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> file.is_directory(entry) <span style="color:#f92672">and</span> <span style="color:#f92672">not</span> file.is_reparse_point(entry) <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>    table.insert(q, entry.path)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><p>This is the only call to <code>is_reparse_point</code> in all 84 modules, which tells you plainly what it was added for.</p>
+<p>The artifact directory still inherits its permissive DACL rather than setting its own, so the defense rests on that one kernel mitigation. It is a good mitigation and it does the job, but an explicit DACL would have made it two layers instead of one.</p>
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>The viral claim was wrong on essentially every count. The service is not new, it does not upload your traces, and it is not recording anything. The 15 minutes is a real number attached to a thoroughly boring event, and Hanselman&rsquo;s description matches the code right down to the directory path he quoted.</p>
+<p>What is worth talking about is the machinery rather than the behavior. The scripts read sensors and write JSON files, while the engine underneath would let them write any file, set any registry key, spawn processes, and call arbitrary native functions through an FFI, all as SYSTEM. None of that is being misused &ndash; I went looking for something dodgy and did not find it. It is simply more capability than the task calls for, and CVE-2025-59241 is a fair illustration of what that can cost. Windows Health and Optimized Experiences is not spyware; it is a legitimate diagnostics service built on a general-purpose scripting runtime, and that is a different thing to threat model than a program which reads a fan sensor.</p>
+<hr>
+<p>The tooling I wrote for this &ndash; the PE resource extractor, the MSZIP container unpacker, and the Lua 5.4 disassembler &ndash; is on <a href="https://github.com/xusheng6/whesvc-analysis">GitHub</a>, together with instructions for unpacking the scripts from your own copy of Windows.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="/categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        3551 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-08-15 20:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h"></span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+
+          
+            <span class="button next">
+              <a href="/posts/reversing/sogou_affiliate_rewrite/main/">
+                <span class="button__text">How Sogou Browser Rewrites Search Affiliate Codes</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2026</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
+            <span><a href="/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.d76f43f920539c8ab3978e5b652202147a633a4ae085f3559a98449e7fda6fe5c9179516e0cbd3a3422ce557c5e24ee6bbfd9a3c08627a6eafc136fae7f03ff8.js" integrity="sha512-129D&#43;SBTnIqzl45bZSICFHpjOkrghfNVmphEnn/ab&#43;XJF5UW4MvTo0Is5VfF4k7mu/2aPAhiem6vwTb65/A/&#43;A=="></script>
+
+
+
+    </body>
+</html>

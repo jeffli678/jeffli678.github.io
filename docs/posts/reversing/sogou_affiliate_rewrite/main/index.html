@@ -1,27 +1,344 @@
-<!doctype html><html lang=en><head><meta charset=UTF-8><meta http-equiv=X-UA-Compatible content="ie=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=author content><meta name=description content="I recently poked at Sogou Browser (version 13.9.6121.400) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="I recently poked at Sogou Browser (version 13.9.6121.400) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
 Affiliate codes, briefly If you have looked closely at a Baidu search URL you have seen something like this:
-"><meta name=keywords content="Xusheng Li,Binary Ninja,reverse engineering,debugger,Time-Travel Debugging,TTD,security research,Vector 35"><meta name=robots content="noodp"><meta name=theme-color content><link rel=canonical href=/posts/reversing/sogou_affiliate_rewrite/main/><title>How Sogou Browser Rewrites Search Affiliate Codes :: Xusheng Li</title><link rel=stylesheet href=/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css><meta itemprop=name content="How Sogou Browser Rewrites Search Affiliate Codes"><meta itemprop=description content="I recently poked at Sogou Browser (version 13.9.6121.400) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
-Affiliate codes, briefly If you have looked closely at a Baidu search URL you have seen something like this:"><meta itemprop=datePublished content="2026-08-11T00:00:00+00:00"><meta itemprop=dateModified content="2026-08-11T00:00:00+00:00"><meta itemprop=wordCount content="456"><meta itemprop=image content="/"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="/"><meta name=twitter:title content="How Sogou Browser Rewrites Search Affiliate Codes"><meta name=twitter:description content="I recently poked at Sogou Browser (version 13.9.6121.400) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
-Affiliate codes, briefly If you have looked closely at a Baidu search URL you have seen something like this:"><meta property="og:url" content="/posts/reversing/sogou_affiliate_rewrite/main/"><meta property="og:site_name" content="Xusheng Li"><meta property="og:title" content="How Sogou Browser Rewrites Search Affiliate Codes"><meta property="og:description" content="I recently poked at Sogou Browser (version 13.9.6121.400) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
-Affiliate codes, briefly If you have looked closely at a Baidu search URL you have seen something like this:"><meta property="og:locale" content="en_us"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-08-11T00:00:00+00:00"><meta property="article:modified_time" content="2026-08-11T00:00:00+00:00"><meta property="og:image" content="/"><meta property="article:section" content="Reversing"><meta property="article:published_time" content="2026-08-11 00:00:00 +0000 UTC"></head><body><div class=container><header class=header><span class=header__inner><a href=/ style=text-decoration:none><div class=logo><span class=logo__mark>></span>
-<span class=logo__text>Xusheng</span>
-<span class=logo__cursor></span></div></a><span class=header__right><nav class=menu><ul class=menu__inner><li><a href=/posts>Blog</a></li><li><a href=/cv.pdf>CV</a></li></ul></nav><span class=menu-trigger><svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></span></span></span></header><div class=content><main class=post><div class=post-info><p><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-3 minutes</p></div><article><h1 class=post-title><a href=/posts/reversing/sogou_affiliate_rewrite/main/>How Sogou Browser Rewrites Search Affiliate Codes</a></h1><div class=post-content><p>I recently poked at <a href=https://ie.sogou.com/>Sogou Browser</a> (version <code>13.9.6121.400</code>) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.</p><h2 id=affiliate-codes-briefly>Affiliate codes, briefly</h2><p>If you have looked closely at a Baidu search URL you have seen something like this:</p><pre tabindex=0><code>https://www.baidu.com/s?wd=something&amp;tn=47018152_13_dg&amp;ie=utf-8
-</code></pre><p>That <code>tn=</code> is a Baidu Union account identifier — it tells Baidu which partner the traffic came through. This is old and well known; Firefox historically shipped <code>tn=suvion_dg</code>, Maxthon used <code>tn=myie2dg</code>. Software that ships a Baidu search box generally has its own code.</p><p>Sogou has an equivalent. Sogou search URLs carry a <code>p=</code> parameter shaped like <code>sogou-site-0e57098d0318a954</code> — a four-letter channel type and sixteen hex digits.</p><h2 id=replacing-the-codes>Replacing the codes</h2><p>When a Sogou Browser user navigates to a Baidu search carrying an affiliate code, this is what the browser actually requests:</p><pre tabindex=0><code>in   https://www.baidu.com/s?wd=test&amp;tn=47018152_13_dg&amp;ie=utf-8
+" />
+<meta name="keywords" content="Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="/posts/reversing/sogou_affiliate_rewrite/main/" />
+
+
+    <title>
+        
+            How Sogou Browser Rewrites Search Affiliate Codes :: Xusheng Li 
+        
+    </title>
+
+
+
+
+    
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+
+	<meta itemprop="name" content="How Sogou Browser Rewrites Search Affiliate Codes">
+	<meta itemprop="description" content="I recently poked at Sogou Browser (version 13.9.6121.400) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
+Affiliate codes, briefly If you have looked closely at a Baidu search URL you have seen something like this:">
+	<meta itemprop="datePublished" content="2026-08-11T00:00:00+00:00">
+	<meta itemprop="dateModified" content="2026-08-11T00:00:00+00:00">
+	<meta itemprop="wordCount" content="456">
+	<meta itemprop="image" content="/">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="/">
+	<meta name="twitter:title" content="How Sogou Browser Rewrites Search Affiliate Codes">
+	<meta name="twitter:description" content="I recently poked at Sogou Browser (version 13.9.6121.400) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
+Affiliate codes, briefly If you have looked closely at a Baidu search URL you have seen something like this:">
+
+
+
+    <meta property="og:url" content="/posts/reversing/sogou_affiliate_rewrite/main/">
+	<meta property="og:site_name" content="Xusheng Li">
+	<meta property="og:title" content="How Sogou Browser Rewrites Search Affiliate Codes">
+	<meta property="og:description" content="I recently poked at Sogou Browser (version 13.9.6121.400) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.
+Affiliate codes, briefly If you have looked closely at a Baidu search URL you have seen something like this:">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-08-11T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-08-11T00:00:00+00:00">
+		<meta property="og:image" content="/">
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2026-08-11 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">Xusheng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li><li><a href="/cv.pdf">CV</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        3 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="/posts/reversing/sogou_affiliate_rewrite/main/">How Sogou Browser Rewrites Search Affiliate Codes</a>
+      </h1>
+
+      
+
+      
+
+      <div class="post-content">
+        <p>I recently poked at <a href="https://ie.sogou.com/">Sogou Browser</a> (version <code>13.9.6121.400</code>) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.</p>
+<h2 id="affiliate-codes-briefly">Affiliate codes, briefly</h2>
+<p>If you have looked closely at a Baidu search URL you have seen something like this:</p>
+<pre tabindex="0"><code>https://www.baidu.com/s?wd=something&amp;tn=47018152_13_dg&amp;ie=utf-8
+</code></pre><p>That <code>tn=</code> is a Baidu Union account identifier — it tells Baidu which partner the traffic came through. This is old and well known; Firefox historically shipped <code>tn=suvion_dg</code>, Maxthon used <code>tn=myie2dg</code>. Software that ships a Baidu search box generally has its own code.</p>
+<p>Sogou has an equivalent. Sogou search URLs carry a <code>p=</code> parameter shaped like <code>sogou-site-0e57098d0318a954</code> — a four-letter channel type and sixteen hex digits.</p>
+<h2 id="replacing-the-codes">Replacing the codes</h2>
+<p>When a Sogou Browser user navigates to a Baidu search carrying an affiliate code, this is what the browser actually requests:</p>
+<pre tabindex="0"><code>in   https://www.baidu.com/s?wd=test&amp;tn=47018152_13_dg&amp;ie=utf-8
 out  https://www.baidu.com/s?wd=test&amp;tn=98010089_dg&amp;ie=utf-8&amp;ch=19
-</code></pre><p>And the same on Sogou, with that engine&rsquo;s own <code>p=</code> scheme:</p><pre tabindex=0><code>in   https://www.sogou.com/web?query=x&amp;p=sogou-site-0e57098d0318a954&amp;ie=utf8
+</code></pre><p>And the same on Sogou, with that engine&rsquo;s own <code>p=</code> scheme:</p>
+<pre tabindex="0"><code>in   https://www.sogou.com/web?query=x&amp;p=sogou-site-0e57098d0318a954&amp;ie=utf8
 out  https://www.sogou.com/web?query=x&amp;p=sogou-addr-cc9657884708170e&amp;ie=utf8
-</code></pre><p>The code is swapped and the rest of the URL is left alone. On the Baidu side a <code>ch=19</code> parameter is set as well, overwriting any existing <code>ch</code> value rather than duplicating it.</p><p>Two conditions have to hold for it to fire at all. The URL must <em>begin</em> with <code>www.baidu.com</code> or <code>sogou.com</code> — a Sogou code carried by some other site, or a Baidu URL nested in a redirect wrapper, is ignored. And the code has to appear on a list built into the browser; anything else is left untouched.</p><h2 id=the-list-of-codes>The list of codes</h2><p>The lists live in a plugin called <code>QBSafe.dll</code>, loaded at browser startup, which receives every navigation URL.</p><p>For Sogou URLs there are three tables of strings in <code>.data</code>, holding 128, 219 and 246 entries — 593 in total, every one of the form <code>sogou-&lt;four letters>-&lt;sixteen hex></code>, and every one distinct. Each table has a single replacement, and the tables are tried in order with the first match winning:</p><table><thead><tr><th>entries</th><th>replaced with</th></tr></thead><tbody><tr><td>128</td><td><code>sogou-clse-f507783927f2ec27</code></td></tr><tr><td>219</td><td><code>sogou-clse-60a70bb05b08d6cd</code></td></tr><tr><td>246</td><td><code>sogou-addr-cc9657884708170e</code></td></tr></tbody></table><p>For Baidu URLs there are eleven codes built directly on the stack, all mapping to one replacement:</p><pre tabindex=0><code>tn=93912046_hao_pg   tn=68082196_oem_dg   tn=18029102_oem_dg
+</code></pre><p>The code is swapped and the rest of the URL is left alone. On the Baidu side a <code>ch=19</code> parameter is set as well, overwriting any existing <code>ch</code> value rather than duplicating it.</p>
+<p>Two conditions have to hold for it to fire at all. The URL must <em>begin</em> with <code>www.baidu.com</code> or <code>sogou.com</code> — a Sogou code carried by some other site, or a Baidu URL nested in a redirect wrapper, is ignored. And the code has to appear on a list built into the browser; anything else is left untouched.</p>
+<h2 id="the-list-of-codes">The list of codes</h2>
+<p>The lists live in a plugin called <code>QBSafe.dll</code>, loaded at browser startup, which receives every navigation URL.</p>
+<p>For Sogou URLs there are three tables of strings in <code>.data</code>, holding 128, 219 and 246 entries — 593 in total, every one of the form <code>sogou-&lt;four letters&gt;-&lt;sixteen hex&gt;</code>, and every one distinct. Each table has a single replacement, and the tables are tried in order with the first match winning:</p>
+<table>
+	<thead>
+			<tr>
+					<th>entries</th>
+					<th>replaced with</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>128</td>
+					<td><code>sogou-clse-f507783927f2ec27</code></td>
+			</tr>
+			<tr>
+					<td>219</td>
+					<td><code>sogou-clse-60a70bb05b08d6cd</code></td>
+			</tr>
+			<tr>
+					<td>246</td>
+					<td><code>sogou-addr-cc9657884708170e</code></td>
+			</tr>
+	</tbody>
+</table>
+<p>For Baidu URLs there are eleven codes built directly on the stack, all mapping to one replacement:</p>
+<pre tabindex="0"><code>tn=93912046_hao_pg   tn=68082196_oem_dg   tn=18029102_oem_dg
 tn=39042058_2_oem_dg tn=02049043_35_pg    tn=47018152_13_dg
 tn=02049043_32_pg    tn=47018152_8_dg     tn=02049043_50_pg
 tn=93139410_hao_pg   tn=02049043_30_pg
                   ↓
             tn=98010089_dg     (plus ch=19)
-</code></pre><h2 id=mitm-verification>MITM verification</h2><p>To confirm my finding, I set up mitmproxy in front of the browser and observed the behavior:</p><table><thead><tr><th>navigated to</th><th>what left the machine</th></tr></thead><tbody><tr><td>baidu <code>tn=02049043_35_pg</code></td><td><code>tn=98010089_dg …&amp;ch=19</code></td></tr><tr><td>baidu <code>tn=00000000_xx_yy</code></td><td>unchanged</td></tr><tr><td>sogou <code>p=sogou-site-0e57098d0318a954</code></td><td><code>p=sogou-addr-cc9657884708170e</code></td></tr><tr><td>sogou <code>p=sogou-site-ffffffffffffffff</code></td><td>unchanged</td></tr><tr><td><code>example.com/?p=sogou-site-0e57098d0318a954&amp;x=1</code></td><td>unchanged</td></tr></tbody></table><p>You might be curious why Sogou is doing this. There are many possible reasons, and I will leave that to interested readers.</p></div></article><hr><div class=post-info><p><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
-<span class=tag><a href=/categories/reversing/>Reversing</a></span></p><p><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6A2 2 0 004 4v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-456 Words</p><p><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-2026-08-10 20:00</p></div><div class=pagination><div class=pagination__title><span class=pagination__title-h></span><hr></div><div class=pagination__buttons><span class="button next"><a href=/posts/reversing/dev_hunter/readme/><span class=button__text>Freeing Dev Hunter from Excel 2000</span>
-<span class=button__icon>→</span></a></span></div></div></main></div><footer class=footer><div class=footer__inner><div class=footer__content><span>&copy; 2026</span>
-<span><a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></span>
-<span><a href=/posts/index.xml target=_blank title=rss><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg></a></span></div></div><div class=footer__inner><div class=footer__content><span>Powered by <a href=http://gohugo.io>Hugo</a></span>
-<span>Made with &#10084; by <a href=https://github.com/rhazdon>Djordje Atlialp</a></span></div></div></footer></div><script type=text/javascript src=/bundle.min.d76f43f920539c8ab3978e5b652202147a633a4ae085f3559a98449e7fda6fe5c9179516e0cbd3a3422ce557c5e24ee6bbfd9a3c08627a6eafc136fae7f03ff8.js integrity="sha512-129D+SBTnIqzl45bZSICFHpjOkrghfNVmphEnn/ab+XJF5UW4MvTo0Is5VfF4k7mu/2aPAhiem6vwTb65/A/+A=="></script></body></html>
+</code></pre><h2 id="mitm-verification">MITM verification</h2>
+<p>To confirm my finding, I set up mitmproxy in front of the browser and observed the behavior:</p>
+<table>
+	<thead>
+			<tr>
+					<th>navigated to</th>
+					<th>what left the machine</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>baidu <code>tn=02049043_35_pg</code></td>
+					<td><code>tn=98010089_dg …&amp;ch=19</code></td>
+			</tr>
+			<tr>
+					<td>baidu <code>tn=00000000_xx_yy</code></td>
+					<td>unchanged</td>
+			</tr>
+			<tr>
+					<td>sogou <code>p=sogou-site-0e57098d0318a954</code></td>
+					<td><code>p=sogou-addr-cc9657884708170e</code></td>
+			</tr>
+			<tr>
+					<td>sogou <code>p=sogou-site-ffffffffffffffff</code></td>
+					<td>unchanged</td>
+			</tr>
+			<tr>
+					<td><code>example.com/?p=sogou-site-0e57098d0318a954&amp;x=1</code></td>
+					<td>unchanged</td>
+			</tr>
+	</tbody>
+</table>
+<p>You might be curious why Sogou is doing this. There are many possible reasons, and I will leave that to interested readers.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="/categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        456 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-08-10 20:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h"></span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+            <span class="button previous">
+              <a href="/posts/reversing/whesvc/main/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Windows&#39; Performance Optimizer Is More Capable Than It Needs to Be</span>
+              </a>
+            </span>
+          
+
+          
+            <span class="button next">
+              <a href="/posts/reversing/dev_hunter/readme/">
+                <span class="button__text">Freeing Dev Hunter from Excel 2000</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2026</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
+            <span><a href="/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.d76f43f920539c8ab3978e5b652202147a633a4ae085f3559a98449e7fda6fe5c9179516e0cbd3a3422ce557c5e24ee6bbfd9a3c08627a6eafc136fae7f03ff8.js" integrity="sha512-129D&#43;SBTnIqzl45bZSICFHpjOkrghfNVmphEnn/ab&#43;XJF5UW4MvTo0Is5VfF4k7mu/2aPAhiem6vwTb65/A/&#43;A=="></script>
+
+
+
+    </body>
+</html>
