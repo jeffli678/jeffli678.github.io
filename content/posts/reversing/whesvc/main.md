@@ -17,9 +17,9 @@ Enough people believed it that Microsoft's Scott Hanselman [replied personally](
 
 He is right, and so are the fact-checks that followed on [Neowin](https://www.neowin.net/reports/what-is-the-viral-whesvc-service-and-should-you-disable-it/), [PCWorld](https://www.pcworld.com/article/3206170/microsoft-denies-viral-rumor-of-windows-11-spying-on-you-every-15-minutes.html), and [Windows Latest](https://www.windowslatest.com/2026/08/04/microsoft-denies-windows-11-is-spying-on-desktop-pcs-reveals-what-the-service-actually-does/). The service is not new, it is not recording your screen, and the traces stay on your disk unless you file them yourself.
 
-But something bothered me while reading all of this. Both sides were arguing from the service description and a folder listing. One camp said it is spying, the other said it is not, and nobody seemed to have opened the binary. That is a strange way to settle a question about a program when the program is sitting right there on the disk.
+But it appears to me that nobody has really looked at the binary, and that is quite unsatisfying for a reverse engineer.
 
-So I opened it. It is a perfectly legitimate diagnostics service, and everything it ships does exactly what the name suggests. What surprised me is how it is built: `whesvc` runs a **sandboxed Lua interpreter as SYSTEM**, with 84 compiled Lua scripts riding along, and the machinery underneath is considerably more powerful than the job seems to need.
+So I opened it (well, mostly with [Binary Ninja MCP](https://dev-docs.binary.ninja/guide/mcp.html)). It is a perfectly legitimate diagnostics service, and everything it ships does exactly what the name suggests. What surprised me is how it is built: `whesvc` runs a **Lua interpreter as SYSTEM**, with 84 compiled Lua scripts riding along, and the machinery underneath is considerably more powerful than the job seems to need.
 
 Everything below is on Windows 11 Pro 26200, with service binaries `10.0.26100.8972`. The tools I wrote are in the [companion repo](https://github.com/xusheng6/whesvc-analysis) if you wish to follow along on your own machine.
 
@@ -65,9 +65,9 @@ In fact, `whesvc.dll` barely does any work at all. `WinDiag::Initialize` loads `
 $LuaVersion: Lua 5.4.7  Copyright (C) 1994-2024 Lua.org, PUC-Rio $
 ```
 
-I had to read that twice. Windows ships a **Lua interpreter** in `system32`, and a service runs it as SYSTEM.
+I had not seen this before -- Windows ships a **Lua interpreter** in `system32`, and a service runs it as SYSTEM.
 
-To be fair, Lua is a sensible choice for this kind of job. It is tiny, it is fast, and embedding it is easy. That is exactly why games and embedded devices use it. It is just not what I expected to find in the Windows service surface.
+To be fair, Lua is a sensible choice for this kind of job. It is tiny, it is fast, and embedding it is easy. That is exactly why games and embedded devices use it. It is still a little surprising to see Windows take on a new language dependency inside a system service.
 
 Now, what about the other new DLL? `whesvc_assets.dll` turns out to be even stranger, because it contains no code at all. Its section table is just `.rdata` and `.rsrc`, there is no `.text`, and consequently there is no PDB for it either -- there was nothing to compile. Everything is in the resources:
 
@@ -79,9 +79,7 @@ Now, what about the other new DLL? `whesvc_assets.dll` turns out to be even stra
 
 `LUAMOD` and `LUALIBM` are the Lua. So there are 84 scripts in here, and their names read like a table of contents: `SCENARIO/HANG_TRACE`, `SCENARIO/SLOW_APP_LAUNCH`, `SCENARIO/NOISY_FAN`, `CORE/REG`, `CORE/SECURITY`, `MISC/ARTIFACT_MANAGER`.
 
-At this point I could have gone straight to reading the scripts. But I think it is more useful to first ask a different question.
-
-## What Are the Scripts Allowed to Do?
+## What Could the Scripts Do?
 
 When you find a scripting engine inside a program, the scripts themselves are only half the story. The other half is the bridge between the script and the native world, because that bridge defines the ceiling. A script can never do more than the bridge allows.
 
@@ -106,7 +104,7 @@ Sixty of them are grouped into twelve libraries:
 
 The remaining nineteen do not belong to any library. `core/global.lua` injects them directly into the environment of every script, so they are available without importing anything: `getpid`, `getcmd`, `getcwd`, `process_info`, `system_info`, `system_times`, `sessionid`, `thread_name`, `create_guid`, `sleep`, `event_write`, and a handful of timing primitives.
 
-Let me pause on this table for a moment. Registry write, arbitrary file I/O, process creation, WMI *method* invocation, and a general-purpose FFI. That is roughly the capability set of a systems administration language. It is quite a lot for a program whose job is to notice that your laptop is running hot.
+Registry write, arbitrary file I/O, process creation, WMI *method* invocation, and a general-purpose FFI. That is roughly the capability set of a systems administration language. It is quite a lot for a program whose job is to notice that your laptop is running hot.
 
 The file access surprised me the most, because it has no restriction whatsoever. This is the whole of `write_data`, at line 9 of `core/file.lua`:
 
@@ -119,6 +117,42 @@ end
 No prefix check, no allowlist, no canonicalization. And before you assume `io` here is some hardened Microsoft replacement, it is not -- `windiag.pdb` exports `luaopen_io`, `luaopen_os`, and `luaopen_package` unmodified, so this is the stock PUC-Rio `liolib` calling `fopen`.
 
 I want to be clear about what this does and does not mean, because it is the part the viral post got backwards. **None of the shipped scripts do anything questionable with this.** They read sensors and write JSON files into their own directories, which is exactly what a diagnostics service should do. The observation is only that the engine underneath would happily let them do much more, and the reason they stay in their lane is that Microsoft wrote them that way.
+
+It is worth seeing what the sharper capabilities are actually used for, because the answer is mundane in every case.
+
+**File I/O.** `scenario/system_summary` writes its result to a temporary file, and `misc/artifact_manager` later publishes it into `%ProgramData%\Whesvc\` and enforces the retention limits:
+
+```lua
+local path = env.expand("%TEMP%\\") .. name .. "_summary.json"
+file.write_data(path, json.stringify(summary))
+```
+
+**Registry.** `scenario/perftrack_monitor` keeps its counters under whesvc's own key so they survive a restart. On my machine one of those entries looks like this:
+
+```
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\whesvc\scenarios\29783662:1
+    id                a92c2390-587f-4ee7-af5b-d1e05402e98a
+    number            29783662
+    on_ac             1
+    total_count       5
+    bucket_ms         2
+    last_update_time  134309573839635035
+```
+
+The only write that leaves whesvc's own keys is `misc/driver_info`, which can set `VerifyDrivers`, `VerifyDriverLevel`, `VerifyMode`, and `VerifierOptions` under `Session Manager\Memory Management`. That is Driver Verifier configuration, used by `memory_monitor` for pool tracking, and it is gated behind `WINDIAG_DRIVER_TELEMETRY_ENABLED`. It is easily the most invasive thing any of these scripts can do to a machine.
+
+**Process creation.** Exactly one script spawns a process through `security.create_process`, and it runs an in-box Windows tool:
+
+```lua
+local opts = {
+    cmd_line   = sysdir .. "/powercfg.exe /sleepstudy /output \"" .. outfile .. "\"",
+    redirected = true,
+    console    = false,
+}
+local proc = security.create_process(opts)
+```
+
+That is `misc/sleep_study` asking `powercfg` for a sleep study report and then reading its output. Interestingly, there is a second process-spawning path that does not use this binding at all: `core/etw` shells out to `wpr.exe -merge` through `io_popen`. Two mechanisms for the same job, in the same codebase.
 
 ## Getting the Scripts Out
 
@@ -237,7 +271,7 @@ So the 15 minutes is a real number. The question is what happens when the timer 
  "app_version":"5.4.10219.0","count":1}
 ```
 
-That is the payload everybody was worried about. It is a crash summary, and in this case it is my own debugger crashing on me.
+That is the payload everybody was worried about. It is a crash summary, and in this case it is my own debugger crashing on me during development.
 
 The network side is similarly undramatic. Across all 84 scripts the only URL is `symweb.azurefd.net`, which is Microsoft's public symbol server, and it is gated behind a `WINDIAG_SYM_CLOUD_TOKEN` environment variable that is not set on a retail machine. No scenario module makes an HTTP request at all. `windiag.dll` imports three WinINet functions and zero socket functions. The running service holds no TCP or UDP endpoints.
 
