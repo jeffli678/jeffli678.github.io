@@ -228,6 +228,32 @@ The response parser expects:
 }
 ```
 
+Static analysis is nice, but at this point I wanted to see a real response from
+the server. I reused Paint's own authenticated session and sent the following
+prompt through the moderation endpoint:
+
+```text
+a cobalt blue circle above a tiny orange square
+```
+
+The server returned HTTP 200:
+
+```json
+{
+  "revisedPrompt": "a cobalt blue circle above a tiny orange square",
+  "promptGenerationId": "74d9e06b-adea-43ce-85fe-186a26e2e34a",
+  "watermarkId": "a4145750-cf7b-499f-9f21-98bead990887",
+  "containsHumanReference": false
+}
+```
+
+I also tried the prompt `a portrait of a smiling person wearing a blue hat`.
+This time the response contained a different pair of
+GUIDs and `containsHumanReference` was `true`. The field is therefore a
+server-side classification of whether the prompt refers to a human. Paint
+parses and stores it alongside the IDs, although I found no evidence that it
+controls the watermarking step itself.
+
 `ParseModerateResponse` parses both ID strings as GUIDs and rejects zero values with `InvalidPromptGenerationId` or `InvalidWatermarkId`. The server's `watermarkId` is what becomes part of the generated image:
 
 ```text
