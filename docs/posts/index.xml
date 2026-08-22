@@ -1,19 +1,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Posts on Xusheng Li</title>
-        <link>http://localhost:1313/posts/</link>
+        <link>https://xusheng.dev/posts/</link>
         <description>Recent content in Posts on Xusheng Li</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
         <lastBuildDate>Fri, 21 Aug 2026 00:00:00 +0000</lastBuildDate>
-        <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+        <atom:link href="https://xusheng.dev/posts/index.xml" rel="self" type="application/rss+xml" />
         
         <item>
             <title>Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images</title>
-            <link>http://localhost:1313/posts/reversing/mspaint_invisible_watermark/main/</link>
+            <link>https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/main/</link>
             <pubDate>Fri, 21 Aug 2026 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/mspaint_invisible_watermark/main/</guid>
+            <guid>https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/main/</guid>
             <description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Microsoft Paint and Photos use local models to generate images&lt;/li&gt;
@@ -22,7 +22,14 @@
 &lt;li&gt;The GUID is embedded into the locally generated image as an invisible watermark&lt;/li&gt;
 &lt;li&gt;A separate visible-watermark setting does not control this invisible watermark&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;../social-preview.png&#34; alt=&#34;Paint sends the user prompt to Microsoft’s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels&#34;&gt;&lt;/p&gt;</description>
+
+    &lt;img src=&#34;../social-preview.png&#34;  alt=&#34;Paint sends the user prompt to Microsoft&amp;#39;s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels&#34;  class=&#34;center&#34;  style=&#34;width: 82%; margin: 1.5em auto;&#34;  /&gt;
+
+
+&lt;h2 id=&#34;a-curious-look-at-microsoft-paint&#34;&gt;A curious look at Microsoft Paint&lt;/h2&gt;
+&lt;p&gt;This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like &lt;a href=&#34;https://binary.ninja/2026/08/04/ucpd-dynamic-rules.html&#34;&gt;UCPD&lt;/a&gt;, &lt;a href=&#34;https://xusheng.dev/posts/reversing/whesvc/main/&#34;&gt;WHESCVC&lt;/a&gt;, and I have long known that Microsoft
+added a bunch of &lt;a href=&#34;https://support.microsoft.com/en-us/windows/ai/ai-apps/use-copilot-pc-features-in-paint&#34;&gt;AI features&lt;/a&gt; into the Paint app.
+I do not know if anyone actually uses Paint + AI to generate images, but I wanted to see how exactly the image generation works.&lt;/p&gt;</description>
             <content type="html"><![CDATA[<h2 id="tldr">TL;DR</h2>
 <ul>
 <li>Microsoft Paint and Photos use local models to generate images</li>
@@ -31,7 +38,10 @@
 <li>The GUID is embedded into the locally generated image as an invisible watermark</li>
 <li>A separate visible-watermark setting does not control this invisible watermark</li>
 </ul>
-<p><img src="../social-preview.png" alt="Paint sends the user prompt to Microsoft’s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels"></p>
+
+    <img src="../social-preview.png"  alt="Paint sends the user prompt to Microsoft&#39;s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels"  class="center"  style="width: 82%; margin: 1.5em auto;"  />
+
+
 <h2 id="a-curious-look-at-microsoft-paint">A curious look at Microsoft Paint</h2>
 <p>This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like <a href="https://binary.ninja/2026/08/04/ucpd-dynamic-rules.html">UCPD</a>, <a href="https://xusheng.dev/posts/reversing/whesvc/main/">WHESCVC</a>, and I have long known that Microsoft
 added a bunch of <a href="https://support.microsoft.com/en-us/windows/ai/ai-apps/use-copilot-pc-features-in-paint">AI features</a> into the Paint app.
@@ -239,9 +249,9 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
         
         <item>
             <title>Windows&#39; Performance Optimizer Is More Capable Than It Needs to Be</title>
-            <link>http://localhost:1313/posts/reversing/whesvc/main/</link>
+            <link>https://xusheng.dev/posts/reversing/whesvc/main/</link>
             <pubDate>Sun, 16 Aug 2026 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/whesvc/main/</guid>
+            <guid>https://xusheng.dev/posts/reversing/whesvc/main/</guid>
             <description>&lt;p&gt;Earlier this month, &lt;a href=&#34;https://x.com/x1lly/status/2083229864862056532&#34;&gt;a post on X&lt;/a&gt; went viral by claiming Microsoft had quietly slipped a spy into Windows 11:&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;MICROSOFT ADDED A NEW BACKGROUND SERVICE TO YOUR PC IN WINDOWS 11. It is called Windows Health and Optimized Experiences. It starts automatically every time you boot. It monitors your CPU, thermals, and battery then sends data to Microsoft every 15 minutes.&lt;/p&gt;
@@ -516,9 +526,9 @@ StartMode   : Auto (delayed)
         
         <item>
             <title>How Sogou Browser Rewrites Search Affiliate Codes</title>
-            <link>http://localhost:1313/posts/reversing/sogou_affiliate_rewrite/main/</link>
+            <link>https://xusheng.dev/posts/reversing/sogou_affiliate_rewrite/main/</link>
             <pubDate>Tue, 11 Aug 2026 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/sogou_affiliate_rewrite/main/</guid>
+            <guid>https://xusheng.dev/posts/reversing/sogou_affiliate_rewrite/main/</guid>
             <description>&lt;p&gt;I recently poked at &lt;a href=&#34;https://ie.sogou.com/&#34;&gt;Sogou Browser&lt;/a&gt; (version &lt;code&gt;13.9.6121.400&lt;/code&gt;) out of curiosity and found that it rewrites hundreds of affiliate codes in Baidu or Sogou search URLs. Specifically, there is a list of search affiliate codes hardcoded in the binary, and when one is seen, it is replaced. The search engine only ever sees the substituted code — the original never reaches it.&lt;/p&gt;
 &lt;h2 id=&#34;affiliate-codes-briefly&#34;&gt;Affiliate codes, briefly&lt;/h2&gt;
 &lt;p&gt;If you have looked closely at a Baidu search URL you have seen something like this:&lt;/p&gt;</description>
@@ -607,9 +617,9 @@ tn=93139410_hao_pg   tn=02049043_30_pg
         
         <item>
             <title>Freeing Dev Hunter from Excel 2000</title>
-            <link>http://localhost:1313/posts/reversing/dev_hunter/readme/</link>
+            <link>https://xusheng.dev/posts/reversing/dev_hunter/readme/</link>
             <pubDate>Sun, 19 Jul 2026 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/dev_hunter/readme/</guid>
+            <guid>https://xusheng.dev/posts/reversing/dev_hunter/readme/</guid>
             <description>&lt;p&gt;Dev Hunter is a small game hidden inside Microsoft Excel 2000. It was one of the few pastimes I had during the dull computer classes I sat through in high school, and, like all adults who grow nostalgic for the things they had when they were young, I eventually went looking for it again.&lt;/p&gt;
 &lt;p&gt;This post is the whole story of chasing it down: first getting the game to run on its own outside of Excel, and then — years later — freeing it completely, into a standalone program that carries nothing of Excel with it at all.&lt;/p&gt;</description>
             <content type="html"><![CDATA[<p>Dev Hunter is a small game hidden inside Microsoft Excel 2000. It was one of the few pastimes I had during the dull computer classes I sat through in high school, and, like all adults who grow nostalgic for the things they had when they were young, I eventually went looking for it again.</p>
@@ -673,9 +683,9 @@ tn=93139410_hao_pg   tn=02049043_30_pg
         
         <item>
             <title>What is LG Monitor App Manager actually doing?</title>
-            <link>http://localhost:1313/posts/reversing/lg_monitor_app_manager/readme/</link>
+            <link>https://xusheng.dev/posts/reversing/lg_monitor_app_manager/readme/</link>
             <pubDate>Sat, 18 Jul 2026 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/lg_monitor_app_manager/readme/</guid>
+            <guid>https://xusheng.dev/posts/reversing/lg_monitor_app_manager/readme/</guid>
             <description>&lt;p&gt;I recently bought an LG 34-inch UltraWide monitor. The screen itself works great — no complaints there. But a little while after setting it up, I started to notice this &lt;code&gt;LGMonitorAppManager&lt;/code&gt; thing on my machine:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;../imgs/1.png&#34; alt=&#34;LG Monitor App Installer&#34;&gt;&lt;/p&gt;
 &lt;p&gt;It showed up on its own — I never went to LG&amp;rsquo;s website and downloaded anything. It just appeared one day, offering to install &amp;ldquo;Dual Controller&amp;rdquo; and a few other LG utilities. I did not think about it too much at the time; I clicked the little &lt;code&gt;x&lt;/code&gt; and moved on with my life.&lt;/p&gt;</description>
@@ -827,9 +837,9 @@ https://lmu.lge.com/ExternalService/LGMonitorAppInstaller/McAfee_MonitorAppInfo.
         
         <item>
             <title>Solving a VM Challenge Using BinaryNinja</title>
-            <link>http://localhost:1313/posts/reversing/kata_vm/readme/</link>
+            <link>https://xusheng.dev/posts/reversing/kata_vm/readme/</link>
             <pubDate>Sun, 18 Apr 2021 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/kata_vm/readme/</guid>
+            <guid>https://xusheng.dev/posts/reversing/kata_vm/readme/</guid>
             <description>&lt;p&gt;Recently, my friend &lt;a href=&#34;https://crackmes.one/user/Towel&#34;&gt;Towel&lt;/a&gt; created a &lt;a href=&#34;https://crackmes.one/crackme/605443e333c5d42c3d016f59&#34;&gt;VM challenge&lt;/a&gt;. I have not done any VM crackmes in the last year and decided to try this one. Towel says the challenge should be easy and serves mostly as an introduction for VM crackmes. More importantly, this one has no anti-debugging or static obfuscation, to allow the solver to concentrate on the VM itself.&lt;/p&gt;
 &lt;h2 id=&#34;preliminary&#34;&gt;Preliminary&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;main()&lt;/code&gt; function is actually quite simple:&lt;/p&gt;
@@ -1035,9 +1045,9 @@ End
         
         <item>
             <title>International Grand Master</title>
-            <link>http://localhost:1313/posts/grandmaster/</link>
+            <link>https://xusheng.dev/posts/grandmaster/</link>
             <pubDate>Sat, 13 Feb 2021 19:44:00 +0800</pubDate>
-            <guid>http://localhost:1313/posts/grandmaster/</guid>
+            <guid>https://xusheng.dev/posts/grandmaster/</guid>
             <description>&lt;p&gt;I was awarded the title of &lt;code&gt;International Grand Master&lt;/code&gt; for Xiangqi in late 2020. I am very excited about this title!&lt;/p&gt;
 &lt;p&gt;I earned this title since I am the &lt;a href=&#34;http://www.naxf.org/wp/wp-content/uploads/2018/11/ranking.txt&#34;&gt;Champnion&lt;/a&gt; of the 8th North American Cup. Game records can be viewed &lt;a href=&#34;http://www.naxf.org/wp/8th/&#34;&gt;online&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;The certificate is shown here:&lt;/p&gt;
@@ -1051,9 +1061,9 @@ End
         
         <item>
             <title>Photo Works</title>
-            <link>http://localhost:1313/posts/photos/</link>
+            <link>https://xusheng.dev/posts/photos/</link>
             <pubDate>Sat, 13 Feb 2021 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/photos/</guid>
+            <guid>https://xusheng.dev/posts/photos/</guid>
             <description>&lt;p&gt;I used to be a keen photographer. I treat photography as a way of expressing my views toward the world. My photos capture both the beauty and absurdity of this world.&lt;/p&gt;
 &lt;p&gt;However, I have not taken very few photos in recent years. One excuse is I become busy and get obsessed with reverse engineering. But a more convincing reason is I am less interested in this world. The situation might change in the future, though.&lt;/p&gt;</description>
             <content type="html"><![CDATA[<p>I used to be a keen photographer. I treat photography as a way of expressing my views toward the world. My photos capture both the beauty and absurdity of this world.</p>
@@ -1381,9 +1391,9 @@ End
         
         <item>
             <title>My New Blog is Ready!</title>
-            <link>http://localhost:1313/posts/my_new_blog/</link>
+            <link>https://xusheng.dev/posts/my_new_blog/</link>
             <pubDate>Thu, 11 Feb 2021 18:46:24 +0800</pubDate>
-            <guid>http://localhost:1313/posts/my_new_blog/</guid>
+            <guid>https://xusheng.dev/posts/my_new_blog/</guid>
             <description>&lt;p&gt;I spent some time with &lt;a href=&#34;https://gohugo.io/&#34;&gt;Hugo&lt;/a&gt; and now my blog is hosted on GitHub. Feel free to visit it at &lt;a href=&#34;https://xusheng.dev&#34;&gt;xusheng.dev&lt;/a&gt;!&lt;/p&gt;
 &lt;p&gt;I will write about reversing, coding, Xiangqi, and other stuff.&lt;/p&gt;</description>
             <content type="html"><![CDATA[<p>I spent some time with <a href="https://gohugo.io/">Hugo</a> and now my blog is hosted on GitHub. Feel free to visit it at <a href="https://xusheng.dev">xusheng.dev</a>!</p>
@@ -1393,9 +1403,9 @@ End
         
         <item>
             <title>How to Avoid Writing a Bad Crackme</title>
-            <link>http://localhost:1313/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</link>
+            <link>https://xusheng.dev/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</link>
             <pubDate>Tue, 29 Dec 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</guid>
+            <guid>https://xusheng.dev/posts/reversing/how_to_not_write_a_bad_crackme/how_to_not_write_a_bad_crackme/</guid>
             <description>&lt;p&gt;Recently, I was promoted to a reviewer on crackmes.one (along with @zed). I am so honored with this and I appreciate the recognition and trust from @stan (creator of crackmes.one) and the entire community. The task for a reviewer is interesting, that I read submitted solutions and verify new crackmes. This allows me to grasp the latest trend on the website.&lt;/p&gt;
 &lt;p&gt;I did not tally the statistics, but there is a fairly good amount of new submissions (of both crackmes and solutions) every week. And most of them are nice! For me, crackmes.one is a place for reversers to exchange knowledge and joyfulness. So I am very glad that we see a steady flow of input. Now that we have three reviewers, and I hope an increase in the reviewing speed will shorten the feedback loop for contributors, which, in turn, will lead to more contributions from the community.&lt;/p&gt;</description>
             <content type="html"><![CDATA[<p>Recently, I was promoted to a reviewer on crackmes.one (along with @zed). I am so honored with this and I appreciate the recognition and trust from @stan (creator of crackmes.one) and the entire community. The task for a reviewer is interesting, that I read submitted solutions and verify new crackmes. This allows me to grasp the latest trend on the website.</p>
@@ -1436,9 +1446,9 @@ End
         
         <item>
             <title>Solving Two OCaml Crackmes Without Knowing Much about OCaml</title>
-            <link>http://localhost:1313/posts/reversing/ocaml_crackmes/readme/</link>
+            <link>https://xusheng.dev/posts/reversing/ocaml_crackmes/readme/</link>
             <pubDate>Sun, 13 Dec 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/ocaml_crackmes/readme/</guid>
+            <guid>https://xusheng.dev/posts/reversing/ocaml_crackmes/readme/</guid>
             <description>&lt;p&gt;Earlier this year, my friend &lt;a href=&#34;https://crackmes.one/user/Towel&#34;&gt;Towel&lt;/a&gt; uploaded two OCaml crackmes to crackmes.one. One of them is &lt;a href=&#34;https://crackmes.one/crackme/5f600af333c5d4357b3b01d6&#34;&gt;&lt;code&gt;Baby OCaml&lt;/code&gt;&lt;/a&gt;, and the other one is called &lt;a href=&#34;https://crackmes.one/crackme/5f600b9933c5d4357b3b01d7&#34;&gt;&lt;code&gt;Teenager OCaml&lt;/code&gt;&lt;/a&gt;. Well, interesting names!&lt;/p&gt;
 &lt;p&gt;This is not the first time Towel came up with OCaml crackmes. &lt;a href=&#34;https://crackmes.one/crackme/5ec1b82133c5d449d91ae539&#34;&gt;&lt;code&gt;Qt Scanner&lt;/code&gt;&lt;/a&gt;, rated as level 5, is a hard challenge. I attempted that, but have not succeeded yet. So, when I first saw these two new OCaml challenges, I am not very eager to try them, despite they are rated as level 1 and 3. Nevertheless, we cannot hide from challenges forever, so I decided to try it last week. And the outcome is good, I managed to solve them without digging deep into the OCaml runtime.&lt;/p&gt;</description>
             <content type="html"><![CDATA[<p>Earlier this year, my friend <a href="https://crackmes.one/user/Towel">Towel</a> uploaded two OCaml crackmes to crackmes.one. One of them is <a href="https://crackmes.one/crackme/5f600af333c5d4357b3b01d6"><code>Baby OCaml</code></a>, and the other one is called <a href="https://crackmes.one/crackme/5f600b9933c5d4357b3b01d7"><code>Teenager OCaml</code></a>. Well, interesting names!</p>
@@ -1573,9 +1583,9 @@ End
         
         <item>
             <title>Deciphering a Windows Anti-debugging Challenge</title>
-            <link>http://localhost:1313/posts/reversing/reverseme3/readme/</link>
+            <link>https://xusheng.dev/posts/reversing/reverseme3/readme/</link>
             <pubDate>Sun, 29 Nov 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/reverseme3/readme/</guid>
+            <guid>https://xusheng.dev/posts/reversing/reverseme3/readme/</guid>
             <description>&lt;p&gt;It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.&lt;/p&gt;
 &lt;p&gt;This time I am writing about the challenge &lt;code&gt;ReverseMe3&lt;/code&gt; from &lt;code&gt;jochen_&lt;/code&gt;. The challenge can be found on &lt;a href=&#34;https://crackmes.one/crackme/5fb1642933c5d424269a1850&#34;&gt;crackmes.one&lt;/a&gt;. The password to unzip is &amp;ldquo;crackmes.one&amp;rdquo;.&lt;/p&gt;</description>
             <content type="html"><![CDATA[<p>It has been a long while since I last wrote about anything. We try to post something every week, but it has been, at least for me, super busy recently. So sorry for the gap. The good news is I am going to post several writeups recently.</p>
@@ -1825,9 +1835,9 @@ I simply need to restore it to 0xcc, and update the &#34;original value&#34; of 
         
         <item>
             <title>Dealing with Manipulated ELF Binary and Manually Resolving Import Functions</title>
-            <link>http://localhost:1313/posts/reversing/elf_format/readme/</link>
+            <link>https://xusheng.dev/posts/reversing/elf_format/readme/</link>
             <pubDate>Sun, 30 Aug 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/elf_format/readme/</guid>
+            <guid>https://xusheng.dev/posts/reversing/elf_format/readme/</guid>
             <description>&lt;p&gt;Unfortunately, this writeup is delayed for almost a week because I am super busy recently. Please take my apologies and I will try my best to keep the weekly challenge going, forever!&lt;/p&gt;
 &lt;p&gt;The challenge can be downloaded at &lt;a href=&#34;https://crackmes.one/crackme/5e727daa33c5d4439bb2decd&#34;&gt;https://crackmes.one/crackme/5e727daa33c5d4439bb2decd&lt;/a&gt;. It is created by user BinaryNewbie, who is NOT a newbie for binary reversing.&lt;/p&gt;
 &lt;p&gt;We will discuss an important topic in this writeup: how to mutate binary executable to obstruct reverse engineering tools. Specifically, these techniques aim to fool the binary parsers so that they fail to parse the binary or the parsing result is missing important information. In the worst case, the binary crashes the analysis tool. For convenience, we will call these techniques &lt;code&gt;Executable Format Manipulation (EFP)&lt;/code&gt;.&lt;/p&gt;</description>
@@ -2123,9 +2133,9 @@ I simply need to restore it to 0xcc, and update the &#34;original value&#34; of 
         
         <item>
             <title>Making and solving a Reversing Challenge Based-on x86 ISA Encoding</title>
-            <link>http://localhost:1313/posts/reversing/x86/readme/</link>
+            <link>https://xusheng.dev/posts/reversing/x86/readme/</link>
             <pubDate>Sun, 02 Aug 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/x86/readme/</guid>
+            <guid>https://xusheng.dev/posts/reversing/x86/readme/</guid>
             <description>&lt;p&gt;This time the writeup is a little bit different &amp;ndash; I am the maker of this challenge so the narrative is from a different perspective. I will first cover how I made it, and then show two possible ways to solve it.&lt;/p&gt;
 &lt;h2 id=&#34;the-plan&#34;&gt;The Plan&lt;/h2&gt;
 &lt;p&gt;I have always been hoping to make some reversing challenges based-on the encoding of the x86 instruction set. It does not have to be super hard, maybe just explore some interesting aspects of the x86, which goes lower than the disassembly. Recently, thanks to my intern task that lifts x86 instructions, as well as reading this &lt;a href=&#34;https://www.msreverseengineering.com/blog/2015/6/9/x86-trivia-for-nerds&#34;&gt;blog post&lt;/a&gt;, I decided to do it rather than set it for the future (indefinitely).&lt;/p&gt;</description>
@@ -2318,9 +2328,9 @@ Well done!
         
         <item>
             <title>Solving a Recursive Crackme by Automating GDB</title>
-            <link>http://localhost:1313/posts/reversing/automating-gdb/readme/</link>
+            <link>https://xusheng.dev/posts/reversing/automating-gdb/readme/</link>
             <pubDate>Mon, 27 Jul 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/automating-gdb/readme/</guid>
+            <guid>https://xusheng.dev/posts/reversing/automating-gdb/readme/</guid>
             <description>&lt;p&gt;The last week&amp;rsquo;s challenge is called &lt;a href=&#34;https://0x00sec.org/t/reverseme-recursion/21802&#34;&gt;&lt;code&gt;Recursion&lt;/code&gt;&lt;/a&gt;. From the name we already expect to do some automation &amp;ndash; manually solving stuff recursively is not a wise idea.&lt;/p&gt;
 &lt;h2 id=&#34;first-impression&#34;&gt;First Impression&lt;/h2&gt;
 &lt;p&gt;The forum probably does not allow users to post binary files, so challenges are all posted as base64 encoded. There are too many ways to restore the binary, but Binary Ninja saves you from remembering the command: Just copy the encoded text, create a new empty binary, and then click &amp;ldquo;Paste From&amp;rdquo; -&amp;gt; &amp;ldquo;Base64&amp;rdquo;. Then you are done!&lt;/p&gt;</description>
@@ -2451,9 +2461,9 @@ Well done!
         
         <item>
             <title>Solving an Obfuscated Crackme with BinaryNinja and Triton</title>
-            <link>http://localhost:1313/posts/reversing/obfuscation/readme/</link>
+            <link>https://xusheng.dev/posts/reversing/obfuscation/readme/</link>
             <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/obfuscation/readme/</guid>
+            <guid>https://xusheng.dev/posts/reversing/obfuscation/readme/</guid>
             <description>&lt;p&gt;The last week&amp;rsquo;s &lt;a href=&#34;https://yurichev.com/blog/58/&#34;&gt;challenge&lt;/a&gt; was created by &lt;a href=&#34;https://yurichev.com/&#34;&gt;Dennis Yurichev&lt;/a&gt;. It is also hosted on &lt;a href=&#34;https://crackmes.one/crackme/5ab77f6233c5d40ad448c9e4&#34;&gt;crackmes.one&lt;/a&gt;. The challenge is compiled by a modified &lt;a href=&#34;https://bellard.org/tcc/&#34;&gt;Tiny C Compiler (TCC)&lt;/a&gt; which obfuscates the generated code during compilation. We will cover the major techniques to deobfuscate the binary, followed by a quick analysis of the algorithm itself.&lt;/p&gt;
 &lt;h2 id=&#34;first-impression&#34;&gt;First Impression&lt;/h2&gt;
 &lt;p&gt;The target (&lt;a href=&#34;../keygenme4.zip&#34;&gt;keygenme4.exe&lt;/a&gt;) is a PE. The entry point looks like this:&lt;/p&gt;
@@ -2799,9 +2809,9 @@ expiration=12342981
         
         <item>
             <title>Examining the difference between C program and Assembly -- An Example of &lt;&lt; and shl</title>
-            <link>http://localhost:1313/posts/reversing/shl_undefined_behavior/writeup/</link>
+            <link>https://xusheng.dev/posts/reversing/shl_undefined_behavior/writeup/</link>
             <pubDate>Sat, 20 Jun 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/shl_undefined_behavior/writeup/</guid>
+            <guid>https://xusheng.dev/posts/reversing/shl_undefined_behavior/writeup/</guid>
             <description>&lt;h2 id=&#34;encountering-a-weird-issue&#34;&gt;Encountering a Weird Issue&lt;/h2&gt;
 &lt;p&gt;Recently, I needed to write one function that returns a bitmask according to the number of bits. Basically, if the input is 8, it should return 0xff. The input &lt;code&gt;n&lt;/code&gt; is in the range of 0-64 (both side include).&lt;/p&gt;
 &lt;p&gt;The first idea is to use left shift and then minus 1:&lt;/p&gt;
@@ -2873,9 +2883,9 @@ expiration=12342981
         
         <item>
             <title>Solving an ARM challenge with z3</title>
-            <link>http://localhost:1313/posts/reversing/armageddon/solve/</link>
+            <link>https://xusheng.dev/posts/reversing/armageddon/solve/</link>
             <pubDate>Thu, 18 Jun 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/armageddon/solve/</guid>
+            <guid>https://xusheng.dev/posts/reversing/armageddon/solve/</guid>
             <description>&lt;h2 id=&#34;first-impression&#34;&gt;First Impression&lt;/h2&gt;
 &lt;p&gt;The last week&amp;rsquo;s challenge is hosted at &lt;a href=&#34;https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b&#34;&gt;https://crackmes.one/crackme/5edb0b8533c5d449d91ae73b&lt;/a&gt;. It is authored by Towel and it is a real challenge in UMDCTF 2019.&lt;/p&gt;
 &lt;p&gt;Loading it into BinaryNinja reveals that it is an ARM binary. Not very surprised as its name is &lt;code&gt;armageddon&lt;/code&gt;. ARM is no longer special for me as I gradually become familiar with the ISA. After all, it is simpler than the x86 and those frequently used instructions are easy to understand and remember.&lt;/p&gt;</description>
@@ -3090,9 +3100,9 @@ exit_group(0)
         
         <item>
             <title>Debugging and Solving an Android Challenge</title>
-            <link>http://localhost:1313/posts/reversing/quarkslab_android_crackme/main/</link>
+            <link>https://xusheng.dev/posts/reversing/quarkslab_android_crackme/main/</link>
             <pubDate>Sat, 30 May 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/quarkslab_android_crackme/main/</guid>
+            <guid>https://xusheng.dev/posts/reversing/quarkslab_android_crackme/main/</guid>
             <description>&lt;p&gt;Our first challenge is an Android challenge that features native library reverse engineering and debugging. Since the algorithm itself is not very complex, in this writeup I will cover the major steps to set up an Android debugging environment. I will also share some of my thoughts as we progress.&lt;/p&gt;
 &lt;h2 id=&#34;first-impression&#34;&gt;First Impression&lt;/h2&gt;
 &lt;p&gt;The &lt;a href=&#34;https://blog.quarkslab.com/android-challenge.html&#34;&gt;challenge&lt;/a&gt; is created by Quarkslab. The &lt;strong&gt;crackme-telegram.apk&lt;/strong&gt; is ~25MB in size which is larger than a typical crackme. One of the challenges in real-world reverse engineering is the huge size of the binary. There are too many possible places to hide the crucial code so even finding it is non-trivial in the first place.&lt;/p&gt;</description>
@@ -3244,9 +3254,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>Solving a Reversing Challenge with Mitmproxy and OCR</title>
-            <link>http://localhost:1313/posts/reversing/client_houseplant_ctf_2020/solve/</link>
+            <link>https://xusheng.dev/posts/reversing/client_houseplant_ctf_2020/solve/</link>
             <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/client_houseplant_ctf_2020/solve/</guid>
+            <guid>https://xusheng.dev/posts/reversing/client_houseplant_ctf_2020/solve/</guid>
             <description>&lt;p&gt;Over the weekend I had some fun with the &lt;a href=&#34;https://houseplant.riceteacatpanda.wtf/home&#34;&gt;Houseplant CTF&lt;/a&gt;. Among the reversing challenges, the &lt;a href=&#34;https://houseplant.riceteacatpanda.wtf/challenge?id=8&#34;&gt;&lt;strong&gt;RTCP Trivia&lt;/strong&gt;&lt;/a&gt; is particularly interesting and I would like to share my unconventional way of solving it.&lt;/p&gt;
 &lt;h2 id=&#34;first-impression&#34;&gt;First Impression&lt;/h2&gt;
 &lt;p&gt;We get a &lt;a href=&#34;../client.zip&#34;&gt;&lt;strong&gt;client.apk&lt;/strong&gt;&lt;/a&gt; after downloading the challenge. I have no Android phones so I ran it in an emulator. It has no ARM native library so it runs well in x86 emulators.&lt;/p&gt;
@@ -3329,9 +3339,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>Reverse Engineering and Repairing a Fan</title>
-            <link>http://localhost:1313/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</link>
+            <link>https://xusheng.dev/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</link>
             <pubDate>Sun, 26 Apr 2020 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</guid>
+            <guid>https://xusheng.dev/posts/reversing/reverse_engineering_and_fixing_a_fan/main/</guid>
             <description>&lt;p&gt;Last summer, I broke a fan and managed to repair it. Although the repairing process is not so exciting, I recently find it can serve as a good example to explain a reverser&amp;rsquo;s mindset. Like how I approached the problem and solved it. I hope to share some of my understanding about reverse engineering in this writeup.&lt;/p&gt;
 &lt;h2 id=&#34;a-broken-fan&#34;&gt;A Broken Fan&lt;/h2&gt;
 &lt;p&gt;I have a fan &amp;ndash; an eight-year-old fan &amp;ndash; that is NOT smart or IoT. It is just a simple fan. One day it fell from the table to the ground and stopped working. &lt;em&gt;RIP&lt;/em&gt;. It accompanied me for several summers and I love it. I decided to take it apart and see what is indeed broken, before saying farewell to my friend.&lt;/p&gt;</description>
@@ -3416,9 +3426,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-20</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-20/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-20/</link>
             <pubDate>Sun, 06 May 2018 16:19:08 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-20/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-20/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-24.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;车八退一 士４进５&lt;/li&gt;
@@ -3448,9 +3458,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-19</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-19/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-19/</link>
             <pubDate>Sun, 06 May 2018 16:10:59 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-19/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-19/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-1-3.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;炮六平八 士４进５&lt;/li&gt;
@@ -3468,9 +3478,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-18</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-18/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-18/</link>
             <pubDate>Sun, 06 May 2018 16:06:56 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-18/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-18/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-21.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;兵六平五 炮７平５&lt;/li&gt;
@@ -3530,9 +3540,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-17</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-17/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-17/</link>
             <pubDate>Sun, 06 May 2018 15:31:13 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-17/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-17/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-20.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;帅六退一 士５进６&lt;/li&gt;
@@ -3562,9 +3572,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-16</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-16/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-16/</link>
             <pubDate>Sun, 06 May 2018 15:30:08 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-16/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-16/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-18.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;兵九平八 将４进１&lt;/li&gt;
@@ -3602,9 +3612,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-15</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-15/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-15/</link>
             <pubDate>Sun, 06 May 2018 15:27:58 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-15/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-15/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-16.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-17.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;</description>
             <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-16.png" alt=""></p>
@@ -3614,9 +3624,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-14</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-14/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-14/</link>
             <pubDate>Sun, 06 May 2018 15:25:19 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-14/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-14/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-14-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;车四平六 将４平５&lt;/li&gt;
@@ -3658,9 +3668,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-13</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-13/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-13/</link>
             <pubDate>Sun, 06 May 2018 15:23:59 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-13/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-13/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-13-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;炮九平六 士５进４&lt;/li&gt;
@@ -3704,9 +3714,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-12</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-12/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-12/</link>
             <pubDate>Sun, 06 May 2018 15:21:12 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-12/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-12/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-12-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;马七退五 将６退１&lt;/li&gt;
@@ -3754,9 +3764,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-11</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-11/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-11/</link>
             <pubDate>Sun, 06 May 2018 15:19:51 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-11/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-11/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-11-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;马六退七 将５退１&lt;/li&gt;
@@ -3802,9 +3812,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-10</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-10/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-10/</link>
             <pubDate>Sun, 06 May 2018 15:09:32 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-10/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-10/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-3-2.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;</description>
             <content type="html"><![CDATA[<p><img src="../imgs/2018/05/capture-3-2.png" alt=""></p>
 <ol>
@@ -3925,9 +3935,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-09</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-09/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-09/</link>
             <pubDate>Sun, 06 May 2018 15:05:02 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-09/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-09/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-1-2.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt; 
  &lt;/p&gt;
@@ -3967,9 +3977,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-08</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-08/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-08/</link>
             <pubDate>Sun, 06 May 2018 15:01:11 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-06-endgame-08/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-06-endgame-08/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-14.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p%20w&#34;&gt;2b6/9/3k5/9/6b2/6B2/9/3A5/4AK3/p4CB1p w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图形势，红方当然可以连续打掉两个黑卒。但这样黑方得以调整阵型，红方无法取胜。&lt;/p&gt;
@@ -4071,9 +4081,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-07</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-05-endgame-07/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-05-endgame-07/</link>
             <pubDate>Sat, 05 May 2018 23:18:22 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-05-endgame-07/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-05-endgame-07/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-4-1.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c%20w&#34;&gt;4ka3/9/5a3/6CC1/9/9/9/3K5/9/8c w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图形势，红方仅有双炮做攻，似乎难以进取。&lt;/p&gt;
@@ -4099,9 +4109,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-06</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-05-endgame-06/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-05-endgame-06/</link>
             <pubDate>Sat, 05 May 2018 22:21:07 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-05-endgame-06/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-05-endgame-06/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-13.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5%20w%22&#34;&gt;3r1r3/5k3/3a1a3/4C4/9/9/9/C8/5K3/3A5 w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图形式，红方双炮巧妙腾挪，迫使黑方子力自相堵塞，最终一举获胜。&lt;/p&gt;
@@ -4237,9 +4247,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-05</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-04-endgame-05/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-04-endgame-05/</link>
             <pubDate>Fri, 04 May 2018 17:13:21 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-04-endgame-05/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-04-endgame-05/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-4.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3%20w&#34;&gt;6R2/3r5/3kr4/9/9/9/9/5C3/4A4/3A1K3 w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图，红方似乎可以车三退三叫杀得车．可红方的取胜之路真的如此简单嘛？&lt;/p&gt;
@@ -4375,9 +4385,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-04</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-05-04-endgame-04/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-05-04-endgame-04/</link>
             <pubDate>Fri, 04 May 2018 16:00:41 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-05-04-endgame-04/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-05-04-endgame-04/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/05/capture-04252018.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9%20w&#34;&gt;1R1ara3/9/4k4/9/2b6/6B2/9/5K3/7p1/9 w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图形势，红方进攻子力仅有一车，如何才能利用黑车的位置取得胜利？&lt;/p&gt;
@@ -4520,9 +4530,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-03</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-01-18-endgame-03/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-01-18-endgame-03/</link>
             <pubDate>Thu, 18 Jan 2018 20:47:50 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-01-18-endgame-03/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-01-18-endgame-03/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/01/5.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9%20w&#34;&gt;2rr5/9/3a1k3/3P5/2R6/2B6/9/9/3K5/9 w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图，黑方将位不安，且双车略背，红方如何凭借先行之利取胜？&lt;/p&gt;
@@ -4694,9 +4704,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-02</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-01-11-endgame-02/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-01-11-endgame-02/</link>
             <pubDate>Thu, 11 Jan 2018 23:08:29 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-01-11-endgame-02/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-01-11-endgame-02/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/01/3.png&#34; alt=&#34;rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4%20w&#34;&gt;rr1ak4/9/9/9/9/9/9/5K3/R8/3AC4 w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图，双方子力不多，且黑方双车通头，红方怎样才能借先行之利取胜？&lt;/p&gt;
@@ -4794,9 +4804,9 @@ modulus = eax - quotient * n
         
         <item>
             <title>排局-01</title>
-            <link>http://localhost:1313/posts/xiangqi/2018-01-11-endgame-01/</link>
+            <link>https://xusheng.dev/posts/xiangqi/2018-01-11-endgame-01/</link>
             <pubDate>Thu, 11 Jan 2018 23:04:07 +0800</pubDate>
-            <guid>http://localhost:1313/posts/xiangqi/2018-01-11-endgame-01/</guid>
+            <guid>https://xusheng.dev/posts/xiangqi/2018-01-11-endgame-01/</guid>
             <description>&lt;p&gt;&lt;img src=&#34;../imgs/2018/01/1.png&#34; alt=&#34;9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://www.chessdb.cn/query/?9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc%20w&#34;&gt;9/9/5k3/9/9/9/9/4BA2B/3K5/3A3Cc w&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;如图局面，是我不久前从残局库中发现的一个挺有意思的局面，红先胜。&lt;/p&gt;

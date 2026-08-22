@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
 		<title>Adware on Xusheng Li</title>
-		<link>http://localhost:1313/tags/adware/</link>
+		<link>https://xusheng.dev/tags/adware/</link>
 		<description>Recent content in Adware on Xusheng Li</description>
 		<generator>Hugo</generator>
 		<language>en-us</language>
@@ -14,12 +14,12 @@
 		
 			<lastBuildDate>Sat, 18 Jul 2026 00:00:00 +0000</lastBuildDate>
 		
-			<atom:link href="http://localhost:1313/tags/adware/index.xml" rel="self" type="application/rss+xml" />
+			<atom:link href="https://xusheng.dev/tags/adware/index.xml" rel="self" type="application/rss+xml" />
 			<item>
 				<title>What is LG Monitor App Manager actually doing?</title>
-				<link>http://localhost:1313/posts/reversing/lg_monitor_app_manager/readme/</link>
+				<link>https://xusheng.dev/posts/reversing/lg_monitor_app_manager/readme/</link>
 				<pubDate>Sat, 18 Jul 2026 00:00:00 +0000</pubDate>
-				<guid>http://localhost:1313/posts/reversing/lg_monitor_app_manager/readme/</guid>
+				<guid>https://xusheng.dev/posts/reversing/lg_monitor_app_manager/readme/</guid>
 				<description>&lt;p&gt;I recently bought an LG 34-inch UltraWide monitor. The screen itself works great — no complaints there. But a little while after setting it up, I started to notice this &lt;code&gt;LGMonitorAppManager&lt;/code&gt; thing on my machine:&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;../imgs/1.png&#34; alt=&#34;LG Monitor App Installer&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;It showed up on its own — I never went to LG&amp;rsquo;s website and downloaded anything. It just appeared one day, offering to install &amp;ldquo;Dual Controller&amp;rdquo; and a few other LG utilities. I did not think about it too much at the time; I clicked the little &lt;code&gt;x&lt;/code&gt; and moved on with my life.&lt;/p&gt;</description>
 			</item>
 	</channel>

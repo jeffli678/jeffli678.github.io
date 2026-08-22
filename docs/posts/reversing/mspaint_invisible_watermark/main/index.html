@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <head>
         <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,7 +9,7 @@
 <meta name="keywords" content="Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35" />
 <meta name="robots" content="noodp" />
 <meta name="theme-color" content="" />
-<link rel="canonical" href="http://localhost:1313/posts/reversing/mspaint_invisible_watermark/main/" />
+<link rel="canonical" href="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/main/" />
 
 
     <title>
@@ -38,16 +38,16 @@
 	<meta itemprop="datePublished" content="2026-08-21T00:00:00+00:00">
 	<meta itemprop="dateModified" content="2026-08-21T00:00:00+00:00">
 	<meta itemprop="wordCount" content="1632">
-	<meta itemprop="image" content="http://localhost:1313/posts/reversing/mspaint_invisible_watermark/social-preview.png">
+	<meta itemprop="image" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/social-preview.png">
 
 	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:image" content="http://localhost:1313/posts/reversing/mspaint_invisible_watermark/social-preview.png">
+	<meta name="twitter:image" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/social-preview.png">
 	<meta name="twitter:title" content="Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images">
 	<meta name="twitter:description" content="Reverse engineering reveals how Paint and Photos embed a server-issued GUID into the pixels of locally generated AI images.">
 
 
 
-    <meta property="og:url" content="http://localhost:1313/posts/reversing/mspaint_invisible_watermark/main/">
+    <meta property="og:url" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/main/">
 	<meta property="og:site_name" content="Xusheng Li">
 	<meta property="og:title" content="Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images">
 	<meta property="og:description" content="Reverse engineering reveals how Paint and Photos embed a server-issued GUID into the pixels of locally generated AI images.">
@@ -56,7 +56,7 @@
 		<meta property="article:section" content="posts">
 		<meta property="article:published_time" content="2026-08-21T00:00:00+00:00">
 		<meta property="article:modified_time" content="2026-08-21T00:00:00+00:00">
-		<meta property="og:image" content="http://localhost:1313/posts/reversing/mspaint_invisible_watermark/social-preview.png">
+		<meta property="og:image" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/social-preview.png">
 
 
 
@@ -135,7 +135,7 @@
 
     <article>
       <h1 class="post-title">
-        <a href="http://localhost:1313/posts/reversing/mspaint_invisible_watermark/main/">Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images</a>
+        <a href="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/main/">Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images</a>
       </h1>
 
       
@@ -153,7 +153,10 @@
 <li>The GUID is embedded into the locally generated image as an invisible watermark</li>
 <li>A separate visible-watermark setting does not control this invisible watermark</li>
 </ul>
-<p><img src="../social-preview.png" alt="Paint sends the user prompt to Microsoft’s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels"></p>
+
+    <img src="../social-preview.png"  alt="Paint sends the user prompt to Microsoft&#39;s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels"  class="center"  style="width: 82%; margin: 1.5em auto;"  />
+
+
 <h2 id="a-curious-look-at-microsoft-paint">A curious look at Microsoft Paint</h2>
 <p>This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like <a href="https://binary.ninja/2026/08/04/ucpd-dynamic-rules.html">UCPD</a>, <a href="https://xusheng.dev/posts/reversing/whesvc/main/">WHESCVC</a>, and I have long known that Microsoft
 added a bunch of <a href="https://support.microsoft.com/en-us/windows/ai/ai-apps/use-copilot-pc-features-in-paint">AI features</a> into the Paint app.
@@ -368,7 +371,7 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
     <p>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
 
-        <span class="tag"><a href="http://localhost:1313/categories/reversing/">Reversing</a></span>
+        <span class="tag"><a href="https://xusheng.dev/categories/reversing/">Reversing</a></span>
         
     </p>
 
@@ -413,7 +416,7 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
 
           
             <span class="button next">
-              <a href="http://localhost:1313/posts/reversing/whesvc/main/">
+              <a href="https://xusheng.dev/posts/reversing/whesvc/main/">
                 <span class="button__text">Windows&#39; Performance Optimizer Is More Capable Than It Needs to Be</span>
                 <span class="button__icon">→</span>
               </a>
@@ -439,7 +442,7 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
             <span>&copy; 2026</span>
             
             <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
-            <span><a href="http://localhost:1313/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+            <span><a href="https://xusheng.dev/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
         </div>
     </div>
     <div class="footer__inner">
