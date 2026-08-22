@@ -15,7 +15,7 @@
 
     <title>
         
-            Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images :: Xusheng Li
+            Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images :: Xusheng Li 
         
     </title>
 
@@ -38,7 +38,7 @@
 	<meta itemprop="description" content="TL;DR Microsoft Paint and Photos use local models to generate images The two apps send the prompt to a remote server for moderation The server returns a GUID along with the moderated prompt The GUID is embedded into the locally generated image as an invisible watermark A separate visible-watermark setting does not control this invisible watermark A curious look at Microsoft Paint This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like UCPD, WHESCVC, and I have long known that Microsoft added a bunch of AI features into the Paint app. I do not know if anyone actually uses Paint &#43; AI to generate images, but I wanted to see how exactly the image generation works.">
 	<meta itemprop="datePublished" content="2026-08-21T00:00:00+00:00">
 	<meta itemprop="dateModified" content="2026-08-21T00:00:00+00:00">
-	<meta itemprop="wordCount" content="1535">
+	<meta itemprop="wordCount" content="1598">
 	<meta itemprop="image" content="/">
 
 	<meta name="twitter:card" content="summary_large_image">
@@ -351,7 +351,8 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
 </span></span></code></pre></div><p>It then appears to continue returning the generated image. Paint instead treats a watermarking failure as a generation failure and the image is not returned to the user.</p>
 <h2 id="conclusion">Conclusion</h2>
 <p>To the best of my knowledge, this is the first research to document and analyze the invisible-watermarking behavior of Paint and Photos. Visible watermarks on AI-generated images are not new—Microsoft documents them for <a href="https://support.microsoft.com/en-us/topic/include-a-watermark-when-content-from-microsoft-365-is-ai-generated-b00a656e-ae61-4692-8086-67d004421030">Microsoft 365</a> and <a href="https://www.microsoft.com/en-us/bing/features/bing-image-creator/">Bing Image Creator</a>—nor are invisible pixel watermarks such as <a href="https://deepmind.google/models/synthid/">Google&rsquo;s SynthID</a> and <a href="https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/August-2024-Microsoft-Bing-Systemic-Risk-Assessment-Report-EU-Digital-Services-Act.pdf">Bing&rsquo;s hidden watermark</a>.</p>
-<p>I could not find any disclosure from Microsoft regarding Paint&rsquo;s and Photos&rsquo; use of the watermark, yet it carries obvious privacy and right-to-know implications.</p>
+<p>Microsoft does disclose an adjacent mechanism: <a href="https://support.microsoft.com/en-us/windows/use-image-creator-in-paint-to-generate-ai-art-107a2b3a-62ea-41f5-a638-7bc6e6ea718f">Paint</a> and <a href="https://support.microsoft.com/en-us/windows/ai/ai-apps/microsoft-photos-restyle-image-and-image-creator-responsible-ai-faq">Photos</a> attach C2PA Content Credentials, which live at the file-metadata level rather than being encoded into the pixels. This might be related to <a href="https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content">Article 50 of the EU AI Act</a>, whose transparency rules took effect on August 2, 2026 and require AI-generated content to carry a detectable, machine-readable mark—but not a prompt-specific GUID.</p>
+<p>However, I could not find any disclosure from Microsoft regarding Paint&rsquo;s and Photos&rsquo; use of the watermark, yet it carries obvious privacy and right-to-know implications.</p>
 
       </div>
     </article>
@@ -377,7 +378,7 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
           <line x1="16" y1="17" x2="8" y2="17"></line>
           <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
-        1535 Words
+        1598 Words
       </p>
 
       <p>

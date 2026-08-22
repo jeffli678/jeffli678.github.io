@@ -79,9 +79,9 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
 </table>
 <h2 id="a-visible-watermark">A visible watermark</h2>
 <p>While walking through these files, I found a <code>Watermarker.dll</code>:</p>
-<p><img src="watermarker-dll-properties.png" alt="The properties of Watermarker.dll included with Microsoft Paint"></p>
+<p><img src="../watermarker-dll-properties.png" alt="The properties of Watermarker.dll included with Microsoft Paint"></p>
 <p>This is not super surprising to me, because while I interacted with the Paint app, I already discovered that it has a setting to embed a <a href="https://support.microsoft.com/en-us/topic/include-a-watermark-when-content-from-microsoft-365-is-ai-generated-b00a656e-ae61-4692-8086-67d004421030">visible watermark</a> to the image that it produces:</p>
-<p><img src="visible-watermark-setting.png" alt="Paint offers Never, Always, and Ask every time choices for its visible AI watermark"></p>
+<p><img src="../visible-watermark-setting.png" alt="Paint offers Never, Always, and Ask every time choices for its visible AI watermark"></p>
 <p>The visible watermark is just a small Copilot logo at the bottom right of the image, which is totally normal.</p>
 <p>Then, out of nowhere, I decided to ask AI to analyze the DLL and see if it could also be embedding an <em>invisible</em> watermark. This is part of my intuition as a reverse engineer, because the file is 1.67 MB in size, which is unusually large for such trivial functionality (arguably, the visible watermark does not even require a separate DLL). Apparently, the recent Claude Code <a href="https://www.anthropic.com/news/claude-text-watermark">text-watermark announcement</a> also played a role in prompting me to think about this possibility.</p>
 <h2 id="an-invisible-watermark">An <em>invisible</em> watermark</h2>
@@ -233,7 +233,8 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
 </span></span></code></pre></div><p>It then appears to continue returning the generated image. Paint instead treats a watermarking failure as a generation failure and the image is not returned to the user.</p>
 <h2 id="conclusion">Conclusion</h2>
 <p>To the best of my knowledge, this is the first research to document and analyze the invisible-watermarking behavior of Paint and Photos. Visible watermarks on AI-generated images are not new—Microsoft documents them for <a href="https://support.microsoft.com/en-us/topic/include-a-watermark-when-content-from-microsoft-365-is-ai-generated-b00a656e-ae61-4692-8086-67d004421030">Microsoft 365</a> and <a href="https://www.microsoft.com/en-us/bing/features/bing-image-creator/">Bing Image Creator</a>—nor are invisible pixel watermarks such as <a href="https://deepmind.google/models/synthid/">Google&rsquo;s SynthID</a> and <a href="https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/August-2024-Microsoft-Bing-Systemic-Risk-Assessment-Report-EU-Digital-Services-Act.pdf">Bing&rsquo;s hidden watermark</a>.</p>
-<p>I could not find any disclosure from Microsoft regarding Paint&rsquo;s and Photos&rsquo; use of the watermark, yet it carries obvious privacy and right-to-know implications.</p>
+<p>Microsoft does disclose an adjacent mechanism: <a href="https://support.microsoft.com/en-us/windows/use-image-creator-in-paint-to-generate-ai-art-107a2b3a-62ea-41f5-a638-7bc6e6ea718f">Paint</a> and <a href="https://support.microsoft.com/en-us/windows/ai/ai-apps/microsoft-photos-restyle-image-and-image-creator-responsible-ai-faq">Photos</a> attach C2PA Content Credentials, which live at the file-metadata level rather than being encoded into the pixels. This might be related to <a href="https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content">Article 50 of the EU AI Act</a>, whose transparency rules took effect on August 2, 2026 and require AI-generated content to carry a detectable, machine-readable mark—but not a prompt-specific GUID.</p>
+<p>However, I could not find any disclosure from Microsoft regarding Paint&rsquo;s and Photos&rsquo; use of the watermark, yet it carries obvious privacy and right-to-know implications.</p>
 ]]></content>
         </item>
         
