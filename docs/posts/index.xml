@@ -6,8 +6,236 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Sun, 16 Aug 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Fri, 21 Aug 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in AI-Generated Images</title>
+            <link>/posts/reversing/mspaint_invisible_watermark/main/</link>
+            <pubDate>Fri, 21 Aug 2026 00:00:00 +0000</pubDate>
+            <guid>/posts/reversing/mspaint_invisible_watermark/main/</guid>
+            <description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Microsoft Paint and Photos use local models to generate images&lt;/li&gt;
+&lt;li&gt;The two apps send the prompt to a remote server for moderation&lt;/li&gt;
+&lt;li&gt;The server returns a GUID along with the moderated prompt&lt;/li&gt;
+&lt;li&gt;The GUID is embedded into the generated image as an invisible watermark&lt;/li&gt;
+&lt;li&gt;A separate visible-watermark setting does not control this invisible watermark&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;a-curious-look-at-microsoft-paint&#34;&gt;A curious look at Microsoft Paint&lt;/h2&gt;
+&lt;p&gt;This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like &lt;a href=&#34;https://binary.ninja/2026/08/04/ucpd-dynamic-rules.html&#34;&gt;UCPD&lt;/a&gt;, &lt;a href=&#34;https://xusheng.dev/posts/reversing/whesvc/main/&#34;&gt;WHESCVC&lt;/a&gt;, and I have long known that Microsoft
+added a bunch of &lt;a href=&#34;https://support.microsoft.com/en-us/windows/ai/ai-apps/use-copilot-pc-features-in-paint&#34;&gt;AI features&lt;/a&gt; into the Paint app.
+I do not know if anyone actually uses Paint + AI to generate images, but I wanted to see how exactly the image generation works.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<h2 id="tldr">TL;DR</h2>
+<ul>
+<li>Microsoft Paint and Photos use local models to generate images</li>
+<li>The two apps send the prompt to a remote server for moderation</li>
+<li>The server returns a GUID along with the moderated prompt</li>
+<li>The GUID is embedded into the generated image as an invisible watermark</li>
+<li>A separate visible-watermark setting does not control this invisible watermark</li>
+</ul>
+<h2 id="a-curious-look-at-microsoft-paint">A curious look at Microsoft Paint</h2>
+<p>This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like <a href="https://binary.ninja/2026/08/04/ucpd-dynamic-rules.html">UCPD</a>, <a href="https://xusheng.dev/posts/reversing/whesvc/main/">WHESCVC</a>, and I have long known that Microsoft
+added a bunch of <a href="https://support.microsoft.com/en-us/windows/ai/ai-apps/use-copilot-pc-features-in-paint">AI features</a> into the Paint app.
+I do not know if anyone actually uses Paint + AI to generate images, but I wanted to see how exactly the image generation works.</p>
+<p>Before I started, I expected that it simply called a remote API to do the image generation. However, after I set up <a href="https://dev-docs.binary.ninja/guide/mcp.html">Binary Ninja MCP</a> with Codex and started the analysis, I soon realized that Microsoft actually shipped local models in Windows as part of Copilot.</p>
+<p>The Paint App is sitting in the following path (yes, they are all <a href="https://learn.microsoft.com/en-us/windows-app/overview">Windows Apps</a> now):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>C:\Program Files\WindowsApps\Microsoft.Paint_11.2605.71.0_x64__8wekyb3d8bbwe\PaintApp\
+</span></span></code></pre></div><p>And there are four apparent model files with the <code>.onnxe</code> extension:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>seg.onnxe          23.1 MB
+</span></span><span style="display:flex;"><span>inseg_enc.onnxe    28.0 MB
+</span></span><span style="display:flex;"><span>inseg_dec.onnxe    16.5 MB
+</span></span><span style="display:flex;"><span>mager.onnxe       302.4 MB
+</span></span></code></pre></div><p>The format of <code>seg.onnxe</code> was <a href="https://itstechbased.com/new-windows-11-build-25947-new-23h2-news-new-paint-and-microsoft-store-and-fixes-canary/">previously known</a>, i.e., when it is XORed with the string <code>Microsoft_2023</code>, it becomes a normal ONNX file. However, the format of the other three <code>.onnxe</code> files initially looked different.</p>
+<p>It turned out that Microsoft had not changed the algorithm, only the key. <code>segapi.dll</code> contains a small key registry:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>ps_enc_key.1.0.80-main -&gt; &#34;Microsoft_2023&#34;
+</span></span><span style="display:flex;"><span>ps_enc_key.1.0.81-main -&gt; a 4,096-byte alphanumeric string
+</span></span></code></pre></div><p>After decryption, <code>onnx.checker.check_model()</code> works on all of them:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Model</th>
+					<th>Graph</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>seg.onnx</code></td>
+					<td>1,094 nodes, input <code>input_image</code>, output <code>output</code></td>
+			</tr>
+			<tr>
+					<td><code>inseg_enc.onnx</code></td>
+					<td>1,014 nodes, output <code>image_embeddings</code></td>
+			</tr>
+			<tr>
+					<td><code>inseg_dec.onnx</code></td>
+					<td>1,133 nodes, inputs for embeddings, points and masks; output <code>masks</code></td>
+			</tr>
+			<tr>
+					<td><code>mager.onnx</code></td>
+					<td>15,284 nodes, image/mask inputs; output <code>output</code></td>
+			</tr>
+	</tbody>
+</table>
+<h2 id="a-visible-watermark">A visible watermark</h2>
+<p>While walking through these files, I found a <code>Watermarker.dll</code>:</p>
+<p><img src="watermarker-dll-properties.png" alt="The properties of Watermarker.dll included with Microsoft Paint"></p>
+<p>This is not super surprising to me, because while I interacted with the Paint app, I already discovered that it has a setting to embed a <a href="https://support.microsoft.com/en-us/topic/include-a-watermark-when-content-from-microsoft-365-is-ai-generated-b00a656e-ae61-4692-8086-67d004421030">visible watermark</a> to the image that it produces:</p>
+<p><img src="visible-watermark-setting.png" alt="Paint offers Never, Always, and Ask every time choices for its visible AI watermark"></p>
+<p>The visible watermark is just a small Copilot logo at the bottom right of the image, which is totally normal.</p>
+<p>Then, out of nowhere, I decided to ask AI to analyze the DLL and see if it could also be embedding an <em>invisible</em> watermark. This is part of my intuition as a reverse engineer, because the file is 1.67 MB in size, which is unusually large for such trivial functionality (arguably, the visible watermark does not even require a separate DLL). Apparently, the recent Claude Code <a href="https://www.anthropic.com/news/claude-text-watermark">text-watermark announcement</a> also played a role in prompting me to think about this possibility.</p>
+<h2 id="an-invisible-watermark">An <em>invisible</em> watermark</h2>
+<p>To begin with, the visible watermark is added by <code>AddPerceptibleWatermark</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>CPBDoc::Save(...)
+</span></span><span style="display:flex;"><span>  |
+</span></span><span style="display:flex;"><span>  `-- perceptible-watermark save helper(bitmap, WatermarkSetting)
+</span></span><span style="display:flex;"><span>        |
+</span></span><span style="display:flex;"><span>        +-- WatermarkSetting::Never
+</span></span><span style="display:flex;"><span>        |     `-- return the original bitmap
+</span></span><span style="display:flex;"><span>        |
+</span></span><span style="display:flex;"><span>        +-- WatermarkSetting::AskEveryTime
+</span></span><span style="display:flex;"><span>        |     `-- show the Yes / No confirmation popup
+</span></span><span style="display:flex;"><span>        |           +-- No: return the original bitmap
+</span></span><span style="display:flex;"><span>        |           `-- Yes: continue
+</span></span><span style="display:flex;"><span>        |
+</span></span><span style="display:flex;"><span>        `-- Always or confirmed Yes
+</span></span><span style="display:flex;"><span>              +-- Paint::AI::GetPerceptibleWatermarkSvg()
+</span></span><span style="display:flex;"><span>              `-- Paint::AI::AddPerceptibleWatermark(bitmap, SVG stream)
+</span></span><span style="display:flex;"><span>                    `-- composite the visible Copilot logo
+</span></span></code></pre></div><p>Then there is also a different <code>WmkWriteWatermark</code> function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>Watermarker.dll<span style="color:#f92672">!</span><span style="color:#a6e22e">WmkWriteWatermark</span>(
+</span></span><span style="display:flex;"><span>    output_pixels,
+</span></span><span style="display:flex;"><span>    payload,
+</span></span><span style="display:flex;"><span>    payload_length,
+</span></span><span style="display:flex;"><span>    width,
+</span></span><span style="display:flex;"><span>    height,
+</span></span><span style="display:flex;"><span>    stride,
+</span></span><span style="display:flex;"><span>    input_pixels,
+</span></span><span style="display:flex;"><span>    pixel_format);
+</span></span></code></pre></div><p>Tracing the call tree, we can see <code>WmkWriteWatermark</code> is called after a local Stable Diffusion image generation. And if <code>WmkWriteWatermark</code> fails, Paint converts the entire generation into an error rather than returning the image without it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>CocreatorViewModel::GenerateImageAsync(...)
+</span></span><span style="display:flex;"><span>  |
+</span></span><span style="display:flex;"><span>  `-- Paint::AI::StableDiffusionHelpers::GenerateAsync(..., watermarkId, ...)
+</span></span><span style="display:flex;"><span>        |
+</span></span><span style="display:flex;"><span>        `-- Microsoft.ImageCreation.ImageGenerator
+</span></span><span style="display:flex;"><span>              |
+</span></span><span style="display:flex;"><span>              `-- NPU-generated image result
+</span></span><span style="display:flex;"><span>                    |
+</span></span><span style="display:flex;"><span>                    +-- output safety/moderation checks
+</span></span><span style="display:flex;"><span>                    |
+</span></span><span style="display:flex;"><span>                    +-- Paint::AI::AddWatermark(bitmap, watermarkId)
+</span></span><span style="display:flex;"><span>                    |     |
+</span></span><span style="display:flex;"><span>                    |     `-- Watermarker.dll!WmkWriteWatermark(...)
+</span></span><span style="display:flex;"><span>                    |           |
+</span></span><span style="display:flex;"><span>                    |           +-- success: return the watermarked bitmap
+</span></span><span style="display:flex;"><span>                    |           `-- failure: turn generation into an error
+</span></span><span style="display:flex;"><span>                    |
+</span></span><span style="display:flex;"><span>                    `-- construct successful StableDiffusionResult
+</span></span></code></pre></div><p>Then it is natural to ask what the incoming <code>payload</code> actually is. It quickly becomes apparent that it must be 16 bytes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (payload_length <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">16</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">6</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (payload_length <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">16</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>;
+</span></span></code></pre></div><p>It is funny to me that the code is using two different error codes when the payload is too short or too long. The function then ignores the length parameter and uses a hard-coded loop bound when it copies the payload:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">size_t</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">16</span>; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    message.<span style="color:#a6e22e">push_back</span>(payload[i]);
+</span></span></code></pre></div><p>We do not yet know what the 16-byte payload is, but as we will see later, it is a GUID! <code>WmkWriteWatermark</code> does not embed the GUID directly. Its wrapper constructs the following 18-byte (144-bit) message:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>0x4c || GUID[0..15] || (sum of the 16 GUID bytes modulo 256)
+</span></span></code></pre></div><p>The core encoder rounds the usable image dimensions down to multiples of eight and keeps 144 counters, one for each bit. It requires every bit to be placed at least three times.</p>
+<p>The encoder itself can be summarized as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>WmkWriteWatermark(output, guid, 16, width, height, stride, input, format)
+</span></span><span style="display:flex;"><span>  |
+</span></span><span style="display:flex;"><span>  +-- validate pointers, format, stride, and payload length
+</span></span><span style="display:flex;"><span>  +-- require width &gt;= 192 and height &gt;= 192
+</span></span><span style="display:flex;"><span>  +-- construct payload
+</span></span><span style="display:flex;"><span>  |     `-- 0x4c || GUID || byte-sum checksum
+</span></span><span style="display:flex;"><span>  +-- expand 18 bytes into 144 individual bits
+</span></span><span style="display:flex;"><span>  +-- round usable dimensions down to 8-pixel boundaries
+</span></span><span style="display:flex;"><span>  +-- scan/select suitable image blocks
+</span></span><span style="display:flex;"><span>  +-- quantize selected block/matrix values according to each bit
+</span></span><span style="display:flex;"><span>  +-- require at least three successful placements per bit
+</span></span><span style="display:flex;"><span>  |     |
+</span></span><span style="display:flex;"><span>  |     `-- insufficient capacity -&gt; return -8
+</span></span><span style="display:flex;"><span>  `-- reconstruct RGB pixels into the output buffer
+</span></span></code></pre></div><p>The embedding loop performs small quantized changes over selected image blocks. It contains 3-by-5 matrix operations and a matrix-decomposition routine, and it uses constants including <code>24.0</code>, <code>0.25</code>, <code>0.5</code>, and <code>0.2</code>. This looks like a content-adaptive block-domain, SVD-style watermark.</p>
+<p>I am not an expert in image watermarking, but one thing should be clear &ndash; this is an invisible watermark! AI even wrote some code to call this function directly and tested it with a synthetic 512-by-512 BGRA image &ndash; 193,376 of the 262,144 pixels changed after adding the watermark.</p>
+<p>That led to the next question. Where does the input of the watermark come from?</p>
+<h2 id="a-guid-from-remote-prompt-moderation">a GUID from remote prompt moderation</h2>
+<p>At the <code>WmkWriteWatermark</code> boundary, the payload is only a pointer and a length. Knowing that it must be 16 bytes was a clue, but many things can be 16 bytes. I therefore started walking backward through its callers. The immediate wrapper in <code>PaintAIManager.dll</code> has this symbolized signature:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>Paint<span style="color:#f92672">::</span>AI<span style="color:#f92672">::</span>AddWatermark(
+</span></span><span style="display:flex;"><span>    Gdiplus<span style="color:#f92672">::</span>Bitmap<span style="color:#f92672">&amp;</span> image,
+</span></span><span style="display:flex;"><span>    winrt<span style="color:#f92672">::</span>guid <span style="color:#66d9ef">const</span><span style="color:#f92672">&amp;</span> watermarkId);
+</span></span></code></pre></div><p><code>winrt::guid</code>, yikes! Now we know that the 16-byte watermark payload is indeed a GUID.</p>
+<p>Further tracking the source, we find that the GUID actually comes from a network request. Before Paint runs the local image model, <code>AIServices.dll</code> sends the prompt and style to:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>https://apsaiservices-a0fqcjc6bzbhgdcd.b02.azurefd.net/
+</span></span><span style="display:flex;"><span>v1/paint-cocreator/moderate-prompt
+</span></span></code></pre></div><p>The request is JSON and contains at least these fields:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;prompt&#34;</span>: <span style="color:#e6db74">&#34;...&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;style&#34;</span>: <span style="color:#e6db74">&#34;...&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;lastPromptGenerationId&#34;</span>: <span style="color:#e6db74">&#34;...&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The response parser expects:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;revisedPrompt&#34;</span>: <span style="color:#e6db74">&#34;...&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;promptGenerationId&#34;</span>: <span style="color:#e6db74">&#34;...&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;watermarkId&#34;</span>: <span style="color:#e6db74">&#34;...&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;containsHumanReference&#34;</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>ParseModerateResponse</code> parses both ID strings as GUIDs and rejects zero values with <code>InvalidPromptGenerationId</code> or <code>InvalidWatermarkId</code>. The server&rsquo;s <code>watermarkId</code> is what becomes part of the generated image:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>PaintUI.dll
+</span></span><span style="display:flex;"><span>  `-- IPromptModerationService
+</span></span><span style="display:flex;"><span>        `-- PaintAIManager.dll
+</span></span><span style="display:flex;"><span>              `-- AIServices.dll!ModerateAsync(...)
+</span></span><span style="display:flex;"><span>                    |
+</span></span><span style="display:flex;"><span>                    +-- build JSON
+</span></span><span style="display:flex;"><span>                    |     +-- prompt
+</span></span><span style="display:flex;"><span>                    |     +-- style
+</span></span><span style="display:flex;"><span>                    |     `-- lastPromptGenerationId
+</span></span><span style="display:flex;"><span>                    |
+</span></span><span style="display:flex;"><span>                    +-- HTTPS POST /v1/paint-cocreator/moderate-prompt
+</span></span><span style="display:flex;"><span>                    |
+</span></span><span style="display:flex;"><span>                    `-- AIServices.dll!ParseModerateResponse(response)
+</span></span><span style="display:flex;"><span>                          +-- revisedPrompt
+</span></span><span style="display:flex;"><span>                          +-- promptGenerationId -&gt; parse as GUID
+</span></span><span style="display:flex;"><span>                          +-- watermarkId        -&gt; parse as GUID
+</span></span><span style="display:flex;"><span>                          `-- containsHumanReference
+</span></span><span style="display:flex;"><span>                                |
+</span></span><span style="display:flex;"><span>                                `-- PaintUI stores WatermarkId
+</span></span><span style="display:flex;"><span>                                      `-- StableDiffusionHelpers::GenerateAsync(..., watermarkId, ...)
+</span></span><span style="display:flex;"><span>                                            `-- local Stable Diffusion result
+</span></span><span style="display:flex;"><span>                                                  `-- Paint::AI::AddWatermark(bitmap, winrt::guid const&amp;)
+</span></span><span style="display:flex;"><span>                                                        `-- WmkWriteWatermark(..., guid, 16, ...)
+</span></span><span style="display:flex;"><span>                                                              `-- modified RGB pixels
+</span></span></code></pre></div><p>In other words, &ldquo;generated locally&rdquo; does not mean that the complete operation is local. Microsoft receives and moderates the prompt, then issues the unique GUID that Paint embeds into the locally generated image. Paint also sends the previous <code>promptGenerationId</code> as <code>lastPromptGenerationId</code> with its next moderation request, allowing successive requests to be linked explicitly.</p>
+<h2 id="photos-app-does-the-same-thing">Photos app does the same thing</h2>
+<p>While I was trying to locate the <code>Watermarker.dll</code> on disk, I happened to notice that Microsoft Photos contains a DLL with the same name:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>C:\Program Files\WindowsApps\
+</span></span><span style="display:flex;"><span>  Microsoft.Windows.Photos_2026.11060.2004.0_x64__8wekyb3d8bbwe\Watermarker.dll
+</span></span></code></pre></div><p>There are also local Stable Diffusion operations behind Photos&rsquo; Image Creator and Restyle Image features. Both lead to the same watermark wrapper:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Photos Image Creator
+</span></span><span style="display:flex;"><span>  `-- PerformSDTextToImageAndWatermarkAsync(..., promptGenerationId, ...)
+</span></span><span style="display:flex;"><span>        +-- run the local text-to-image model
+</span></span><span style="display:flex;"><span>        `-- ApplyWatermark(image, promptGenerationId)
+</span></span><span style="display:flex;"><span>              +-- parse promptGenerationId as a GUID
+</span></span><span style="display:flex;"><span>              +-- ConvertGUIDtoContiguousByteArray()
+</span></span><span style="display:flex;"><span>              +-- convert RGBA to ARGB
+</span></span><span style="display:flex;"><span>              +-- Watermarker.dll!WmkWriteWatermark(..., guid, 16, ...)
+</span></span><span style="display:flex;"><span>              `-- convert ARGB back to RGBA
+</span></span></code></pre></div><p>Restyle Image takes the parallel path:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Photos Restyle Image
+</span></span><span style="display:flex;"><span>  `-- PerformSDSketchToImageAndWatermarkAsync(..., promptGenerationId, ...)
+</span></span><span style="display:flex;"><span>        `-- ApplyWatermark(image, promptGenerationId)
+</span></span><span style="display:flex;"><span>              `-- Watermarker.dll!WmkWriteWatermark(..., guid, 16, ...)
+</span></span></code></pre></div><p>A subtle difference between Photos and Paint is failure behavior. If the watermark encoder returns an error, its code logs:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>ApplyWatermark encountered error: ... - watermark will not be applied.
+</span></span></code></pre></div><p>It then appears to continue returning the generated image. Paint instead treats a watermarking failure as a generation failure and the image is not returned to the user.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>To the best of my knowledge, this is the first research to document and analyze the invisible-watermarking behavior of Paint and Photos. Visible watermarks on AI-generated images are not new—Microsoft documents them for <a href="https://support.microsoft.com/en-us/topic/include-a-watermark-when-content-from-microsoft-365-is-ai-generated-b00a656e-ae61-4692-8086-67d004421030">Microsoft 365</a> and <a href="https://www.microsoft.com/en-us/bing/features/bing-image-creator/">Bing Image Creator</a>—nor are invisible pixel watermarks such as <a href="https://deepmind.google/models/synthid/">Google&rsquo;s SynthID</a> and <a href="https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/August-2024-Microsoft-Bing-Systemic-Risk-Assessment-Report-EU-Digital-Services-Act.pdf">Bing&rsquo;s hidden watermark</a>.</p>
+<p>I could not find any disclosure from Microsoft regarding Paint&rsquo;s and Photos&rsquo; use of the watermark, yet it carries obvious privacy and right-to-know implications.</p>
+]]></content>
+        </item>
         
         <item>
             <title>Windows&#39; Performance Optimizer Is More Capable Than It Needs to Be</title>
