@@ -1,7 +1,7 @@
 ---
 layout: post
 status: publish
-title: Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in AI-Generated Images
+title: Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images
 date: '2026-08-21'
 categories:
 - Reversing
@@ -12,7 +12,7 @@ categories:
 - Microsoft Paint and Photos use local models to generate images
 - The two apps send the prompt to a remote server for moderation
 - The server returns a GUID along with the moderated prompt
-- The GUID is embedded into the generated image as an invisible watermark
+- The GUID is embedded into the locally generated image as an invisible watermark
 - A separate visible-watermark setting does not control this invisible watermark
 
 ## A curious look at Microsoft Paint
@@ -60,11 +60,11 @@ After decryption, `onnx.checker.check_model()` works on all of them:
 
 While walking through these files, I found a `Watermarker.dll`:
 
-![The properties of Watermarker.dll included with Microsoft Paint](watermarker-dll-properties.png)
+![The properties of Watermarker.dll included with Microsoft Paint](../watermarker-dll-properties.png)
 
 This is not super surprising to me, because while I interacted with the Paint app, I already discovered that it has a setting to embed a [visible watermark](https://support.microsoft.com/en-us/topic/include-a-watermark-when-content-from-microsoft-365-is-ai-generated-b00a656e-ae61-4692-8086-67d004421030) to the image that it produces:
 
-![Paint offers Never, Always, and Ask every time choices for its visible AI watermark](visible-watermark-setting.png)
+![Paint offers Never, Always, and Ask every time choices for its visible AI watermark](../visible-watermark-setting.png)
 
 The visible watermark is just a small Copilot logo at the bottom right of the image, which is totally normal.
 

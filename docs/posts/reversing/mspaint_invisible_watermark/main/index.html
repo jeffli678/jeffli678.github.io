@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="author" content="">
-<meta name="description" content="TL;DR Microsoft Paint and Photos use local models to generate images The two apps send the prompt to a remote server for moderation The server returns a GUID along with the moderated prompt The GUID is embedded into the generated image as an invisible watermark A separate visible-watermark setting does not control this invisible watermark A curious look at Microsoft Paint This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like UCPD, WHESCVC, and I have long known that Microsoft added a bunch of AI features into the Paint app. I do not know if anyone actually uses Paint &#43; AI to generate images, but I wanted to see how exactly the image generation works.
+<meta name="description" content="TL;DR Microsoft Paint and Photos use local models to generate images The two apps send the prompt to a remote server for moderation The server returns a GUID along with the moderated prompt The GUID is embedded into the locally generated image as an invisible watermark A separate visible-watermark setting does not control this invisible watermark A curious look at Microsoft Paint This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like UCPD, WHESCVC, and I have long known that Microsoft added a bunch of AI features into the Paint app. I do not know if anyone actually uses Paint &#43; AI to generate images, but I wanted to see how exactly the image generation works.
 " />
 <meta name="keywords" content="Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35" />
 <meta name="robots" content="noodp" />
@@ -15,7 +15,7 @@
 
     <title>
         
-            Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in AI-Generated Images :: Xusheng Li 
+            Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images :: Xusheng Li
         
     </title>
 
@@ -34,8 +34,8 @@
 
 
 
-	<meta itemprop="name" content="Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in AI-Generated Images">
-	<meta itemprop="description" content="TL;DR Microsoft Paint and Photos use local models to generate images The two apps send the prompt to a remote server for moderation The server returns a GUID along with the moderated prompt The GUID is embedded into the generated image as an invisible watermark A separate visible-watermark setting does not control this invisible watermark A curious look at Microsoft Paint This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like UCPD, WHESCVC, and I have long known that Microsoft added a bunch of AI features into the Paint app. I do not know if anyone actually uses Paint &#43; AI to generate images, but I wanted to see how exactly the image generation works.">
+	<meta itemprop="name" content="Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images">
+	<meta itemprop="description" content="TL;DR Microsoft Paint and Photos use local models to generate images The two apps send the prompt to a remote server for moderation The server returns a GUID along with the moderated prompt The GUID is embedded into the locally generated image as an invisible watermark A separate visible-watermark setting does not control this invisible watermark A curious look at Microsoft Paint This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like UCPD, WHESCVC, and I have long known that Microsoft added a bunch of AI features into the Paint app. I do not know if anyone actually uses Paint &#43; AI to generate images, but I wanted to see how exactly the image generation works.">
 	<meta itemprop="datePublished" content="2026-08-21T00:00:00+00:00">
 	<meta itemprop="dateModified" content="2026-08-21T00:00:00+00:00">
 	<meta itemprop="wordCount" content="1535">
@@ -43,15 +43,15 @@
 
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:image" content="/">
-	<meta name="twitter:title" content="Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in AI-Generated Images">
-	<meta name="twitter:description" content="TL;DR Microsoft Paint and Photos use local models to generate images The two apps send the prompt to a remote server for moderation The server returns a GUID along with the moderated prompt The GUID is embedded into the generated image as an invisible watermark A separate visible-watermark setting does not control this invisible watermark A curious look at Microsoft Paint This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like UCPD, WHESCVC, and I have long known that Microsoft added a bunch of AI features into the Paint app. I do not know if anyone actually uses Paint &#43; AI to generate images, but I wanted to see how exactly the image generation works.">
+	<meta name="twitter:title" content="Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images">
+	<meta name="twitter:description" content="TL;DR Microsoft Paint and Photos use local models to generate images The two apps send the prompt to a remote server for moderation The server returns a GUID along with the moderated prompt The GUID is embedded into the locally generated image as an invisible watermark A separate visible-watermark setting does not control this invisible watermark A curious look at Microsoft Paint This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like UCPD, WHESCVC, and I have long known that Microsoft added a bunch of AI features into the Paint app. I do not know if anyone actually uses Paint &#43; AI to generate images, but I wanted to see how exactly the image generation works.">
 
 
 
     <meta property="og:url" content="/posts/reversing/mspaint_invisible_watermark/main/">
 	<meta property="og:site_name" content="Xusheng Li">
-	<meta property="og:title" content="Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in AI-Generated Images">
-	<meta property="og:description" content="TL;DR Microsoft Paint and Photos use local models to generate images The two apps send the prompt to a remote server for moderation The server returns a GUID along with the moderated prompt The GUID is embedded into the generated image as an invisible watermark A separate visible-watermark setting does not control this invisible watermark A curious look at Microsoft Paint This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like UCPD, WHESCVC, and I have long known that Microsoft added a bunch of AI features into the Paint app. I do not know if anyone actually uses Paint &#43; AI to generate images, but I wanted to see how exactly the image generation works.">
+	<meta property="og:title" content="Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images">
+	<meta property="og:description" content="TL;DR Microsoft Paint and Photos use local models to generate images The two apps send the prompt to a remote server for moderation The server returns a GUID along with the moderated prompt The GUID is embedded into the locally generated image as an invisible watermark A separate visible-watermark setting does not control this invisible watermark A curious look at Microsoft Paint This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like UCPD, WHESCVC, and I have long known that Microsoft added a bunch of AI features into the Paint app. I do not know if anyone actually uses Paint &#43; AI to generate images, but I wanted to see how exactly the image generation works.">
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="posts">
@@ -136,7 +136,7 @@
 
     <article>
       <h1 class="post-title">
-        <a href="/posts/reversing/mspaint_invisible_watermark/main/">Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in AI-Generated Images</a>
+        <a href="/posts/reversing/mspaint_invisible_watermark/main/">Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images</a>
       </h1>
 
       
@@ -149,7 +149,7 @@
 <li>Microsoft Paint and Photos use local models to generate images</li>
 <li>The two apps send the prompt to a remote server for moderation</li>
 <li>The server returns a GUID along with the moderated prompt</li>
-<li>The GUID is embedded into the generated image as an invisible watermark</li>
+<li>The GUID is embedded into the locally generated image as an invisible watermark</li>
 <li>A separate visible-watermark setting does not control this invisible watermark</li>
 </ul>
 <h2 id="a-curious-look-at-microsoft-paint">A curious look at Microsoft Paint</h2>
@@ -197,9 +197,9 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
 </table>
 <h2 id="a-visible-watermark">A visible watermark</h2>
 <p>While walking through these files, I found a <code>Watermarker.dll</code>:</p>
-<p><img src="watermarker-dll-properties.png" alt="The properties of Watermarker.dll included with Microsoft Paint"></p>
+<p><img src="../watermarker-dll-properties.png" alt="The properties of Watermarker.dll included with Microsoft Paint"></p>
 <p>This is not super surprising to me, because while I interacted with the Paint app, I already discovered that it has a setting to embed a <a href="https://support.microsoft.com/en-us/topic/include-a-watermark-when-content-from-microsoft-365-is-ai-generated-b00a656e-ae61-4692-8086-67d004421030">visible watermark</a> to the image that it produces:</p>
-<p><img src="visible-watermark-setting.png" alt="Paint offers Never, Always, and Ask every time choices for its visible AI watermark"></p>
+<p><img src="../visible-watermark-setting.png" alt="Paint offers Never, Always, and Ask every time choices for its visible AI watermark"></p>
 <p>The visible watermark is just a small Copilot logo at the bottom right of the image, which is totally normal.</p>
 <p>Then, out of nowhere, I decided to ask AI to analyze the DLL and see if it could also be embedding an <em>invisible</em> watermark. This is part of my intuition as a reverse engineer, because the file is 1.67 MB in size, which is unusually large for such trivial functionality (arguably, the visible watermark does not even require a separate DLL). Apparently, the recent Claude Code <a href="https://www.anthropic.com/news/claude-text-watermark">text-watermark announcement</a> also played a role in prompting me to think about this possibility.</p>
 <h2 id="an-invisible-watermark">An <em>invisible</em> watermark</h2>

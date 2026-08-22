@@ -10,7 +10,7 @@
         <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
         
         <item>
-            <title>Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in AI-Generated Images</title>
+            <title>Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images</title>
             <link>/posts/reversing/mspaint_invisible_watermark/main/</link>
             <pubDate>Fri, 21 Aug 2026 00:00:00 +0000</pubDate>
             <guid>/posts/reversing/mspaint_invisible_watermark/main/</guid>
@@ -19,7 +19,7 @@
 &lt;li&gt;Microsoft Paint and Photos use local models to generate images&lt;/li&gt;
 &lt;li&gt;The two apps send the prompt to a remote server for moderation&lt;/li&gt;
 &lt;li&gt;The server returns a GUID along with the moderated prompt&lt;/li&gt;
-&lt;li&gt;The GUID is embedded into the generated image as an invisible watermark&lt;/li&gt;
+&lt;li&gt;The GUID is embedded into the locally generated image as an invisible watermark&lt;/li&gt;
 &lt;li&gt;A separate visible-watermark setting does not control this invisible watermark&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;a-curious-look-at-microsoft-paint&#34;&gt;A curious look at Microsoft Paint&lt;/h2&gt;
@@ -31,7 +31,7 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
 <li>Microsoft Paint and Photos use local models to generate images</li>
 <li>The two apps send the prompt to a remote server for moderation</li>
 <li>The server returns a GUID along with the moderated prompt</li>
-<li>The GUID is embedded into the generated image as an invisible watermark</li>
+<li>The GUID is embedded into the locally generated image as an invisible watermark</li>
 <li>A separate visible-watermark setting does not control this invisible watermark</li>
 </ul>
 <h2 id="a-curious-look-at-microsoft-paint">A curious look at Microsoft Paint</h2>
