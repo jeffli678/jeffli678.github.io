@@ -3,6 +3,9 @@ layout: post
 status: publish
 title: Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images
 date: '2026-08-21'
+description: Reverse engineering reveals how Paint and Photos embed a server-issued GUID into the pixels of locally generated AI images.
+images:
+- /posts/reversing/mspaint_invisible_watermark/social-preview.png
 categories:
 - Reversing
 ---
@@ -14,6 +17,8 @@ categories:
 - The server returns a GUID along with the moderated prompt
 - The GUID is embedded into the locally generated image as an invisible watermark
 - A separate visible-watermark setting does not control this invisible watermark
+
+![Paint sends the user prompt to Microsoft's moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels](../social-preview.png)
 
 ## A curious look at Microsoft Paint
 
@@ -301,3 +306,5 @@ To the best of my knowledge, this is the first research to document and analyze 
 Microsoft does disclose an adjacent mechanism: [Paint](https://support.microsoft.com/en-us/windows/use-image-creator-in-paint-to-generate-ai-art-107a2b3a-62ea-41f5-a638-7bc6e6ea718f) and [Photos](https://support.microsoft.com/en-us/windows/ai/ai-apps/microsoft-photos-restyle-image-and-image-creator-responsible-ai-faq) attach C2PA Content Credentials, which live at the file-metadata level rather than being encoded into the pixels. This might be related to [Article 50 of the EU AI Act](https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content), whose transparency rules took effect on August 2, 2026 and require AI-generated content to carry a detectable, machine-readable mark—but not a prompt-specific GUID.
 
 However, I could not find any disclosure from Microsoft regarding Paint's and Photos' use of the watermark, yet it carries obvious privacy and right-to-know implications.
+
+It also appears possible to modify Paint or Photos to bypass both prompt moderation and watermarking. But that does not provide a new capability: anyone can already run Stable Diffusion directly without either mechanism.

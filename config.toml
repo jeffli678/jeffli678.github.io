@@ -1,4 +1,4 @@
-baseurl      = ""
+baseurl      = "https://xusheng.dev/"
 title        = "Xusheng Li"
 languageCode = "en-us"
 theme        = "hello-friend-ng"

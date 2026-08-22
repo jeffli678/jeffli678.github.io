@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
 		<title>Tags on Xusheng Li</title>
-		<link>/tags/</link>
+		<link>http://localhost:1313/tags/</link>
 		<description>Recent content in Tags on Xusheng Li</description>
 		<generator>Hugo</generator>
 		<language>en-us</language>
@@ -14,68 +14,68 @@
 		
 			<lastBuildDate>Sun, 19 Jul 2026 00:00:00 +0000</lastBuildDate>
 		
-			<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
+			<atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
 			<item>
 				<title>Ai</title>
-				<link>/tags/ai/</link>
+				<link>http://localhost:1313/tags/ai/</link>
 				<pubDate>Sun, 19 Jul 2026 00:00:00 +0000</pubDate>
-				<guid>/tags/ai/</guid>
+				<guid>http://localhost:1313/tags/ai/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Binary-Ninja</title>
-				<link>/tags/binary-ninja/</link>
+				<link>http://localhost:1313/tags/binary-ninja/</link>
 				<pubDate>Sun, 19 Jul 2026 00:00:00 +0000</pubDate>
-				<guid>/tags/binary-ninja/</guid>
+				<guid>http://localhost:1313/tags/binary-ninja/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Decompiler</title>
-				<link>/tags/decompiler/</link>
+				<link>http://localhost:1313/tags/decompiler/</link>
 				<pubDate>Sun, 19 Jul 2026 00:00:00 +0000</pubDate>
-				<guid>/tags/decompiler/</guid>
+				<guid>http://localhost:1313/tags/decompiler/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Easter-Egg</title>
-				<link>/tags/easter-egg/</link>
+				<link>http://localhost:1313/tags/easter-egg/</link>
 				<pubDate>Sun, 19 Jul 2026 00:00:00 +0000</pubDate>
-				<guid>/tags/easter-egg/</guid>
+				<guid>http://localhost:1313/tags/easter-egg/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Excel</title>
-				<link>/tags/excel/</link>
+				<link>http://localhost:1313/tags/excel/</link>
 				<pubDate>Sun, 19 Jul 2026 00:00:00 +0000</pubDate>
-				<guid>/tags/excel/</guid>
+				<guid>http://localhost:1313/tags/excel/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Adware</title>
-				<link>/tags/adware/</link>
+				<link>http://localhost:1313/tags/adware/</link>
 				<pubDate>Sat, 18 Jul 2026 00:00:00 +0000</pubDate>
-				<guid>/tags/adware/</guid>
+				<guid>http://localhost:1313/tags/adware/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Dotnet</title>
-				<link>/tags/dotnet/</link>
+				<link>http://localhost:1313/tags/dotnet/</link>
 				<pubDate>Sat, 18 Jul 2026 00:00:00 +0000</pubDate>
-				<guid>/tags/dotnet/</guid>
+				<guid>http://localhost:1313/tags/dotnet/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Eazfuscator</title>
-				<link>/tags/eazfuscator/</link>
+				<link>http://localhost:1313/tags/eazfuscator/</link>
 				<pubDate>Sat, 18 Jul 2026 00:00:00 +0000</pubDate>
-				<guid>/tags/eazfuscator/</guid>
+				<guid>http://localhost:1313/tags/eazfuscator/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Untagged</title>
-				<link>/tags/untagged/</link>
+				<link>http://localhost:1313/tags/untagged/</link>
 				<pubDate>Thu, 11 Feb 2021 18:46:24 +0800</pubDate>
-				<guid>/tags/untagged/</guid>
+				<guid>http://localhost:1313/tags/untagged/</guid>
 				<description></description>
 			</item>
 	</channel>
