@@ -22,14 +22,7 @@
 &lt;li&gt;The GUID is embedded into the locally generated image as an invisible watermark&lt;/li&gt;
 &lt;li&gt;A separate visible-watermark setting does not control this invisible watermark&lt;/li&gt;
 &lt;/ul&gt;
-
-    &lt;img src=&#34;../social-preview.png&#34;  alt=&#34;Paint sends the user prompt to Microsoft&amp;#39;s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels&#34;  class=&#34;center&#34;  style=&#34;width: 82%; margin: 1.5em auto;&#34;  /&gt;
-
-
-&lt;h2 id=&#34;a-curious-look-at-microsoft-paint&#34;&gt;A curious look at Microsoft Paint&lt;/h2&gt;
-&lt;p&gt;This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like &lt;a href=&#34;https://binary.ninja/2026/08/04/ucpd-dynamic-rules.html&#34;&gt;UCPD&lt;/a&gt;, &lt;a href=&#34;https://xusheng.dev/posts/reversing/whesvc/main/&#34;&gt;WHESCVC&lt;/a&gt;, and I have long known that Microsoft
-added a bunch of &lt;a href=&#34;https://support.microsoft.com/en-us/windows/ai/ai-apps/use-copilot-pc-features-in-paint&#34;&gt;AI features&lt;/a&gt; into the Paint app.
-I do not know if anyone actually uses Paint + AI to generate images, but I wanted to see how exactly the image generation works.&lt;/p&gt;</description>
+&lt;p&gt;&lt;img src=&#34;../social-preview.jpg&#34; alt=&#34;Paint sends the user prompt to Microsoft’s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels&#34;&gt;&lt;/p&gt;</description>
             <content type="html"><![CDATA[<h2 id="tldr">TL;DR</h2>
 <ul>
 <li>Microsoft Paint and Photos use local models to generate images</li>
@@ -38,10 +31,7 @@ I do not know if anyone actually uses Paint + AI to generate images, but I wante
 <li>The GUID is embedded into the locally generated image as an invisible watermark</li>
 <li>A separate visible-watermark setting does not control this invisible watermark</li>
 </ul>
-
-    <img src="../social-preview.png"  alt="Paint sends the user prompt to Microsoft&#39;s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels"  class="center"  style="width: 82%; margin: 1.5em auto;"  />
-
-
+<p><img src="../social-preview.jpg" alt="Paint sends the user prompt to Microsoft’s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels"></p>
 <h2 id="a-curious-look-at-microsoft-paint">A curious look at Microsoft Paint</h2>
 <p>This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like <a href="https://binary.ninja/2026/08/04/ucpd-dynamic-rules.html">UCPD</a>, <a href="https://xusheng.dev/posts/reversing/whesvc/main/">WHESCVC</a>, and I have long known that Microsoft
 added a bunch of <a href="https://support.microsoft.com/en-us/windows/ai/ai-apps/use-copilot-pc-features-in-paint">AI features</a> into the Paint app.

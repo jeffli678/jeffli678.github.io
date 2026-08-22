@@ -5,7 +5,7 @@ title: Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Waterma
 date: '2026-08-21'
 description: Reverse engineering reveals how Paint and Photos embed a server-issued GUID into the pixels of locally generated AI images.
 images:
-- /posts/reversing/mspaint_invisible_watermark/social-preview.png
+- /posts/reversing/mspaint_invisible_watermark/social-preview.jpg
 categories:
 - Reversing
 ---
@@ -18,7 +18,7 @@ categories:
 - The GUID is embedded into the locally generated image as an invisible watermark
 - A separate visible-watermark setting does not control this invisible watermark
 
-{{< image src="../social-preview.png" alt="Paint sends the user prompt to Microsoft's moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels" position="center" style="width: 82%; margin: 1.5em auto;" >}}
+![Paint sends the user prompt to Microsoft's moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels](../social-preview.jpg)
 
 ## A curious look at Microsoft Paint
 

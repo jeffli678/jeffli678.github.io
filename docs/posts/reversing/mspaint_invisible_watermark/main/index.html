@@ -38,10 +38,10 @@
 	<meta itemprop="datePublished" content="2026-08-21T00:00:00+00:00">
 	<meta itemprop="dateModified" content="2026-08-21T00:00:00+00:00">
 	<meta itemprop="wordCount" content="1632">
-	<meta itemprop="image" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/social-preview.png">
+	<meta itemprop="image" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/social-preview.jpg">
 
 	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:image" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/social-preview.png">
+	<meta name="twitter:image" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/social-preview.jpg">
 	<meta name="twitter:title" content="Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images">
 	<meta name="twitter:description" content="Reverse engineering reveals how Paint and Photos embed a server-issued GUID into the pixels of locally generated AI images.">
 
@@ -56,7 +56,7 @@
 		<meta property="article:section" content="posts">
 		<meta property="article:published_time" content="2026-08-21T00:00:00+00:00">
 		<meta property="article:modified_time" content="2026-08-21T00:00:00+00:00">
-		<meta property="og:image" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/social-preview.png">
+		<meta property="og:image" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/social-preview.jpg">
 
 
 
@@ -153,10 +153,7 @@
 <li>The GUID is embedded into the locally generated image as an invisible watermark</li>
 <li>A separate visible-watermark setting does not control this invisible watermark</li>
 </ul>
-
-    <img src="../social-preview.png"  alt="Paint sends the user prompt to Microsoft&#39;s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels"  class="center"  style="width: 82%; margin: 1.5em auto;"  />
-
-
+<p><img src="../social-preview.jpg" alt="Paint sends the user prompt to Microsoft’s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels"></p>
 <h2 id="a-curious-look-at-microsoft-paint">A curious look at Microsoft Paint</h2>
 <p>This research started with my curiosity about Paint. I recently had some success looking into less-explored Windows features like <a href="https://binary.ninja/2026/08/04/ucpd-dynamic-rules.html">UCPD</a>, <a href="https://xusheng.dev/posts/reversing/whesvc/main/">WHESCVC</a>, and I have long known that Microsoft
 added a bunch of <a href="https://support.microsoft.com/en-us/windows/ai/ai-apps/use-copilot-pc-features-in-paint">AI features</a> into the Paint app.
