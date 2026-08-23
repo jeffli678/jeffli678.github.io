@@ -16,9 +16,10 @@ categories:
 - The two apps send the prompt to a remote server for moderation
 - The server returns a GUID along with the moderated prompt
 - The GUID is embedded into the locally generated image as an invisible watermark
+- A separate visible-watermark setting does not control this invisible watermark
 - On Copilot+ PCs, image generation is local but prompt moderation remains remote
 - Microsoft discloses that Paint adds C2PA metadata to AI-generated images
-- A separate visible-watermark setting does not control this invisible watermark
+- AI-generated image saves limited to C2PA-preserving formats: PNG, JPEG, GIF, and `.paint`
 
 ![Paint sends the user prompt to Microsoft's moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels](../social-preview.jpg)
 
@@ -289,7 +290,7 @@ In other words, "generated locally" does not mean that the complete operation is
 
 ## The same watermark GUID in C2PA metadata
 
-There is another piece to this story. Paint does not only alter the pixels. It also attaches [C2PA Content Credentials](https://c2pa.org/) to the saved file. The code responsible for this lives in `ProvenanceHelper.dll`, backed by `provenancesdk.dll`.
+There is another piece to this story. Paint does more than alter the pixels. It also attaches [C2PA Content Credentials](https://c2pa.org/) to the saved file. The code responsible for this lives in `ProvenanceHelper.dll`, backed by `provenancesdk.dll`.
 
 For the local Stable Diffusion path, the flow looks like this:
 
@@ -391,9 +392,17 @@ Cocreator on a Copilot+ PC
 
 This is probably the reason Paint needs a local watermark implementation at all. A cloud generator can watermark its output before returning it. A local generator cannot rely on that, so Paint has to alter the locally generated pixels itself. It also explains why Paint treats a failure from `WmkWriteWatermark` as a failure of the entire generation instead of quietly returning an unmarked image.
 
+There is another surprisingly visible sign that Microsoft designed the save path around provenance. When I save a generated result directly from the Image Creator pane, Paint offers exactly one format: PNG.
+
+![Paint only offers PNG when saving an AI-generated result directly](../can-only-save-png.png)
+
+After an AI result is applied to the Paint canvas, the available formats are still restricted to PNG, JPEG, GIF, and Paint's own `.paint` format. BMP—the classic Paint format—is conspicuously absent.
+
+This lines up with the formats supported by C2PA. PNG stores its manifest in a `caBX` chunk, JPEG uses one or more `APP11` marker segments, and GIF has its own C2PA application-extension representation. The `.paint` format is controlled by Microsoft and can preserve whatever provenance state Paint requires. By contrast, the [C2PA specification explicitly calls out BMP](https://spec.c2pa.org/specifications/specifications/2.4/specs/ContentCredentials.html) as a classic format that cannot embed arbitrary manifest data without using an external manifest. If Paint allowed the image to be exported directly as BMP, the file-level C2PA manifest would therefore disappear.
+
 The split also raises an interesting security question about the cloud path. If the underlying remote image-generation endpoint can be made to return the generated image before watermarking and provenance packaging—or has an internal option that suppresses those stages—it might be possible to obtain a cloud-generated image with neither signal attached.
 
-How to classify such a path would depend entirely on Microsoft's design goal. It could be intended behavior if the underlying service is allowed to return raw generations and Paint is merely responsible for applying the provenance layers. It could be a product bug if the possiblity of someone calling the API direclty and not letting Paint to add watermark to it. Or it could be a security vulnerability if Microsoft treats watermarking as a mandatory abuse-prevention or provenance control and the endpoint can be made to bypass it. Without knowing the intended trust boundary, all three possibilities remain open.
+How to classify such a path would depend entirely on Microsoft's design goal. It could be intended behavior if the underlying service is allowed to return raw generations and Paint is merely responsible for applying the provenance layers. It could be a product bug if Microsoft overlooked the possibility of someone calling the API directly and bypassing Paint's watermarking step. Or it could be a security vulnerability if Microsoft treats watermarking as a mandatory abuse-prevention or provenance control and the endpoint can be made to bypass it. Without knowing the intended trust boundary, all three possibilities remain open.
 
 ## Photos app does the same thing
 
