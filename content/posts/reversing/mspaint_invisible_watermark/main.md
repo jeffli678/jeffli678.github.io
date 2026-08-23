@@ -16,6 +16,8 @@ categories:
 - The two apps send the prompt to a remote server for moderation
 - The server returns a GUID along with the moderated prompt
 - The GUID is embedded into the locally generated image as an invisible watermark
+- On Copilot+ PCs, image generation is local but prompt moderation remains remote
+- Microsoft discloses that Paint adds C2PA metadata to AI-generated images
 - A separate visible-watermark setting does not control this invisible watermark
 
 ![Paint sends the user prompt to Microsoft's moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels](../social-preview.jpg)
@@ -242,7 +244,7 @@ The server returned HTTP 200:
 {
   "revisedPrompt": "a cobalt blue circle above a tiny orange square",
   "promptGenerationId": "74d9e06b-adea-43ce-85fe-186a26e2e34a",
-  "watermarkId": "a4145750-cf7b-499f-9f21-98bead990887",
+  "watermarkId": "83424621-03cb-40e3-9808-a9fae837156d",
   "containsHumanReference": false
 }
 ```
@@ -285,6 +287,114 @@ PaintUI.dll
 
 In other words, "generated locally" does not mean that the complete operation is local. Microsoft receives and moderates the prompt, then issues the unique GUID that Paint embeds into the locally generated image. Paint also sends the previous `promptGenerationId` as `lastPromptGenerationId` with its next moderation request, allowing successive requests to be linked explicitly.
 
+## The same watermark GUID in C2PA metadata
+
+There is another piece to this story. Paint does not only alter the pixels. It also attaches [C2PA Content Credentials](https://c2pa.org/) to the saved file. The code responsible for this lives in `ProvenanceHelper.dll`, backed by `provenancesdk.dll`.
+
+For the local Stable Diffusion path, the flow looks like this:
+
+```text
+local Stable Diffusion result
+  |
+  +-- Paint::AI::AddWatermark(bitmap, watermarkId)
+  |     `-- Watermarker.dll!WmkWriteWatermark(..., watermarkId, 16, ...)
+  |
+  `-- AIServices.dll!SignIngredientOnlineAsync(..., promptGenerationId, image, ...)
+        |
+        +-- POST /v1/paint-cocreator/image-sign
+        |     +-- imageMetadata
+        |     |     +-- PromptGenerationId
+        |     |     +-- GenerationSeed
+        |     |     +-- CreativityLevel
+        |     |     +-- AIFVersion
+        |     |     `-- moderation scores
+        |     `-- imageToSign.jpg
+        |
+        `-- ParseProvenanceResponse(...)
+              `-- server-supplied C2PA manifest
+                    `-- ProvenanceHelper::InsertManifestIngredient(...)
+                          `-- AuthoringFinalizeOutputToBufferAsync(...)
+                                `-- final image with C2PA metadata
+```
+
+Notice that the signing request sends `PromptGenerationId`, while the image already contains the separately returned `watermarkId`. The server assigned both values during moderation, so it can associate the signing request with the watermark already present in the submitted pixels.
+
+I then saved a real image directly from Paint's Image Creator and inspected its PNG chunks. Immediately after `IHDR` was an 18,979-byte `caBX` chunk containing a signed C2PA manifest. The interesting part was this:
+
+```json
+{
+  "c2pa.soft-binding": {
+    "alg": "com.microsoft.invismark.1",
+    "blocks": [
+      {
+        "scope": "the entire image",
+        "value": "83424621-03cb-40e3-9808-a9fae837156d"
+      }
+    ]
+  },
+  "c2pa.actions.v2": {
+    "actions": [
+      {
+        "action": "c2pa.watermarked",
+        "description": "Content watermarked by Microsoft Responsible AI"
+      }
+    ]
+  }
+}
+```
+
+Decoded into something more readable, the manifest says:
+
+- Generator: `Microsoft Responsible AI Provenance`
+- AI system: `Azure OpenAI ImageGen`
+- Action: `c2pa.watermarked`
+- Algorithm: `com.microsoft.invismark.1`
+- Watermark value: `83424621-03cb-40e3-9808-a9fae837156d`
+- Description: `Content watermarked by Microsoft Responsible AI`
+
+The server's `watermarkId`, the identifier embedded into the pixels, and the C2PA `c2pa.soft-binding.value` are the same per-generation value.
+
+That relationship is important. C2PA calls this a *soft binding*: a value derived from, or embedded into, the content so that the content can still be matched with its provenance record after the file-level manifest has been removed. For a watermark soft binding, the `value` is the watermark's content identifier. Microsoft cryptographically signed this assertion.
+
+## Why does Paint watermark locally?
+
+At this point, the existence of `Watermarker.dll` started to make more sense. Paint actually has two rather different generation paths.
+
+The Image Creator feature I tested above uses `Azure OpenAI ImageGen`. Generation, watermarking, and provenance packaging can all happen in Microsoft's cloud, and Paint can simply receive a finished image that already contains both the invisible watermark and C2PA manifest:
+
+```text
+Image Creator
+  `-- Microsoft cloud
+        +-- content filtering
+        +-- Azure OpenAI ImageGen
+        +-- invisible watermark
+        +-- C2PA manifest
+        `-- completed image returned to Paint
+```
+
+Cocreator is different. On a supported Copilot+ PC, Microsoft [says that the NPU generates the image locally](https://support.microsoft.com/en-us/windows/ai/ai-apps/use-copilot-pc-features-in-paint), while Azure online services still perform the safety checks. The feature therefore requires both a Microsoft account and an internet connection even though the actual Stable Diffusion inference runs on the device:
+
+```text
+Cocreator on a Copilot+ PC
+  |
+  +-- prompt -> Microsoft moderation service
+  |                 +-- revisedPrompt
+  |                 +-- promptGenerationId
+  |                 `-- watermarkId
+  |
+  +-- revisedPrompt + sketch -> local NPU generation
+  |
+  +-- Watermarker.dll -> embed watermarkId locally
+  |
+  `-- online provenance signing -> final C2PA manifest
+```
+
+This is probably the reason Paint needs a local watermark implementation at all. A cloud generator can watermark its output before returning it. A local generator cannot rely on that, so Paint has to alter the locally generated pixels itself. It also explains why Paint treats a failure from `WmkWriteWatermark` as a failure of the entire generation instead of quietly returning an unmarked image.
+
+The split also raises an interesting security question about the cloud path. If the underlying remote image-generation endpoint can be made to return the generated image before watermarking and provenance packaging—or has an internal option that suppresses those stages—it might be possible to obtain a cloud-generated image with neither signal attached.
+
+How to classify such a path would depend entirely on Microsoft's design goal. It could be intended behavior if the underlying service is allowed to return raw generations and Paint is merely responsible for applying the provenance layers. It could be a product bug if the possiblity of someone calling the API direclty and not letting Paint to add watermark to it. Or it could be a security vulnerability if Microsoft treats watermarking as a mandatory abuse-prevention or provenance control and the endpoint can be made to bypass it. Without knowing the intended trust boundary, all three possibilities remain open.
+
 ## Photos app does the same thing
 
 While I was trying to locate the `Watermarker.dll` on disk, I happened to notice that Microsoft Photos contains a DLL with the same name:
@@ -325,12 +435,28 @@ ApplyWatermark encountered error: ... - watermark will not be applied.
 
 It then appears to continue returning the generated image. Paint instead treats a watermarking failure as a generation failure and the image is not returned to the user.
 
+## What Microsoft discloses
+
+After doing this analysis, I found that Microsoft does disclose some adjacent parts of the system on its [Image Creator support page](https://support.microsoft.com/en-us/windows/ai/ai-apps/use-image-creator-in-paint-to-generate-ai-art). On content filtering, it says:
+
+> "we apply content filtering to prevent the generation of images"
+
+The same page says that generated images:
+
+> "will contain C2PA manifest helping users identify that it is an AI generated image."
+
+It also explains that Image Creator uses Azure online services and says Microsoft collects user and device identifiers together with prompts for abuse prevention and monitoring. That is a meaningful disclosure of remote filtering and C2PA metadata.
+
+What the page does not explain is that the C2PA manifest contains a GUID identifying the invisible pixel watermark, or that Paint's local generation path receives its watermark GUID from remote prompt moderation. Calling the feature “Content Credentials” is accurate, but it does not make this prompt-associated identifier obvious to a Windows user.
+
 ## Conclusion
 
 To the best of my knowledge, this is the first research to document and analyze the invisible-watermarking behavior of Paint and Photos. Visible watermarks on AI-generated images are not new—Microsoft documents them for [Microsoft 365](https://support.microsoft.com/en-us/topic/include-a-watermark-when-content-from-microsoft-365-is-ai-generated-b00a656e-ae61-4692-8086-67d004421030) and [Bing Image Creator](https://www.microsoft.com/en-us/bing/features/bing-image-creator/)—nor are invisible pixel watermarks such as [Google's SynthID](https://deepmind.google/models/synthid/) and [Bing's hidden watermark](https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/August-2024-Microsoft-Bing-Systemic-Risk-Assessment-Report-EU-Digital-Services-Act.pdf).
 
-Microsoft does disclose an adjacent mechanism: [Paint](https://support.microsoft.com/en-us/windows/use-image-creator-in-paint-to-generate-ai-art-107a2b3a-62ea-41f5-a638-7bc6e6ea718f) and [Photos](https://support.microsoft.com/en-us/windows/ai/ai-apps/microsoft-photos-restyle-image-and-image-creator-responsible-ai-faq) attach C2PA Content Credentials, which live at the file-metadata level rather than being encoded into the pixels. This might be related to [Article 50 of the EU AI Act](https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content), whose transparency rules took effect on August 2, 2026 and require AI-generated content to carry a detectable, machine-readable mark—but not a prompt-specific GUID.
+Microsoft does disclose that Paint uses remote content filtering and adds C2PA Content Credentials. The new evidence shows that this metadata is not merely an unrelated file-level AI label: its signed `c2pa.soft-binding` assertion names Microsoft InvisMark and records the identifier carried by the invisible pixel watermark. The file-level manifest and pixel-level watermark are two layers of the same provenance system.
 
-However, I could not find any disclosure from Microsoft regarding Paint's and Photos' use of the watermark, yet it carries obvious privacy and right-to-know implications.
+The local and cloud paths also explain the unusual division of labor. Cloud Image Creator can return an already watermarked and signed image, while Cocreator must embed the server-issued identifier after local NPU inference. In both cases, “local” does not mean offline: the prompt still goes to Microsoft for moderation, and the completed local result goes through online provenance signing.
+
+This might be related to [Article 50 of the EU AI Act](https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content), whose transparency rules took effect on August 2, 2026 and require AI-generated content to carry a detectable, machine-readable mark—but not a prompt-specific GUID. Microsoft discloses the existence of C2PA metadata, but I could not find a disclosure explaining the server-issued watermark GUID, its association with prompt moderation, or its presence in the pixels. Those details carry obvious privacy and right-to-know implications.
 
 It also appears possible to modify Paint or Photos to bypass both prompt moderation and watermarking. But that does not provide a new capability: anyone can already run Stable Diffusion directly without either mechanism.
