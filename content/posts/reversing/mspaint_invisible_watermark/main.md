@@ -12,7 +12,8 @@ categories:
 
 ## TL;DR
 
-- Microsoft Paint and Photos use local models to generate images
+- Microsoft Paint supports both local and cloud image generation
+- Paint and Photos also ship local AI models
 - The two apps send the prompt to a remote server for moderation
 - The server returns a GUID along with the moderated prompt
 - The GUID is embedded into the locally generated image as an invisible watermark

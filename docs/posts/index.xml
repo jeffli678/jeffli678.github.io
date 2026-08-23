@@ -16,7 +16,8 @@
             <guid>https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/main/</guid>
             <description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;Microsoft Paint and Photos use local models to generate images&lt;/li&gt;
+&lt;li&gt;Microsoft Paint supports both local and cloud image generation&lt;/li&gt;
+&lt;li&gt;Paint and Photos also ship local AI models&lt;/li&gt;
 &lt;li&gt;The two apps send the prompt to a remote server for moderation&lt;/li&gt;
 &lt;li&gt;The server returns a GUID along with the moderated prompt&lt;/li&gt;
 &lt;li&gt;The GUID is embedded into the locally generated image as an invisible watermark&lt;/li&gt;
@@ -28,7 +29,8 @@
 &lt;p&gt;&lt;img src=&#34;../social-preview.jpg&#34; alt=&#34;Paint sends the user prompt to Microsoft’s moderation server, receives a moderated prompt and watermark GUID, generates the image locally, and embeds the GUID into the final image pixels&#34;&gt;&lt;/p&gt;</description>
             <content type="html"><![CDATA[<h2 id="tldr">TL;DR</h2>
 <ul>
-<li>Microsoft Paint and Photos use local models to generate images</li>
+<li>Microsoft Paint supports both local and cloud image generation</li>
+<li>Paint and Photos also ship local AI models</li>
 <li>The two apps send the prompt to a remote server for moderation</li>
 <li>The server returns a GUID along with the moderated prompt</li>
 <li>The GUID is embedded into the locally generated image as an invisible watermark</li>

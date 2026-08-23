@@ -37,7 +37,7 @@
 	<meta itemprop="description" content="Reverse engineering reveals how Paint and Photos embed a server-issued GUID into the pixels of locally generated AI images.">
 	<meta itemprop="datePublished" content="2026-08-21T00:00:00+00:00">
 	<meta itemprop="dateModified" content="2026-08-21T00:00:00+00:00">
-	<meta itemprop="wordCount" content="2937">
+	<meta itemprop="wordCount" content="2944">
 	<meta itemprop="image" content="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/social-preview.jpg">
 
 	<meta name="twitter:card" content="summary_large_image">
@@ -147,7 +147,8 @@
       <div class="post-content">
         <h2 id="tldr">TL;DR</h2>
 <ul>
-<li>Microsoft Paint and Photos use local models to generate images</li>
+<li>Microsoft Paint supports both local and cloud image generation</li>
+<li>Paint and Photos also ship local AI models</li>
 <li>The two apps send the prompt to a remote server for moderation</li>
 <li>The server returns a GUID along with the moderated prompt</li>
 <li>The GUID is embedded into the locally generated image as an invisible watermark</li>
@@ -499,7 +500,7 @@ controls the watermarking step itself.</p>
           <line x1="16" y1="17" x2="8" y2="17"></line>
           <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
-        2937 Words
+        2944 Words
       </p>
 
       <p>
