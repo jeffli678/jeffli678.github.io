@@ -41,6 +41,10 @@ ignoreErrors = ["error-remote-getjson"]
     url  = "https://github.com/xusheng6"
 
   [[params.social]]
+    name = "twitter"
+    url  = "https://x.com/CrackmesOne"
+
+  [[params.social]]
     name = "linkedin"
     url  = "https://www.linkedin.com/in/xusheng-li-8819b7329/"
 
