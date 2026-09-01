@@ -59,6 +59,23 @@ The complete built-in Windows list contains 167 process names:
 
 When the native detector reports a match, the meeting JavaScript applies the configured app-type and risk-level filters, then stores the remaining app names, types, and risk levels locally.
 
+The defaults in the JavaScript are:
+
+```js
+const displayRiskLevels = externalRecordingDisplayRiskLevels ?? ["Medium", "High", "Critical"];
+const publishRiskLevels = externalRecordingMetaDataPublishRiskLevels ?? ["High", "Critical"];
+```
+
+| Risk | Local warning | Other participants warned |
+|---|---:|---:|
+| `None` | No | No |
+| `Low` | No | No |
+| `Medium` | Yes | No |
+| `High` | Yes | Yes |
+| `Critical` | Yes | Yes |
+
+OBS is classified as `High`, so it qualifies for both.
+
 The user running the matched application gets a dismissible warning. It is quite direct:
 
 > You are capturing meeting with OBS Studio\

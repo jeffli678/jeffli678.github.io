@@ -37,7 +37,7 @@
 	<meta itemprop="description" content="Teams has a process detector for OBS, QuickTime, AI note-takers, and other external recording apps.">
 	<meta itemprop="datePublished" content="2026-08-31T00:00:00+00:00">
 	<meta itemprop="dateModified" content="2026-08-31T00:00:00+00:00">
-	<meta itemprop="wordCount" content="978">
+	<meta itemprop="wordCount" content="1042">
 	<meta itemprop="image" content="https://xusheng.dev/posts/reversing/teams_external_recording_detector/social-preview.jpg">
 
 	<meta name="twitter:card" content="summary_large_image">
@@ -177,6 +177,46 @@
 <p><strong>None / expected (34):</strong> <code>POWERPNT</code>, <code>TextInputHost</code>, <code>audiodg</code>, <code>CiscoCollabHost</code>, <code>Cortana</code>, <code>Discord</code>, <code>g2mcomm</code>, <code>GoToMeeting</code>, <code>HdxRtcEngine</code>, <code>Microsoft Teams</code>, <code>ms-teams</code>, <code>ms-teams_modulehost</code>, <code>MsMmrHost</code>, <code>MsTeamsVdi</code>, <code>RuntimeBroker</code>, <code>SearchHost</code>, <code>ShellExperienceHost</code>, <code>Skype</code>, <code>SkypeApp</code>, <code>Slack</code>, <code>svchost</code>, <code>System</code>, <code>SystemSettings</code>, <code>Teams</code>, <code>webexmta</code>, <code>EXCEL</code>, <code>OUTLOOK</code>, <code>Todo</code>, <code>WINWORD</code>, <code>LiveCaptions</code>, <code>Narrator</code>, <code>osk</code>, <code>VoiceAccess</code>, <code>RtkAudUService64</code>.</p>
 <h2 id="what-happens-after-a-match">What happens after a match?</h2>
 <p>When the native detector reports a match, the meeting JavaScript applies the configured app-type and risk-level filters, then stores the remaining app names, types, and risk levels locally.</p>
+<p>The defaults in the JavaScript are:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">displayRiskLevels</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">externalRecordingDisplayRiskLevels</span> <span style="color:#f92672">??</span> [<span style="color:#e6db74">&#34;Medium&#34;</span>, <span style="color:#e6db74">&#34;High&#34;</span>, <span style="color:#e6db74">&#34;Critical&#34;</span>];
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">publishRiskLevels</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">externalRecordingMetaDataPublishRiskLevels</span> <span style="color:#f92672">??</span> [<span style="color:#e6db74">&#34;High&#34;</span>, <span style="color:#e6db74">&#34;Critical&#34;</span>];
+</span></span></code></pre></div><table>
+	<thead>
+			<tr>
+					<th>Risk</th>
+					<th style="text-align: right">Local warning</th>
+					<th style="text-align: right">Other participants warned</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>None</code></td>
+					<td style="text-align: right">No</td>
+					<td style="text-align: right">No</td>
+			</tr>
+			<tr>
+					<td><code>Low</code></td>
+					<td style="text-align: right">No</td>
+					<td style="text-align: right">No</td>
+			</tr>
+			<tr>
+					<td><code>Medium</code></td>
+					<td style="text-align: right">Yes</td>
+					<td style="text-align: right">No</td>
+			</tr>
+			<tr>
+					<td><code>High</code></td>
+					<td style="text-align: right">Yes</td>
+					<td style="text-align: right">Yes</td>
+			</tr>
+			<tr>
+					<td><code>Critical</code></td>
+					<td style="text-align: right">Yes</td>
+					<td style="text-align: right">Yes</td>
+			</tr>
+	</tbody>
+</table>
+<p>OBS is classified as <code>High</code>, so it qualifies for both. The two allowlists come from meeting configuration and can be changed remotely.</p>
 <p>The user running the matched application gets a dismissible warning. It is quite direct:</p>
 <blockquote>
 <p>You are capturing meeting with OBS Studio<br>
@@ -303,7 +343,7 @@ An external app on Alice&rsquo;s device may be recording or listening to this me
           <line x1="16" y1="17" x2="8" y2="17"></line>
           <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
-        978 Words
+        1042 Words
       </p>
 
       <p>
