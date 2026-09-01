@@ -38,10 +38,10 @@
 	<meta itemprop="datePublished" content="2026-08-31T00:00:00+00:00">
 	<meta itemprop="dateModified" content="2026-08-31T00:00:00+00:00">
 	<meta itemprop="wordCount" content="978">
-	<meta itemprop="image" content="https://xusheng.dev/posts/reversing/teams_external_recording_detector/social-preview.png">
+	<meta itemprop="image" content="https://xusheng.dev/posts/reversing/teams_external_recording_detector/social-preview.jpg">
 
 	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:image" content="https://xusheng.dev/posts/reversing/teams_external_recording_detector/social-preview.png">
+	<meta name="twitter:image" content="https://xusheng.dev/posts/reversing/teams_external_recording_detector/social-preview.jpg">
 	<meta name="twitter:title" content="Microsoft Teams Can Detect Recording Apps and Notify Other Participants">
 	<meta name="twitter:description" content="Teams has a process detector for OBS, QuickTime, AI note-takers, and other external recording apps.">
 
@@ -56,7 +56,7 @@
 		<meta property="article:section" content="posts">
 		<meta property="article:published_time" content="2026-08-31T00:00:00+00:00">
 		<meta property="article:modified_time" content="2026-08-31T00:00:00+00:00">
-		<meta property="og:image" content="https://xusheng.dev/posts/reversing/teams_external_recording_detector/social-preview.png">
+		<meta property="og:image" content="https://xusheng.dev/posts/reversing/teams_external_recording_detector/social-preview.jpg">
 
 
 
@@ -156,7 +156,7 @@
 <li>It only runs in meetings where the host organization&rsquo;s policy enables it; the default is off</li>
 <li>This detector is separate from Teams&rsquo; &ldquo;Prevent screen capture&rdquo; feature</li>
 </ul>
-<p><img src="../social-preview.png" alt="A Teams-style meeting window warning that an external app on Alice’s device may be recording or listening to the meeting"></p>
+<p><img src="../social-preview.jpg" alt="A Teams-style meeting window warning that an external app on Alice’s device may be recording or listening to the meeting"></p>
 <h2 id="does-teams-know-i-opened-obs">Does Teams know I opened OBS?</h2>
 <p>Microsoft <a href="https://techcommunity.microsoft.com/blog/microsoftteamsblog/what%E2%80%99s-new-in-microsoft-teams--september-2025/4457965">introduced Prevent Screen Capture in September 2025</a>. That part was fairly conventional. Teams uses Windows window-content protection, including <a href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowdisplayaffinity"><code>SetWindowDisplayAffinity</code></a>, and propagates the protection to meeting pop-out windows. It is a useful speed bump, but it is easy for a sufficiently uncooperative client to bypass.</p>
 <p>While looking through the client, however, I found something more interesting: <code>RecordingDetectorModule</code>.</p>

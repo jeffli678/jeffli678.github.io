@@ -5,7 +5,7 @@ title: Microsoft Teams Can Detect Recording Apps and Notify Other Participants
 date: '2026-08-31'
 description: Teams has a process detector for OBS, QuickTime, AI note-takers, and other external recording apps.
 images:
-- /posts/reversing/teams_external_recording_detector/social-preview.png
+- /posts/reversing/teams_external_recording_detector/social-preview.jpg
 categories:
 - Reversing
 ---
@@ -21,7 +21,7 @@ categories:
 - It only runs in meetings where the host organization's policy enables it; the default is off
 - This detector is separate from Teams' "Prevent screen capture" feature
 
-![A Teams-style meeting window warning that an external app on Alice's device may be recording or listening to the meeting](../social-preview.png)
+![A Teams-style meeting window warning that an external app on Alice's device may be recording or listening to the meeting](../social-preview.jpg)
 
 ## Does Teams know I opened OBS?
 
