@@ -6,8 +6,161 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Fri, 21 Aug 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Mon, 31 Aug 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://xusheng.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Microsoft Teams Can Detect Recording Apps and Notify Other Participants</title>
+            <link>https://xusheng.dev/posts/reversing/teams_external_recording_detector/main/</link>
+            <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
+            <guid>https://xusheng.dev/posts/reversing/teams_external_recording_detector/main/</guid>
+            <description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Teams has a feature that can detect third-party recording and AI note-taking applications during a meeting&lt;/li&gt;
+&lt;li&gt;On Windows and macOS, it enumerates running processes every 30 seconds and compares their names with a classification table&lt;/li&gt;
+&lt;li&gt;The local user sees the detected application name&lt;/li&gt;
+&lt;li&gt;Eligible meeting participants are told which participant may be recording, but not which application was found&lt;/li&gt;
+&lt;li&gt;Separate Microsoft telemetry contains the matched app name, type, and risk level&lt;/li&gt;
+&lt;li&gt;Microsoft can update the table remotely through its Experimentation and Configuration Service (ECS)&lt;/li&gt;
+&lt;li&gt;It only runs in meetings where the host organization&amp;rsquo;s policy enables it; the default is off&lt;/li&gt;
+&lt;li&gt;This detector is separate from Teams&amp;rsquo; &amp;ldquo;Prevent screen capture&amp;rdquo; feature&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;../social-preview.png&#34; alt=&#34;A Teams-style meeting window warning that an external app on Alice’s device may be recording or listening to the meeting&#34;&gt;&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<h2 id="tldr">TL;DR</h2>
+<ul>
+<li>Teams has a feature that can detect third-party recording and AI note-taking applications during a meeting</li>
+<li>On Windows and macOS, it enumerates running processes every 30 seconds and compares their names with a classification table</li>
+<li>The local user sees the detected application name</li>
+<li>Eligible meeting participants are told which participant may be recording, but not which application was found</li>
+<li>Separate Microsoft telemetry contains the matched app name, type, and risk level</li>
+<li>Microsoft can update the table remotely through its Experimentation and Configuration Service (ECS)</li>
+<li>It only runs in meetings where the host organization&rsquo;s policy enables it; the default is off</li>
+<li>This detector is separate from Teams&rsquo; &ldquo;Prevent screen capture&rdquo; feature</li>
+</ul>
+<p><img src="../social-preview.png" alt="A Teams-style meeting window warning that an external app on Alice’s device may be recording or listening to the meeting"></p>
+<h2 id="does-teams-know-i-opened-obs">Does Teams know I opened OBS?</h2>
+<p>Microsoft <a href="https://techcommunity.microsoft.com/blog/microsoftteamsblog/what%E2%80%99s-new-in-microsoft-teams--september-2025/4457965">introduced Prevent Screen Capture in September 2025</a>. That part was fairly conventional. Teams uses Windows window-content protection, including <a href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowdisplayaffinity"><code>SetWindowDisplayAffinity</code></a>, and propagates the protection to meeting pop-out windows. It is a useful speed bump, but it is easy for a sufficiently uncooperative client to bypass.</p>
+<p>While looking through the client, however, I found something more interesting: <code>RecordingDetectorModule</code>.</p>
+<p>The current Teams client contains a process classification table with entries for OBS, ShareX, Snipping Tool, Camtasia, Bandicam, Loom, Snagit, XSplit, AI note-takers, audio tools, browsers, and a surprisingly broad supporting cast.</p>
+<p>For example, the built-in Windows rules include:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;obs64&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;displayName&#34;</span>: <span style="color:#e6db74">&#34;OBS Studio&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;appType&#34;</span>: <span style="color:#e6db74">&#34;ScreenRecorder&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;risk&#34;</span>: <span style="color:#e6db74">&#34;High&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;expected&#34;</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The complete built-in Windows list contains 167 process names:</p>
+<h3 id="full-built-in-windows-list-167-entries">Full built-in Windows list (167 entries)</h3>
+<p><strong>High (33):</strong> <code>Airgram</code>, <code>Avoma</code>, <code>Chorus</code>, <code>Fathom</code>, <code>Fireflies</code>, <code>Gong</code>, <code>Grain</code>, <code>Read AI</code>, <code>Tactiq</code>, <code>CamtasiaStudio</code>, <code>handy</code>, <code>Krisp</code>, <code>LogiCapture</code>, <code>ManyCam</code>, <code>natspeak</code>, <code>obs32</code>, <code>obs64</code>, <code>Otter</code>, <code>ShareX</code>, <code>voiceai</code>, <code>willow voice</code>, <code>Camtasia</code>, <code>Loom</code>, <code>obs</code>, <code>streamlabs</code>, <code>XSplit</code>, <code>XSplit.Core</code>, <code>Zoom</code>, <code>Zoom.exe</code>, <code>murmure</code>, <code>OpenWhispr</code>, <code>Typeless</code>, <code>Wispr Flow</code>.</p>
+<p><strong>Medium (24):</strong> <code>Action</code>, <code>Audacity</code>, <code>bdcam</code>, <code>CamRecorder</code>, <code>copilot</code>, <code>copilot.exe.old</code>, <code>Debut</code>, <code>FlashBack</code>, <code>GoldWave</code>, <code>M365Copilot</code>, <code>mscopilot</code>, <code>NVIDIA Share</code>, <code>Resolve</code>, <code>ScreenPal</code>, <code>ScreenToGif</code>, <code>Snagit32</code>, <code>SnagitEditor</code>, <code>SnippingTool</code>, <code>SoundRecorder</code>, <code>WavePad</code>, <code>Ableton Live 12 Suite</code>, <code>Adobe Premiere Pro</code>, <code>Aximmetry.Composer</code>, <code>MOTIV Mix</code>.</p>
+<p><strong>Low (76):</strong> <code>ffmpeg</code>, <code>ffplay</code>, <code>ffprobe</code>, <code>nvcontainer</code>, <code>VoiceMeeter</code>, <code>VoiceMeeter8</code>, <code>chrome</code>, <code>Code</code>, <code>firefox</code>, <code>GoXLR App</code>, <code>msedgewebview2</code>, <code>msrdc</code>, <code>mstsc</code>, <code>NVIDIA Broadcast</code>, <code>proximity</code>, <code>python</code>, <code>qemu-system-x86_64</code>, <code>rundll32</code>, <code>SoTGame</code>, <code>SteelSeriesSonar</code>, <code>Unity</code>, <code>voicemeeter_x64</code>, <code>brave</code>, <code>msedge</code>, <code>iCUE</code>, <code>Elgato.WaveLink</code>, <code>FxSound</code>, <code>LogiTune</code>, <code>SilencePlayer</code>, <code>SoundKeeper64</code>, <code>comet</code>, <code>opera</code>, <code>PrismaAccessBrowser</code>, <code>thorium</code>, <code>vivaldi</code>, <code>waterfox</code>, <code>Figma</code>, <code>thunderbird</code>, <code>Signal</code>, <code>Telegram</code>, <code>Viber</code>, <code>WeChat</code>, <code>Weixin</code>, <code>WhatsApp.Root</code>, <code>XboxPcApp</code>, <code>Zoiper5</code>, <code>AzureKinectServer</code>, <code>github</code>, <code>scrcpy</code>, <code>conhost</code>, <code>powershell</code>, <code>WindowsTerminal</code>, <code>RuneLite</code>, <code>UnrealEditor</code>, <code>UnrealGame-Win64-Shipping</code>, <code>GoTV</code>, <code>Photos</code>, <code>cloudmusic</code>, <code>QQMusic</code>, <code>Spotify</code>, <code>vlc</code>, <code>Microsoft.Media.Player</code>, <code>wmplayer</code>, <code>dcvagent</code>, <code>rdcx</code>, <code>RDCMan</code>, <code>vmware-vmx</code>, <code>Windows365</code>, <code>VoiceAssistant</code>, <code>jfw</code>, <code>fsSynth32</code>, <code>nvda</code>, <code>wfica32</code>, <code>vmconnect</code>, <code>horizon-protocol</code>, <code>LiftComponent</code>.</p>
+<p><strong>None / expected (34):</strong> <code>POWERPNT</code>, <code>TextInputHost</code>, <code>audiodg</code>, <code>CiscoCollabHost</code>, <code>Cortana</code>, <code>Discord</code>, <code>g2mcomm</code>, <code>GoToMeeting</code>, <code>HdxRtcEngine</code>, <code>Microsoft Teams</code>, <code>ms-teams</code>, <code>ms-teams_modulehost</code>, <code>MsMmrHost</code>, <code>MsTeamsVdi</code>, <code>RuntimeBroker</code>, <code>SearchHost</code>, <code>ShellExperienceHost</code>, <code>Skype</code>, <code>SkypeApp</code>, <code>Slack</code>, <code>svchost</code>, <code>System</code>, <code>SystemSettings</code>, <code>Teams</code>, <code>webexmta</code>, <code>EXCEL</code>, <code>OUTLOOK</code>, <code>Todo</code>, <code>WINWORD</code>, <code>LiveCaptions</code>, <code>Narrator</code>, <code>osk</code>, <code>VoiceAccess</code>, <code>RtkAudUService64</code>.</p>
+<h2 id="what-happens-after-a-match">What happens after a match?</h2>
+<p>When the native detector reports a match, the meeting JavaScript applies the configured app-type and risk-level filters, then stores the remaining app names, types, and risk levels locally.</p>
+<p>The user running the matched application gets a dismissible warning. It is quite direct:</p>
+<blockquote>
+<p>You are capturing meeting with OBS Studio<br>
+An app on your device has been detected to be listening or recording this meeting. Others in the meeting have been notified about this.</p>
+</blockquote>
+<p>Teams then invokes this GraphQL mutation when metadata publication is enabled:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-graphql" data-lang="graphql"><span style="display:flex;"><span><span style="color:#66d9ef">mutation</span> ($teamsCallId: <span style="color:#a6e22e">ID</span>!, $isRecording: <span style="color:#a6e22e">Boolean</span>!, $recordingCount: <span style="color:#a6e22e">Int</span>!) {
+</span></span><span style="display:flex;"><span>  publishLocalExternalRecordingState(
+</span></span><span style="display:flex;"><span>    teamsCallId: $teamsCallId
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">isRecording</span>: $isRecording
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">recordingCount</span>: $recordingCount
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The mutation includes neither the process name, application type, nor risk level. Other clients receive participant state containing <code>externalRecording.isRecording</code> and use it to render an indicator:</p>
+<blockquote>
+<p>This meeting is being captured<br>
+An external app on Alice&rsquo;s device may be recording or listening to this meeting.</p>
+</blockquote>
+<p>Who can see it is separately feature-gated. Depending on <code>externalRecordingVisibility</code>, it can be available to everyone or limited to organizers and co-organizers.</p>
+<h2 id="telemetry-and-remote-configuration">Telemetry and remote configuration</h2>
+<p>There is a second outbound path. The client emits an <code>external_recording_detected_apps</code> telemetry event containing detector matches shaped as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>[
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;appName&#34;</span>: <span style="color:#e6db74">&#34;OBS Studio&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;appType&#34;</span>: <span style="color:#e6db74">&#34;ScreenRecorder&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;riskLevel&#34;</span>: <span style="color:#e6db74">&#34;High&#34;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>Microsoft&rsquo;s telemetry therefore receives richer information about the matched application.</p>
+<p>Microsoft can also change the process list without shipping a Teams update. The hard-coded JSON is the built-in default, but Teams fetches configuration from Microsoft&rsquo;s Experimentation and Configuration Service (ECS), including:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>recordingDetectorClassificationsWin
+</span></span><span style="display:flex;"><span>recordingDetectorClassificationsMac
+</span></span><span style="display:flex;"><span>recordingDetectorPollIntervalMs
+</span></span><span style="display:flex;"><span>recordingDetectorStopTimeoutMs
+</span></span><span style="display:flex;"><span>recordingDetectorUnknownRiskLevel
+</span></span><span style="display:flex;"><span>recordingDetectorUnclassifiedRiskLevel
+</span></span></code></pre></div><p>The response is cached locally in <code>ecs_settings.dat64</code>. If Microsoft supplies a valid classification list, the client uses it; if parsing fails, native logging says it uses the built-in table.</p>
+<h2 id="how-detection-runs">How detection runs</h2>
+<p>An organization administrator can enable the feature with the <a href="https://learn.microsoft.com/en-us/powershell/module/microsoftteams/set-csteamsmeetingpolicy#-enableexternalrecordingdetection"><code>EnableExternalRecordingDetection</code></a> meeting policy, which defaults to <code>false</code>. Microsoft says it detects third-party screen recorders, audio recorders, and AI note-takers and notifies participants, but does not document the implementation details discussed here. It only runs during an eligible active meeting and stops when the call ends. This policy is independent of Prevent Screen Capture.</p>
+<p>On Windows, Teams takes an initial process snapshot with <code>CreateToolhelp32Snapshot</code>, walks it with <code>Process32FirstW</code> and <code>Process32NextW</code>, and uses <code>ProcessIdToSessionId</code> and <code>QueryFullProcessImageNameW</code> to identify processes in the applicable session. It repeats this every 30 seconds by default and compares the names with its configured list. This establishes that a listed process is running, not that it has started recording.</p>
+<h2 id="macos-does-the-same-thing">macOS does the same thing</h2>
+<p>I also checked out how it works on the macOS version. The detector lives in the main <code>MSTeams</code> Mach-O, which helpfully contains its original source path:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>native_modules/mods/recordingdetector/mac/mac_detection_module.cpp
+</span></span></code></pre></div><p>It imports process-enumeration facilities including <code>sysctl</code>, <code>getuid</code>, <code>proc_pidinfo</code>, and <code>proc_pidpath</code>, performs periodic process snapshots, and applies <code>recordingDetectorClassificationsMac</code>. It does not need macOS Screen Recording permission because it is reading process information, not the screen.</p>
+<p>The built-in Mac list includes:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Process</th>
+					<th>Display name</th>
+					<th>Type</th>
+					<th>Risk</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>obs</code></td>
+					<td>OBS Studio</td>
+					<td>ScreenRecorder</td>
+					<td>High</td>
+			</tr>
+			<tr>
+					<td><code>QuickTime Player</code></td>
+					<td>QuickTime Player</td>
+					<td>ScreenRecorder</td>
+					<td>High</td>
+			</tr>
+			<tr>
+					<td><code>ManyCam</code></td>
+					<td>ManyCam</td>
+					<td>ScreenRecorder</td>
+					<td>High</td>
+			</tr>
+			<tr>
+					<td><code>VoiceMemos</code></td>
+					<td>Apple Voice Memos</td>
+					<td>AudioRecorder</td>
+					<td>Medium</td>
+			</tr>
+			<tr>
+					<td><code>Granola Helper</code></td>
+					<td>Granola</td>
+					<td>AIAssistant</td>
+					<td>High</td>
+			</tr>
+			<tr>
+					<td><code>Wispr Flow Helper</code></td>
+					<td>Wispr Flow</td>
+					<td>AIAssistant</td>
+					<td>High</td>
+			</tr>
+			<tr>
+					<td><code>zoom.us</code></td>
+					<td>Zoom</td>
+					<td>Communication</td>
+					<td>High</td>
+			</tr>
+	</tbody>
+</table>
+<p>System processes such as <code>coreaudiod</code>, <code>WindowServer</code>, and ReplayKit&rsquo;s <code>replayd</code> are expected and assigned <code>None</code> risk.</p>
+<p>Thinking about secretly recording a Teams meeting? Think twice—the other participants might find out.</p>
+]]></content>
+        </item>
         
         <item>
             <title>Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images</title>

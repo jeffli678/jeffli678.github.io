@@ -12,9 +12,16 @@
 			<copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
 		
 		
-			<lastBuildDate>Fri, 21 Aug 2026 00:00:00 +0000</lastBuildDate>
+			<lastBuildDate>Mon, 31 Aug 2026 00:00:00 +0000</lastBuildDate>
 		
 			<atom:link href="https://xusheng.dev/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Microsoft Teams Can Detect Recording Apps and Notify Other Participants</title>
+				<link>https://xusheng.dev/posts/reversing/teams_external_recording_detector/main/</link>
+				<pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
+				<guid>https://xusheng.dev/posts/reversing/teams_external_recording_detector/main/</guid>
+				<description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Teams has a feature that can detect third-party recording and AI note-taking applications during a meeting&lt;/li&gt;&#xA;&lt;li&gt;On Windows and macOS, it enumerates running processes every 30 seconds and compares their names with a classification table&lt;/li&gt;&#xA;&lt;li&gt;The local user sees the detected application name&lt;/li&gt;&#xA;&lt;li&gt;Eligible meeting participants are told which participant may be recording, but not which application was found&lt;/li&gt;&#xA;&lt;li&gt;Separate Microsoft telemetry contains the matched app name, type, and risk level&lt;/li&gt;&#xA;&lt;li&gt;Microsoft can update the table remotely through its Experimentation and Configuration Service (ECS)&lt;/li&gt;&#xA;&lt;li&gt;It only runs in meetings where the host organization&amp;rsquo;s policy enables it; the default is off&lt;/li&gt;&#xA;&lt;li&gt;This detector is separate from Teams&amp;rsquo; &amp;ldquo;Prevent screen capture&amp;rdquo; feature&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;img src=&#34;../social-preview.png&#34; alt=&#34;A Teams-style meeting window warning that an external app on Alice’s device may be recording or listening to the meeting&#34;&gt;&lt;/p&gt;</description>
+			</item>
 			<item>
 				<title>Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images</title>
 				<link>https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/main/</link>
