@@ -3,7 +3,7 @@ layout: post
 status: publish
 title: How Zoom Detects Google Meet Without Microphone Access
 date: '2026-09-02'
-description: Reverse engineering Zoom Workplace reveals how it uses macOS Control Center logs and the Windows microphone consent store to identify microphone-using apps.
+description: Zoom uses macOS Control Center logs and Windows microphone privacy records to detect when other applications use the microphone.
 images:
 - /posts/reversing/zoom_my_notes_detector/social-preview-v3.jpg
 categories:
