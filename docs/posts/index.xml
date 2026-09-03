@@ -23,11 +23,7 @@
 &lt;li&gt;On Windows, it obtains equivalent application-usage information from the per-user Capability Access Manager microphone records in the registry&lt;/li&gt;
 &lt;li&gt;Reading this metadata requires neither administrator/root privileges nor Zoom microphone permission&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;why-does-zoom-know-that-chrome-is-using-the-microphone&#34;&gt;Why does Zoom know that Chrome is using the microphone?&lt;/h2&gt;
-&lt;p&gt;Zoom&amp;rsquo;s My Notes feature can take notes during meetings hosted in applications
-such as Google Meet, Microsoft Teams, and Slack. Before the user starts it, Zoom
-can display a &lt;strong&gt;Take Note&lt;/strong&gt; prompt when it thinks a third-party meeting is in
-progress.&lt;/p&gt;</description>
+&lt;p&gt;&lt;img src=&#34;social-preview-v3.jpg&#34; alt=&#34;Zoom suggesting note-taking during a Google Meet call&#34;&gt;&lt;/p&gt;</description>
             <content type="html"><![CDATA[<h2 id="tldr">TL;DR</h2>
 <ul>
 <li>Zoom can notice that Google Meet, Teams, Slack, and other applications may be in a meeting and offer to start My Notes</li>
@@ -37,6 +33,7 @@ progress.&lt;/p&gt;</description>
 <li>On Windows, it obtains equivalent application-usage information from the per-user Capability Access Manager microphone records in the registry</li>
 <li>Reading this metadata requires neither administrator/root privileges nor Zoom microphone permission</li>
 </ul>
+<p><img src="social-preview-v3.jpg" alt="Zoom suggesting note-taking during a Google Meet call"></p>
 <h2 id="why-does-zoom-know-that-chrome-is-using-the-microphone">Why does Zoom know that Chrome is using the microphone?</h2>
 <p>Zoom&rsquo;s My Notes feature can take notes during meetings hosted in applications
 such as Google Meet, Microsoft Teams, and Slack. Before the user starts it, Zoom

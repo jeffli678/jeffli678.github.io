@@ -19,6 +19,8 @@ categories:
 - On Windows, it obtains equivalent application-usage information from the per-user Capability Access Manager microphone records in the registry
 - Reading this metadata requires neither administrator/root privileges nor Zoom microphone permission
 
+![Zoom suggesting note-taking during a Google Meet call](social-preview-v3.jpg)
+
 ## Why does Zoom know that Chrome is using the microphone?
 
 Zoom's My Notes feature can take notes during meetings hosted in applications
