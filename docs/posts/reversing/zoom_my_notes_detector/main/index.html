@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Reverse engineering Zoom Workplace reveals how it uses macOS Control Center logs and the Windows microphone consent store to identify microphone-using apps." />
+<meta name="keywords" content="Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://xusheng.dev/posts/reversing/zoom_my_notes_detector/main/" />
+
+
+    <title>
+        
+            How Zoom Detects Google Meet Without Microphone Access :: Xusheng Li 
+        
+    </title>
+
+
+
+
+    
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+
+	<meta itemprop="name" content="How Zoom Detects Google Meet Without Microphone Access">
+	<meta itemprop="description" content="Reverse engineering Zoom Workplace reveals how it uses macOS Control Center logs and the Windows microphone consent store to identify microphone-using apps.">
+	<meta itemprop="datePublished" content="2026-09-02T00:00:00+00:00">
+	<meta itemprop="dateModified" content="2026-09-02T00:00:00+00:00">
+	<meta itemprop="wordCount" content="700">
+	<meta itemprop="image" content="https://xusheng.dev/posts/reversing/zoom_my_notes_detector/social-preview-v3.jpg">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://xusheng.dev/posts/reversing/zoom_my_notes_detector/social-preview-v3.jpg">
+	<meta name="twitter:title" content="How Zoom Detects Google Meet Without Microphone Access">
+	<meta name="twitter:description" content="Reverse engineering Zoom Workplace reveals how it uses macOS Control Center logs and the Windows microphone consent store to identify microphone-using apps.">
+
+
+
+    <meta property="og:url" content="https://xusheng.dev/posts/reversing/zoom_my_notes_detector/main/">
+	<meta property="og:site_name" content="Xusheng Li">
+	<meta property="og:title" content="How Zoom Detects Google Meet Without Microphone Access">
+	<meta property="og:description" content="Reverse engineering Zoom Workplace reveals how it uses macOS Control Center logs and the Windows microphone consent store to identify microphone-using apps.">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-09-02T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-09-02T00:00:00+00:00">
+		<meta property="og:image" content="https://xusheng.dev/posts/reversing/zoom_my_notes_detector/social-preview-v3.jpg">
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2026-09-02 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">Xusheng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li><li><a href="/cv.pdf">CV</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        4 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://xusheng.dev/posts/reversing/zoom_my_notes_detector/main/">How Zoom Detects Google Meet Without Microphone Access</a>
+      </h1>
+
+      
+        <div class="post-excerpt">Reverse engineering Zoom Workplace reveals how it uses macOS Control Center logs and the Windows microphone consent store to identify microphone-using apps.</div>
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="tldr">TL;DR</h2>
+<ul>
+<li>Zoom can notice that Google Meet, Teams, Slack, and other applications may be in a meeting and offer to start My Notes</li>
+<li>On macOS, Zoom monitors Control Center&rsquo;s <code>sensor-indicators</code> log stream</li>
+<li>The messages contain records such as <code>[mic] Google Chrome (com.google.Chrome)</code></li>
+<li>Zoom extracts an application identity and detects when microphone use starts or stops</li>
+<li>On Windows, it obtains equivalent application-usage information from the per-user Capability Access Manager microphone records in the registry</li>
+<li>Reading this metadata requires neither administrator/root privileges nor Zoom microphone permission</li>
+</ul>
+<h2 id="why-does-zoom-know-that-chrome-is-using-the-microphone">Why does Zoom know that Chrome is using the microphone?</h2>
+<p>Zoom&rsquo;s My Notes feature can take notes during meetings hosted in applications
+such as Google Meet, Microsoft Teams, and Slack. Before the user starts it, Zoom
+can display a <strong>Take Note</strong> prompt when it thinks a third-party meeting is in
+progress.</p>
+<p>That raised an interesting question: how does Zoom recognize the other
+application before it has started taking notes?</p>
+<p>The answer differs by platform. On macOS, Zoom parses human-readable Unified
+Logging output. On Windows, it enumerates microphone-usage records in the
+registry.</p>
+<h2 id="the-macos-detector">The macOS detector</h2>
+<p>I statically analyzed the arm64 build of Zoom Workplace 7.1.5 (84650).</p>
+<p>The implementation is in a class named <code>PrivacyEventMonitor</code> inside
+<code>viper.framework</code>. Its relevant methods are:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>-[PrivacyEventMonitor startMonitoring]
+</span></span><span style="display:flex;"><span>-[PrivacyEventMonitor handleLogOutput:]
+</span></span><span style="display:flex;"><span>-[PrivacyEventMonitor parseSystemLogLine:]
+</span></span><span style="display:flex;"><span>-[PrivacyEventMonitor parseAttributionsStringForMicrophone:]
+</span></span><span style="display:flex;"><span>-[PrivacyEventMonitor notifyMacAppStateChange:previousStates:]
+</span></span></code></pre></div><p><code>startMonitoring</code> launches <code>/usr/bin/log</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>/usr/bin/log stream <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  --type log <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  --level default <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  --predicate <span style="color:#e6db74">&#39;subsystem == &#34;com.apple.controlcenter&#34; AND category == &#34;sensor-indicators&#34;&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  --style compact
+</span></span></code></pre></div><p>macOS Control Center maintains the orange and green privacy indicators for
+microphone and camera use. The same subsystem writes the currently responsible
+applications to Unified Logging. A microphone record for Chrome looks like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Sorted active attributions from SystemStatus update: [mic] Google Chrome (com.google.Chrome)
+</span></span></code></pre></div><p>macOS has already supplied the display name and bundle ID. Zoom keeps entries
+marked <code>[mic]</code>, parses those two fields, and compares each new attribution list
+with the previous one. An application appearing or disappearing becomes a
+microphone-start or microphone-stop event; no audio analysis is involved.</p>
+<h2 id="from-chrome-to-google-meet">From Chrome to Google Meet</h2>
+<p>The UI layer contains a product category named <code>chrome</code>, labels it <strong>Google
+Meet</strong>, and applies notification and per-application blacklist settings. The
+overall flow is:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Chrome opens the microphone
+</span></span><span style="display:flex;"><span>  -&gt; macOS updates Control Center&#39;s sensor attribution
+</span></span><span style="display:flex;"><span>  -&gt; Control Center emits a sensor-indicators log record
+</span></span><span style="display:flex;"><span>  -&gt; Zoom extracts “Google Chrome” and “com.google.Chrome”
+</span></span><span style="display:flex;"><span>  -&gt; Zoom detects an application-state transition
+</span></span><span style="display:flex;"><span>  -&gt; product mapping and notification policy
+</span></span><span style="display:flex;"><span>  -&gt; optional “Take Note” prompt
+</span></span></code></pre></div><p>This is more accurately called <strong>microphone-use detection</strong> than meeting
+detection. Chrome could be accessing the microphone for a reason unrelated to
+Google Meet. Zoom&rsquo;s higher layers decide whether the signal should produce a
+prompt.</p>
+<h2 id="the-windows-detector">The Windows detector</h2>
+<p>I also statically analyzed Zoom Workplace for Windows x64 7.1.8.46825. Its
+detector is in <code>viper_async_device.dll</code> and reads this per-user registry key:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\
+</span></span><span style="display:flex;"><span>CapabilityAccessManager\ConsentStore\microphone
+</span></span></code></pre></div><p>Zoom opens the key with <code>KEY_READ</code>, enumerates packaged application entries and
+the <code>NonPackaged</code> subtree used by classic desktop applications, and queries
+each entry&rsquo;s 64-bit <code>LastUsedTimeStop</code> value. A zero value represents an access
+interval that has not ended, so Zoom treats that application as currently using
+the microphone.</p>
+<p>The Windows flow is therefore:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Chrome opens the microphone
+</span></span><span style="display:flex;"><span>  -&gt; Windows updates ConsentStore\microphone\NonPackaged
+</span></span><span style="display:flex;"><span>  -&gt; LastUsedTimeStop remains zero while access is active
+</span></span><span style="display:flex;"><span>  -&gt; Zoom enumerates the registry records
+</span></span><span style="display:flex;"><span>  -&gt; Zoom identifies Chrome&#39;s executable
+</span></span><span style="display:flex;"><span>  -&gt; product mapping and notification policy
+</span></span><span style="display:flex;"><span>  -&gt; optional “Take Note” prompt
+</span></span></code></pre></div><p>This part uses ordinary registry APIs. I found no ETW consumer, audio-session
+observer, or PCM processing in the application-attribution routine. Static
+analysis does not establish its polling interval, the feature flags controlling
+it, or whether detection metadata is included in telemetry.</p>
+<h2 id="does-this-require-permission">Does this require permission?</h2>
+<p>I tested Zoom&rsquo;s exact <code>/usr/bin/log stream</code> predicate as an ordinary user,
+without <code>sudo</code>, and macOS accepted it. Reading the records did not require
+Microphone, Screen Recording, System Audio Recording, or Accessibility
+permission.</p>
+<p>On Windows, the key is under <code>HKEY_CURRENT_USER</code> and Zoom requests only
+<code>KEY_READ</code>, so it likewise requires neither elevation nor microphone access.</p>
+<p>Neither mechanism should be treated as a stable application API. Zoom depends
+on undocumented macOS log formatting and Windows registry implementation
+details that either operating-system vendor could change.</p>
+<p>It is a clever use of privacy bookkeeping that both operating systems already
+expose—and a reminder that privacy indicators can themselves become a source of
+cross-application activity information.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://xusheng.dev/categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        700 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-09-01 20:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h"></span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+
+          
+            <span class="button next">
+              <a href="https://xusheng.dev/posts/reversing/teams_external_recording_detector/main/">
+                <span class="button__text">Microsoft Teams Can Detect Recording Apps and Notify Other Participants</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2026</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
+            <span><a href="https://xusheng.dev/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.d76f43f920539c8ab3978e5b652202147a633a4ae085f3559a98449e7fda6fe5c9179516e0cbd3a3422ce557c5e24ee6bbfd9a3c08627a6eafc136fae7f03ff8.js" integrity="sha512-129D&#43;SBTnIqzl45bZSICFHpjOkrghfNVmphEnn/ab&#43;XJF5UW4MvTo0Is5VfF4k7mu/2aPAhiem6vwTb65/A/&#43;A=="></script>
+
+
+
+    </body>
+</html>

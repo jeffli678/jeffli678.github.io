@@ -12,9 +12,16 @@
 			<copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
 		
 		
-			<lastBuildDate>Mon, 31 Aug 2026 00:00:00 +0000</lastBuildDate>
+			<lastBuildDate>Wed, 02 Sep 2026 00:00:00 +0000</lastBuildDate>
 		
 			<atom:link href="https://xusheng.dev/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>How Zoom Detects Google Meet Without Microphone Access</title>
+				<link>https://xusheng.dev/posts/reversing/zoom_my_notes_detector/main/</link>
+				<pubDate>Wed, 02 Sep 2026 00:00:00 +0000</pubDate>
+				<guid>https://xusheng.dev/posts/reversing/zoom_my_notes_detector/main/</guid>
+				<description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Zoom can notice that Google Meet, Teams, Slack, and other applications may be in a meeting and offer to start My Notes&lt;/li&gt;&#xA;&lt;li&gt;On macOS, Zoom monitors Control Center&amp;rsquo;s &lt;code&gt;sensor-indicators&lt;/code&gt; log stream&lt;/li&gt;&#xA;&lt;li&gt;The messages contain records such as &lt;code&gt;[mic] Google Chrome (com.google.Chrome)&lt;/code&gt;&lt;/li&gt;&#xA;&lt;li&gt;Zoom extracts an application identity and detects when microphone use starts or stops&lt;/li&gt;&#xA;&lt;li&gt;On Windows, it obtains equivalent application-usage information from the per-user Capability Access Manager microphone records in the registry&lt;/li&gt;&#xA;&lt;li&gt;Reading this metadata requires neither administrator/root privileges nor Zoom microphone permission&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;why-does-zoom-know-that-chrome-is-using-the-microphone&#34;&gt;Why does Zoom know that Chrome is using the microphone?&lt;/h2&gt;&#xA;&lt;p&gt;Zoom&amp;rsquo;s My Notes feature can take notes during meetings hosted in applications&#xA;such as Google Meet, Microsoft Teams, and Slack. Before the user starts it, Zoom&#xA;can display a &lt;strong&gt;Take Note&lt;/strong&gt; prompt when it thinks a third-party meeting is in&#xA;progress.&lt;/p&gt;</description>
+			</item>
 			<item>
 				<title>Microsoft Teams Can Detect Recording Apps and Notify Other Participants</title>
 				<link>https://xusheng.dev/posts/reversing/teams_external_recording_detector/main/</link>

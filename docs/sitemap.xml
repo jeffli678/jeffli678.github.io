@@ -3,12 +3,15 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://xusheng.dev/</loc>
-    <lastmod>2026-08-31T00:00:00+00:00</lastmod>
+    <lastmod>2026-09-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://xusheng.dev/posts/reversing/teams_external_recording_detector/main/</loc>
-    <lastmod>2026-08-31T00:00:00+00:00</lastmod>
+    <loc>https://xusheng.dev/posts/reversing/zoom_my_notes_detector/main/</loc>
+    <lastmod>2026-09-02T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://xusheng.dev/posts/</loc>
+    <lastmod>2026-09-02T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/posts/reversing/teams_external_recording_detector/main/</loc>
     <lastmod>2026-08-31T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/main/</loc>
