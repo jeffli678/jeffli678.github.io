@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>BYOVD on Xusheng Li</title>
+		<link>https://xusheng.dev/tags/byovd/</link>
+		<description>Recent content in BYOVD on Xusheng Li</description>
+		<generator>Hugo</generator>
+		<language>en-us</language>
+		
+		
+		
+			<copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+		
+		
+			<lastBuildDate>Thu, 03 Sep 2026 00:00:00 -0400</lastBuildDate>
+		
+			<atom:link href="https://xusheng.dev/tags/byovd/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Bring Your Own Trusted Caller (BYOTC): A New Way to Exploit Vulnerable Windows Drivers (Part 1)</title>
+				<link>https://xusheng.dev/posts/byotc/main/</link>
+				<pubDate>Thu, 03 Sep 2026 00:00:00 -0400</pubDate>
+				<guid>https://xusheng.dev/posts/byotc/main/</guid>
+				<description>&lt;p&gt;&lt;img src=&#34;https://xusheng.dev/posts/byotc/social-preview.jpg&#34; alt=&#34;A malicious process injecting code into a signed trusted client, which passes caller verification and reaches a privileged kernel driver&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;Bring Your Own Vulnerable Driver (BYOVD) is a familiar Windows attack technique: an attacker loads a legitimate, signed driver and abuses a flaw in it to gain kernel-level capabilities. Microsoft maintains a &lt;a href=&#34;https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/design/microsoft-recommended-driver-block-rules&#34;&gt;vulnerable-driver blocklist&lt;/a&gt; to make this harder, while the community-maintained &lt;a href=&#34;https://www.loldrivers.io/&#34;&gt;LOLDrivers&lt;/a&gt; project catalogs known vulnerable and malicious Windows drivers.&lt;/p&gt;&#xA;&lt;p&gt;But sometimes the dangerous capability is intentional. A security or system-inspection driver may legitimately need to terminate processes, open privileged handles, or resist interference. Removing that functionality would break the product, so the driver must instead decide &lt;em&gt;who is allowed to request it&lt;/em&gt;. Vendors therefore add caller authentication:&lt;/p&gt;</description>
+			</item>
+	</channel>
+</rss>

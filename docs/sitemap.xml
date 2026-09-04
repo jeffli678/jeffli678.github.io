@@ -3,12 +3,30 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://xusheng.dev/</loc>
-    <lastmod>2026-09-02T00:00:00+00:00</lastmod>
+    <lastmod>2026-09-03T00:00:00-04:00</lastmod>
   </url><url>
-    <loc>https://xusheng.dev/posts/reversing/zoom_my_notes_detector/main/</loc>
-    <lastmod>2026-09-02T00:00:00+00:00</lastmod>
+    <loc>https://xusheng.dev/posts/byotc/main/</loc>
+    <lastmod>2026-09-03T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/tags/byovd/</loc>
+    <lastmod>2026-09-03T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/tags/drivers/</loc>
+    <lastmod>2026-09-03T00:00:00-04:00</lastmod>
   </url><url>
     <loc>https://xusheng.dev/posts/</loc>
+    <lastmod>2026-09-03T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/tags/reverse-engineering/</loc>
+    <lastmod>2026-09-03T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/tags/</loc>
+    <lastmod>2026-09-03T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/tags/windows/</loc>
+    <lastmod>2026-09-03T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/posts/reversing/zoom_my_notes_detector/main/</loc>
     <lastmod>2026-09-02T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://xusheng.dev/posts/reversing/teams_external_recording_detector/main/</loc>
@@ -39,9 +57,6 @@
     <lastmod>2026-07-19T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://xusheng.dev/posts/reversing/dev_hunter/readme/</loc>
-    <lastmod>2026-07-19T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://xusheng.dev/tags/</loc>
     <lastmod>2026-07-19T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://xusheng.dev/tags/adware/</loc>

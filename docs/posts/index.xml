@@ -6,8 +6,205 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Wed, 02 Sep 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Thu, 03 Sep 2026 00:00:00 -0400</lastBuildDate>
         <atom:link href="https://xusheng.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Bring Your Own Trusted Caller (BYOTC): A New Way to Exploit Vulnerable Windows Drivers (Part 1)</title>
+            <link>https://xusheng.dev/posts/byotc/main/</link>
+            <pubDate>Thu, 03 Sep 2026 00:00:00 -0400</pubDate>
+            <guid>https://xusheng.dev/posts/byotc/main/</guid>
+            <description>&lt;p&gt;&lt;img src=&#34;https://xusheng.dev/posts/byotc/social-preview.jpg&#34; alt=&#34;A malicious process injecting code into a signed trusted client, which passes caller verification and reaches a privileged kernel driver&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Bring Your Own Vulnerable Driver (BYOVD) is a familiar Windows attack technique: an attacker loads a legitimate, signed driver and abuses a flaw in it to gain kernel-level capabilities. Microsoft maintains a &lt;a href=&#34;https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/design/microsoft-recommended-driver-block-rules&#34;&gt;vulnerable-driver blocklist&lt;/a&gt; to make this harder, while the community-maintained &lt;a href=&#34;https://www.loldrivers.io/&#34;&gt;LOLDrivers&lt;/a&gt; project catalogs known vulnerable and malicious Windows drivers.&lt;/p&gt;
+&lt;p&gt;But sometimes the dangerous capability is intentional. A security or system-inspection driver may legitimately need to terminate processes, open privileged handles, or resist interference. Removing that functionality would break the product, so the driver must instead decide &lt;em&gt;who is allowed to request it&lt;/em&gt;. Vendors therefore add caller authentication:&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><img src="/posts/byotc/social-preview.jpg" alt="A malicious process injecting code into a signed trusted client, which passes caller verification and reaches a privileged kernel driver"></p>
+<p>Bring Your Own Vulnerable Driver (BYOVD) is a familiar Windows attack technique: an attacker loads a legitimate, signed driver and abuses a flaw in it to gain kernel-level capabilities. Microsoft maintains a <a href="https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/design/microsoft-recommended-driver-block-rules">vulnerable-driver blocklist</a> to make this harder, while the community-maintained <a href="https://www.loldrivers.io/">LOLDrivers</a> project catalogs known vulnerable and malicious Windows drivers.</p>
+<p>But sometimes the dangerous capability is intentional. A security or system-inspection driver may legitimately need to terminate processes, open privileged handles, or resist interference. Removing that functionality would break the product, so the driver must instead decide <em>who is allowed to request it</em>. Vendors therefore add caller authentication:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>untrusted process ──X──&gt; privileged driver operation
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>trusted client  ───────&gt; privileged driver operation
+</span></span></code></pre></div><p>This creates a second security boundary. The question is no longer only whether an untrusted executable can send a privileged IOCTL, but whether an attacker can take control of the trusted caller:</p>
+<ul>
+<li>Can code be injected into the trusted process?</li>
+<li>Can an attacker launch the trusted image while retaining a powerful creator handle?</li>
+<li>Can trust be inherited across processes, or remain valid after the process has been modified?</li>
+</ul>
+<p>I call this pattern <strong>Bring Your Own Trusted Caller (BYOTC)</strong>: instead of attacking the kernel interface directly, obtain code execution inside—or otherwise abuse—the user-mode program the driver already trusts, then make it invoke the privileged interface. The authorization check succeeds, but its security meaning has been lost. BYOTC is therefore a confused-deputy problem at the user/kernel boundary.</p>
+<p>This post develops the idea through two case studies from my research: <a href="https://www.malwarebytes.com/">Malwarebytes</a>&rsquo; <code>mbamchameleon.sys</code> and <a href="https://www.systeminformer.com/">System Informer</a>&rsquo;s <code>SystemInformer.sys</code>. Their trust models differ substantially, but both illustrate the same lesson:</p>
+<blockquote>
+<p>Establishing—and continuously preserving—the integrity of a process at runtime is hard.</p>
+</blockquote>
+<h2 id="case-study-1-malwarebytes-chameleon">Case study 1: Malwarebytes Chameleon</h2>
+<p>In June 2025, I reported a BYOTC issue in Malwarebytes&rsquo; <code>mbamchameleon.sys</code> (SHA-256: d86b9b20788b6bff70a1a4c4111b2ea33b9ec705cc6b8fe869362fc3899820a3). The driver exposed an IOCTL, <code>0x222024</code>, that ultimately invoked <code>ZwTerminateProcess</code>. This was not a stray memory-safety bug: process termination was a feature of the driver.</p>
+<p>The driver did not allow every process to use that operation. A caller first had to register as trusted through IOCTL <code>0x222008</code>. My reverse engineering showed that this path checked whether the calling process&rsquo;s image was signed by Malwarebytes.</p>
+<p>The problem was that a valid signature describes the file that started the process; it does not prove that the process is still executing only Malwarebytes-controlled code.</p>
+<p>For the proof of concept, I launched the legitimate, signed <code>MBAM.exe</code>, injected a DLL into it, registered that process as trusted, and then asked the driver to terminate Microsoft Defender&rsquo;s <code>MsMpEng.exe</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>attacker (administrator)
+</span></span><span style="display:flex;"><span>        │
+</span></span><span style="display:flex;"><span>        ├── inject DLL ──&gt; signed MBAM.exe
+</span></span><span style="display:flex;"><span>        │                        │
+</span></span><span style="display:flex;"><span>        │                        ├── IOCTL 0x222008: register trusted client
+</span></span><span style="display:flex;"><span>        │                        └── IOCTL 0x222024: terminate MsMpEng.exe
+</span></span><span style="display:flex;"><span>        │
+</span></span><span style="display:flex;"><span>        └────────────────&gt; mbamchameleon.sys ──&gt; ZwTerminateProcess
+</span></span></code></pre></div><p>This case is the simplest form of BYOTC:</p>
+<ol>
+<li>Bring the signed driver.</li>
+<li>Bring its signed user-mode client.</li>
+<li>Gain execution inside the client.</li>
+<li>Let the client pass the driver&rsquo;s signer check.</li>
+<li>Invoke the driver&rsquo;s intended privileged feature for an unintended purpose.</li>
+</ol>
+<h3 id="malwarebytes-disclosure-timeline">Malwarebytes disclosure timeline</h3>
+<ul>
+<li><strong>June 15, 2025:</strong> I submit my Chameleon report to Malwarebytes.</li>
+<li><strong>July 2, 2025:</strong> Malwarebytes says my report duplicates an earlier report made by a different researcher.</li>
+<li><strong>September 5, 2025:</strong> My report is closed as a duplicate.</li>
+<li><strong>October 31, 2025:</strong> Malwarebytes says a fix is in progress and that I will be invited to retest after release.</li>
+<li><strong>March 4, 2026:</strong> 180 days have elapsed since the report was closed.</li>
+<li><strong>September 3, 2026:</strong> I publicly disclose my findings in this blog post. As of publication, no fix is available.</li>
+</ul>
+<p>I do not blame Malwarebytes for not shipping a fix after a year. As we will see in the next case study, even systematic
+validation of the client process can still leave a gap.</p>
+<h2 id="case-study-2-system-informer-and-the-evil-parent">Case study 2: System Informer and the evil parent</h2>
+<p>System Informer was the more interesting target because KSystemInformer already performed unusually thorough client validation. It assigned each client one of five cumulative process-integrity levels. The <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/kphlib/include/kphapi.h#L20-L76">state definitions</a> and <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/KSystemInformer/cid_tracking.c#L2270-L2354"><code>KphGetProcessState</code></a> show exactly what each level added:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Level</th>
+					<th>Checks required</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>MINIMUM</code></td>
+					<td>The process has a real backing file and section; the file is not writable in a way that permits replacement; the mapped image has no user-writable references; and the file is not participating in a transaction.</td>
+			</tr>
+			<tr>
+					<td><code>LOW</code></td>
+					<td>Everything in <code>MINIMUM</code>, plus a verified image. <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/KSystemInformer/verify.c#L405-L614"><code>KphVerifyFileObject</code></a> hashes the image with SHA-512 and verifies its adjacent <code>.sig</code> file using an <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/KSystemInformer/verify.c#L41-L75">RSA public key embedded in the driver</a>.</td>
+			</tr>
+			<tr>
+					<td><code>MEDIUM</code></td>
+					<td>Everything in <code>LOW</code>, plus active driver-enforced process protection. Object Manager callbacks strip dangerous rights from handles opened to the protected process and its threads.</td>
+			</tr>
+			<tr>
+					<td><code>HIGH</code></td>
+					<td>Everything in <code>MEDIUM</code>, plus no untrusted image loads and no active debugger.</td>
+			</tr>
+			<tr>
+					<td><code>MAXIMUM</code></td>
+					<td>Everything in <code>HIGH</code>, plus proof that the process was securely created by a process that is <code>HIGH</code>.</td>
+			</tr>
+	</tbody>
+</table>
+<p>System Informer uses its own message system for user-kernel communication, and each message declares the minimum integrity level required to execute it. On every request, <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/KSystemInformer/comms.c#L825-L874"><code>KphpCommsMessageNotifyCallback</code></a> recomputes the caller&rsquo;s state and rejects the message if the process does not meet that requirement. For example, <code>KphMsgTerminateProcess</code> requires <code>MAXIMUM</code>, so only a client at that level can ask the driver to terminate a process.</p>
+<p>This reduced my research question to two parts: <strong>How does <code>SystemInformer.exe</code> obtain <code>MAXIMUM</code>, and can an attacker get code execution inside that instance?</strong> The answer to the first part lies in how System Informer starts.</p>
+<h3 id="how-the-truest-client-reached-maximum">How The Truest Client reached MAXIMUM</h3>
+<p>Before following the startup sequence, it helps to see the complete set of checks required for a <code>MAXIMUM</code> process:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Protection</th>
+					<th>What the driver checks or enforces</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Real backing image</td>
+					<td>The process has a real image file and section rather than an anonymous or substituted mapping.</td>
+			</tr>
+			<tr>
+					<td>File cannot be replaced</td>
+					<td>The image file is not writable in a way that would allow its contents to be changed after verification.</td>
+			</tr>
+			<tr>
+					<td>No writable image references</td>
+					<td>The mapped image section has no user-writable references.</td>
+			</tr>
+			<tr>
+					<td>No file transaction</td>
+					<td>The image file is not participating in a transaction that could present different contents at different times.</td>
+			</tr>
+			<tr>
+					<td>Cryptographic image verification</td>
+					<td><a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/KSystemInformer/verify.c#L405-L614"><code>KphVerifyFileObject</code></a> hashes the executable with SHA-512 and verifies its adjacent <code>.sig</code> file using an <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/KSystemInformer/verify.c#L41-L75">RSA public key embedded in the driver</a>.</td>
+			</tr>
+			<tr>
+					<td>Protected process and thread handles</td>
+					<td><a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/KSystemInformer/protection.c#L623-L829"><code>KphApplyObProtections</code></a> uses Object Manager callbacks to strip dangerous rights from handles opened by outside processes.</td>
+			</tr>
+			<tr>
+					<td>No untrusted image loads</td>
+					<td>The <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/KSystemInformer/protection.c#L1083-L1139">image-load path</a> tries to remove untrusted mappings and records any that remain.</td>
+			</tr>
+			<tr>
+					<td>Not being debugged</td>
+					<td>The driver checks whether the process is being debugged.</td>
+			</tr>
+			<tr>
+					<td>Secure creation history</td>
+					<td>The driver tracks whether the process was created through an approved parent-child chain.</td>
+			</tr>
+	</tbody>
+</table>
+<p>System Informer used three separate processes rather than gradually raising the trust level of one process. The sequence began when the user launched <code>SystemInformer.exe</code> with administrator rights. This first instance brought up the driver: <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/phlib/kph.c#L27-L140"><code>KphConnect</code></a> first tried to connect to an existing driver and, if none was available, created the kernel-driver service before starting it and connecting again.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>1. The user launches SystemInformer.exe as administrator.
+</span></span><span style="display:flex;"><span>   This first instance loads SystemInformer.sys and connects to it.
+</span></span><span style="display:flex;"><span>   Because the driver started after this process was created, it can
+</span></span><span style="display:flex;"><span>   verify the image but cannot establish the full creation-time chain. → LOW
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>2. Because it is below HIGH, it starts SystemInformer.exe -kh.
+</span></span><span style="display:flex;"><span>   The driver observes this child from creation, verifies it,
+</span></span><span style="display:flex;"><span>   protects it against dangerous outside handles, and confirms
+</span></span><span style="display:flex;"><span>   that it is not being debugged and has loaded no untrusted images. → HIGH
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>3. Because the child is HIGH but not MAXIMUM, it starts
+</span></span><span style="display:flex;"><span>   SystemInformer.exe -kh -kx. Under the old rule, creation by a
+</span></span><span style="display:flex;"><span>   HIGH parent set SecurelyCreated; the child repeats all checks.      → MAXIMUM
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>4. The MAXIMUM instance can invoke the most privileged driver APIs.
+</span></span></code></pre></div><p>The user-mode restart decisions are in <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/SystemInformer/ksisup.c#L1544-L1563"><code>KsiConnectDriver</code></a>, while the old <code>HIGH parent → SecurelyCreated child</code> rule is in <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/KSystemInformer/informer_process.c#L89-L163"><code>KphpPerformProcessTracking</code></a>.</p>
+<h3 id="how-the-evil-parent-attack-broke-the-chain">How the evil-parent attack broke the chain</h3>
+<p>The gap was a narrow exception in an otherwise strong design. Windows process creation requires the creator to retain powerful handles while initializing its child. System Informer&rsquo;s object callbacks normally stripped dangerous rights from handles to protected clients, but <a href="https://github.com/winsiderss/systeminformer/blob/553d309edb07934bda9387cff29a82ca1714acbb/KSystemInformer/protection.c#L581-L621"><code>KphpShouldPermitCreatorProcess</code></a> permitted the actual creator extra rights, including <code>PROCESS_VM_OPERATION</code> and <code>PROCESS_VM_WRITE</code>. Duplication was blocked, but the creator could use its own handle directly.</p>
+<p>An elevated <code>malicious.exe</code> could therefore create the legitimate <code>-kh</code> instance and modify it through the creator handle after it became <code>HIGH</code>. That compromised process could create the <code>-kx</code> instance, which the old rule promoted to <code>MAXIMUM</code>, and modify that child through the next creator handle. All image and runtime checks could pass even though control flowed from the evil parent into the trusted chain.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>malicious.exe
+</span></span><span style="display:flex;"><span>    └─ creates and modifies ─&gt; verified HIGH instance
+</span></span><span style="display:flex;"><span>                                  └─ creates and modifies ─&gt; verified MAXIMUM instance
+</span></span><span style="display:flex;"><span>                                                                  └─&gt; privileged driver APIs
+</span></span></code></pre></div><p>Simply removing the creator exception was not practical: process initialization legitimately needed those rights and failed without them. The weakness was the combination of necessary Windows creation semantics with a trust rule that allowed a child to become more trusted than the process that still controlled its initialization.</p>
+<h2 id="how-system-informer-fixed-it">How System Informer fixed it</h2>
+<p>The System Informer developers responded quickly, confirmed the gap, and designed a fix. The fix has two complementary parts.</p>
+<p>First, the driver no longer treats a <code>HIGH</code> System Informer process as securely created merely because another <code>HIGH</code> process created it. The new process can advance into the maximum-trust chain only if its creator is already <code>MAXIMUM</code>, or if the creator is a protected process signed at Windows TCB/System level. This change is visible in <a href="https://github.com/winsiderss/systeminformer/commit/0f189f43a4b72c1766bab7e3293f7a85ae23b25e"><code>KphpPerformProcessTracking</code></a>, where the driver checks <code>PsGetProcessProtection</code> and accepts only <code>PsProtectedSignerWinTcb</code> or <code>PsProtectedSignerWinSystem</code> as the root of a new secure-creation chain.</p>
+<p>Second, System Informer changed how it restarts itself. Rather than letting the weaker GUI process directly create the stronger instance, it creates a temporary service and asks the service path to perform the creation. The Service Control Manager runs <code>services.exe</code> as a WinTcb-protected process, providing an operating-system-backed root of trust. The user-mode side of this design is shown in the <a href="https://github.com/winsiderss/systeminformer/commit/fd70a88fa809a01fe2197e53d0516bb599c9fb42"><code>kph restart self through tcb</code></a> commit.</p>
+<p>The resulting chain is:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>System Informer (&lt; MAXIMUM)
+</span></span><span style="display:flex;"><span>        │ create and start temporary service
+</span></span><span style="display:flex;"><span>        ▼
+</span></span><span style="display:flex;"><span>services.exe (WinTcb PPL)
+</span></span><span style="display:flex;"><span>        │ create
+</span></span><span style="display:flex;"><span>        ▼
+</span></span><span style="display:flex;"><span>System Informer (HIGH)
+</span></span><span style="display:flex;"><span>        │ create
+</span></span><span style="display:flex;"><span>        ▼
+</span></span><span style="display:flex;"><span>System Informer (MAXIMUM)
+</span></span></code></pre></div><p>Because the untrusted initiator does not receive the privileged creator handle to the trusted child, and handle duplication across the verified-process boundary is already prohibited, the evil-parent path is broken. A malicious ordinary administrator cannot manufacture the WinTcb-protected root that the driver now requires.</p>
+<p>Two nearby hardening changes also made relevant state checks “sticky”: once a violation such as debugging or an untrusted image load is observed, temporarily removing that condition cannot restore the process&rsquo;s earlier trust. That addresses the broader TOCTOU concern: trust should generally be monotonic in the direction of revocation.</p>
+<h3 id="system-informer-disclosure-timeline">System Informer disclosure timeline</h3>
+<ul>
+<li><strong>April 20, 2025:</strong> I privately report the evil-parent design gap.</li>
+<li><strong>April 20–21, 2025:</strong> System Informer&rsquo;s maintainers author the TCB-rooted secure-creation and service-restart changes during our technical discussion.</li>
+<li><strong>February 1, 2026:</strong> The rebased equivalents of those changes enter the current public repository history.</li>
+<li><strong>August 29, 2026:</strong> The maintainer confirms that the updated signed driver has shipped to the Release Channel and closes the disclosure loop.</li>
+</ul>
+<h2 id="a-lesson-from-game-anti-cheat">A lesson from game anti-cheat</h2>
+<p>Game anti-cheat provides a useful comparison. Kernel anti-cheat drivers also try to determine whether a user-mode process remains trustworthy while an adversary actively attempts to modify or deceive it. <a href="https://www.riotgames.com/en/news/a-message-about-vanguard-from-our-security-privacy-teams">Riot Games&rsquo; Vanguard architecture overview</a> describes its driver as validating memory and system state and checking that the client has not been tampered with.</p>
+<p>Anti-cheat and general-purpose utilities have different compatibility constraints, but the structural problem is the same. The never-ending contest between anti-cheat developers and cheat authors shows that runtime integrity is not a single check that can be perfected. A live process can be influenced through its memory, threads, loaded modules, handles, creation history, and even its view of the operating system. BYOTC brings this lesson to driver review: a recognized process is not a static identity, but a security-sensitive object whose integrity must be established and maintained over time.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>BYOTC targets the trusted user-mode client of a privileged driver. Malwarebytes showed the direct version—injecting into a signed client—while System Informer showed how a process-creation trust chain could be hijacked. Both cases demonstrate how hard it is to preserve a process&rsquo;s integrity at runtime.</p>
+<p>I have also found a third BYOTC case study, which remains under embargo. If coordination proceeds as expected, I will publish its technical analysis and disclosure story later in September 2026.</p>
+]]></content>
+        </item>
         
         <item>
             <title>How Zoom Detects Google Meet Without Microphone Access</title>
