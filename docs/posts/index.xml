@@ -6,8 +6,60 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Thu, 03 Sep 2026 00:00:00 -0400</lastBuildDate>
+        <lastBuildDate>Fri, 04 Sep 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://xusheng.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Windows Age APIs Can Expose Your Date of Birth to Apps</title>
+            <link>https://xusheng.dev/posts/reversing/windows_age_api_dob/main/</link>
+            <pubDate>Fri, 04 Sep 2026 00:00:00 +0000</pubDate>
+            <guid>https://xusheng.dev/posts/reversing/windows_age_api_dob/main/</guid>
+            <description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Windows&amp;rsquo; new age API is supposed to give an app only your age range&lt;/li&gt;
+&lt;li&gt;The current implementation first obtains your date of birth, then calculates the range inside the requesting app&amp;rsquo;s process&lt;/li&gt;
+&lt;li&gt;The requesting process can intercept the token or DOB&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;../social-preview.png&#34; alt=&#34;UserMgrProxy decoding the birthdate claim and calculating the user’s exact age&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;the-api-returns-a-rangebut-that-is-not-the-whole-story&#34;&gt;The API returns a range—but that is not the whole story&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.windowslatest.com/2026/09/03/windows-11-will-start-telling-apps-your-age-but-microsoft-says-it-wont-share-your-birthday/&#34;&gt;Windows Latest recently reported&lt;/a&gt; that Windows 11 will allow apps to request an age range without receiving the user&amp;rsquo;s birthday. Microsoft&amp;rsquo;s &lt;a href=&#34;https://learn.microsoft.com/en-us/windows/apps/develop/security/age-signals/&#34;&gt;documentation&lt;/a&gt; describes &lt;code&gt;GetUserAgeRangeAsync&lt;/code&gt;, which returns ranges such as 13–15, 16–17, or 18+.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<h2 id="tldr">TL;DR</h2>
+<ul>
+<li>Windows&rsquo; new age API is supposed to give an app only your age range</li>
+<li>The current implementation first obtains your date of birth, then calculates the range inside the requesting app&rsquo;s process</li>
+<li>The requesting process can intercept the token or DOB</li>
+</ul>
+<p><img src="../social-preview.png" alt="UserMgrProxy decoding the birthdate claim and calculating the user’s exact age"></p>
+<h2 id="the-api-returns-a-rangebut-that-is-not-the-whole-story">The API returns a range—but that is not the whole story</h2>
+<p><a href="https://www.windowslatest.com/2026/09/03/windows-11-will-start-telling-apps-your-age-but-microsoft-says-it-wont-share-your-birthday/">Windows Latest recently reported</a> that Windows 11 will allow apps to request an age range without receiving the user&rsquo;s birthday. Microsoft&rsquo;s <a href="https://learn.microsoft.com/en-us/windows/apps/develop/security/age-signals/">documentation</a> describes <code>GetUserAgeRangeAsync</code>, which returns ranges such as 13–15, 16–17, or 18+.</p>
+<p>On Windows 11 25H2 build 26200.9168, the API is present but currently returns <code>E_NOTIMPL</code> because a <code>DigitalSafetyAPI</code> feature flag is disabled. The implementation is already inside <code>UserMgrProxy.dll</code>, however, so I looked at what will happen after that gate is enabled.</p>
+<p>The flow is:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>requesting application
+</span></span><span style="display:flex;"><span>  -&gt; UserMgrProxy.dll requests an ID token through WAM
+</span></span><span style="display:flex;"><span>  -&gt; the token contains the birthdate claim
+</span></span><span style="display:flex;"><span>  -&gt; UserMgrProxy.dll extracts the DOB
+</span></span><span style="display:flex;"><span>  -&gt; it calculates the exact age
+</span></span><span style="display:flex;"><span>  -&gt; it converts that age to a range
+</span></span><span style="display:flex;"><span>  -&gt; the public API returns only the range
+</span></span></code></pre></div><p>The relevant decompiled code is unambiguous:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (DecodeJwtAndExtractClaim(
+</span></span><span style="display:flex;"><span>        token, tokenLength, <span style="color:#e6db74">&#34;birthdate&#34;</span>, <span style="color:#f92672">&amp;</span>birthdate, ...))
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int32_t</span> age <span style="color:#f92672">=</span> CalculateAgeFromDoB(<span style="color:#f92672">&amp;</span>birthdate);
+</span></span><span style="display:flex;"><span>    memset(<span style="color:#f92672">&amp;</span>birthdate, <span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">sizeof</span>(birthdate));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (arge <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">int64_t</span> range <span style="color:#f92672">=</span> MapAgeToRange(age);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// omitted...
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In other words, Windows receives the DOB and derives the range locally.</p>
+<h2 id="the-conversion-happens-inside-the-requesting-process">The conversion happens inside the requesting process</h2>
+<p>This distinction matters because <code>UserMgrProxy.dll</code> is loaded into the process that calls the API. I confirmed this by invoking the API from PowerShell and observing <code>C:\Windows\System32\UserMgrProxy.dll</code> loaded in that same PowerShell process. The OAuth response, JWT, and decoded <code>birthdate</code> therefore enter the requesting application&rsquo;s address space before being reduced to an age range.</p>
+<p><strong>This means the process can hook the JWT decoder or inspect its memory to obtain the user&rsquo;s date of birth.</strong> There are plenty of ways to do this because the process has full control over itself, including the DLLs loaded into it.</p>
+<p>Windows does perform capability, account, and caller checks. Those checks can prevent an unauthorized app from using the API, but they cannot hide data from an authorized app after Windows has placed that data inside the app&rsquo;s own process.</p>
+<p>I also downloaded and analyzed <code>UserMgrProxy.dll</code> version 10.0.29648.1000 from the latest available Windows preview build. Microsoft changed some internal plumbing, but the core mechanism for obtaining the age range remains the same. While Microsoft can change what it eventually enables or ships, there is currently no sign that it has replaced this design with a broker that returns only an age range.</p>
+<p>The application should call a trusted Windows broker or Microsoft service that returns the age range directly. The DOB-to-range conversion should happen before any result crosses into the application&rsquo;s process. It is surprising to see Microsoft make such a basic privacy-design mistake, even if temporarily.</p>
+]]></content>
+        </item>
         
         <item>
             <title>Bring Your Own Trusted Caller (BYOTC): A New Way to Exploit Vulnerable Windows Drivers (Part 1)</title>

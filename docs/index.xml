@@ -12,9 +12,16 @@
 			<copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
 		
 		
-			<lastBuildDate>Thu, 03 Sep 2026 00:00:00 -0400</lastBuildDate>
+			<lastBuildDate>Fri, 04 Sep 2026 00:00:00 +0000</lastBuildDate>
 		
 			<atom:link href="https://xusheng.dev/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Windows Age APIs Can Expose Your Date of Birth to Apps</title>
+				<link>https://xusheng.dev/posts/reversing/windows_age_api_dob/main/</link>
+				<pubDate>Fri, 04 Sep 2026 00:00:00 +0000</pubDate>
+				<guid>https://xusheng.dev/posts/reversing/windows_age_api_dob/main/</guid>
+				<description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Windows&amp;rsquo; new age API is supposed to give an app only your age range&lt;/li&gt;&#xA;&lt;li&gt;The current implementation first obtains your date of birth, then calculates the range inside the requesting app&amp;rsquo;s process&lt;/li&gt;&#xA;&lt;li&gt;The requesting process can intercept the token or DOB&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;img src=&#34;../social-preview.png&#34; alt=&#34;UserMgrProxy decoding the birthdate claim and calculating the user’s exact age&#34;&gt;&lt;/p&gt;&#xA;&lt;h2 id=&#34;the-api-returns-a-rangebut-that-is-not-the-whole-story&#34;&gt;The API returns a range—but that is not the whole story&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://www.windowslatest.com/2026/09/03/windows-11-will-start-telling-apps-your-age-but-microsoft-says-it-wont-share-your-birthday/&#34;&gt;Windows Latest recently reported&lt;/a&gt; that Windows 11 will allow apps to request an age range without receiving the user&amp;rsquo;s birthday. Microsoft&amp;rsquo;s &lt;a href=&#34;https://learn.microsoft.com/en-us/windows/apps/develop/security/age-signals/&#34;&gt;documentation&lt;/a&gt; describes &lt;code&gt;GetUserAgeRangeAsync&lt;/code&gt;, which returns ranges such as 13–15, 16–17, or 18+.&lt;/p&gt;</description>
+			</item>
 			<item>
 				<title>Bring Your Own Trusted Caller (BYOTC): A New Way to Exploit Vulnerable Windows Drivers (Part 1)</title>
 				<link>https://xusheng.dev/posts/byotc/main/</link>
