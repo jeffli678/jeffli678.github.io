@@ -212,6 +212,10 @@ BYOTC also deserves a large-scale study across the Windows driver ecosystem. Rel
 - [*POPKORN: Popping Windows Kernel Drivers At Scale*](https://doi.org/10.1145/3564625.3564631)
 - [*Finding vulnerable drivers with hooking and reading result verification*](https://link.springer.com/article/10.1186/s42400-025-00434-w)
 - [*Unveiling BYOVD Threats: Malware's Use and Abuse of Kernel Drivers*](https://www.ndss-symposium.org/ndss-paper/unveiling-byovd-threats-malwares-use-and-abuse-of-kernel-drivers/)
+- [*The Windows IOCTL Census: A Corpus-Scale, Multi-Architecture Database of the Driver Control-Code Surface*](https://arxiv.org/abs/2606.07732)
+- [*IOCTLance: Enhanced Vulnerability Hunting in WDM Drivers with Symbolic Execution and Taint Analysis*](https://github.com/zeze-zeze/ioctlance)
+- [*Building a Scalable Windows Driver Vulnerability Analyzer*](https://threatunpacked.com/2026/02/04/building-a-scalable-windows-driver-vulnerability-analyzer-part-2/)
+- [*100+ Kernel Bugs in 30 Days*](https://ydinkin.substack.com/p/200-kernel-bugs-in-30-days)
 
 A similar corpus-scale study of trusted user-mode clients would help determine how widespread BYOTC is across the Windows driver ecosystem: how many drivers authorize privileged operations this way, and how many of those trust boundaries can be bypassed.
 
