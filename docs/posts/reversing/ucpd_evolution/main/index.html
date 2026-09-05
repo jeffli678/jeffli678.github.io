@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Tracking 38 historical UCPD.sys binaries reveals when Microsoft added each layer of default-browser, registry, process, and dynamic-policy protection." />
+<meta name="keywords" content="Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://xusheng.dev/posts/reversing/ucpd_evolution/main/" />
+
+
+    <title>
+        
+            How Windows UCPD Grew from a 29 KB Registry Filter into a 196 KB Policy Engine :: Xusheng Li 
+        
+    </title>
+
+
+
+
+    
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+
+	<meta itemprop="name" content="How Windows UCPD Grew from a 29 KB Registry Filter into a 196 KB Policy Engine">
+	<meta itemprop="description" content="Tracking 38 historical UCPD.sys binaries reveals when Microsoft added each layer of default-browser, registry, process, and dynamic-policy protection.">
+	<meta itemprop="datePublished" content="2026-08-23T00:00:00+00:00">
+	<meta itemprop="dateModified" content="2026-08-23T00:00:00+00:00">
+	<meta itemprop="wordCount" content="2587">
+	<meta itemprop="image" content="https://xusheng.dev/">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://xusheng.dev/">
+	<meta name="twitter:title" content="How Windows UCPD Grew from a 29 KB Registry Filter into a 196 KB Policy Engine">
+	<meta name="twitter:description" content="Tracking 38 historical UCPD.sys binaries reveals when Microsoft added each layer of default-browser, registry, process, and dynamic-policy protection.">
+
+
+
+    <meta property="og:url" content="https://xusheng.dev/posts/reversing/ucpd_evolution/main/">
+	<meta property="og:site_name" content="Xusheng Li">
+	<meta property="og:title" content="How Windows UCPD Grew from a 29 KB Registry Filter into a 196 KB Policy Engine">
+	<meta property="og:description" content="Tracking 38 historical UCPD.sys binaries reveals when Microsoft added each layer of default-browser, registry, process, and dynamic-policy protection.">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-08-23T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-08-23T00:00:00+00:00">
+		<meta property="og:image" content="https://xusheng.dev/">
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2026-08-23 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">Xusheng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li><li><a href="/cv.pdf">CV</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        13 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://xusheng.dev/posts/reversing/ucpd_evolution/main/">How Windows UCPD Grew from a 29 KB Registry Filter into a 196 KB Policy Engine</a>
+      </h1>
+
+      
+        <div class="post-excerpt">Tracking 38 historical UCPD.sys binaries reveals when Microsoft added each layer of default-browser, registry, process, and dynamic-policy protection.</div>
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="tldr">TL;DR</h2>
+<ul>
+<li>I collected 38 <code>UCPD.sys</code> binaries representing 24 versions</li>
+<li>UCPD first shipped in August 2023, seven months before its public discovery</li>
+<li>It grew from a 29 KB browser-association filter into a 196 KB registry and process policy engine</li>
+<li>Later versions added ACL, rename, injection, UI Automation, backtrace, and dynamic-rule defenses</li>
+<li>Versions 4.4–4.7 added cross-device resume, gaming, <code>FeatureV3</code>, and an expanded deny list</li>
+</ul>
+<h2 id="going-backward">Going backward</h2>
+<p>My <a href="https://binary.ninja/2026/08/04/ucpd-dynamic-rules.html">recent article</a> examined how the Dynamic Rules (DR) work in the UCPD driver, and earlier research by <a href="https://kolbi.cz/blog/2024/04/03/userchoice-protection-driver-ucpd-sys/">Christoph Kolbicz</a>, <a href="https://hitco.at/blog/windows-userchoice-protection-driver-ucpd/">Gunnar Haslinger</a>, and <a href="https://binary.ninja/2025/03/25/default-browser-upcd.html">me</a> captured individual stages of its development. The remaining piece was to track how the driver evolved over time.</p>
+<p>So I used Winbindex to locate and retrieve 38 reconstructable x64 <code>UCPD.sys</code> files from Microsoft&rsquo;s public symbol server. Microsoft had removed the corresponding PDBs for most versions, so the comparison relied on the binaries rather than symbol information. The files cover 24 versions, and I compared adjacent versions.</p>
+<p>Most of this work was performed by Codex using Binary Ninja&rsquo;s MCP integration. I was quite surprised by its ability to diff binaries without specialized tools such as BinDiff and BinExport.</p>
+<h2 id="ucpd-was-already-in-windows-in-august-2023">UCPD was already in Windows in August 2023</h2>
+<p>The oldest indexed binary is <code>UCPD.sys</code> version <code>1.0.1.383513</code>. Winbindex associates it with Windows 11 22H2 preview update <a href="https://support.microsoft.com/help/5029351">KB5029351</a>, released on August 22, 2023.</p>
+<p>That is about seven months before the reports that led to UCPD&rsquo;s public discovery.</p>
+<p>The distinction is important. Early 2024 appears to be when Microsoft activated or broadly rolled out the protection, not when it wrote the driver. Microsoft had already been developing and servicing UCPD in public Windows packages for months.</p>
+<p>The first version was not an empty shell, either. It was a 29,184-byte driver with 58 unwind-described functions. Its strings and code identify the essential design:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice
+</span></span><span style="display:flex;"><span>Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>RemoveUserChoice
+</span></span><span style="display:flex;"><span>RenameUserChoice
+</span></span><span style="display:flex;"><span>OriginalFilename
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>*\dllhost.exe
+</span></span><span style="display:flex;"><span>*\reg.exe
+</span></span><span style="display:flex;"><span>*\rundll32.exe
+</span></span><span style="display:flex;"><span>*\svchost.exe
+</span></span></code></pre></div><p>In other words, version 1.0 already knew which registry keys represented the default browser, distinguished operations against them, and had a list of Microsoft utilities that should not be trusted merely because Microsoft signed them.</p>
+<p>The architecture that would define UCPD was present from the beginning:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>registry operation
+</span></span><span style="display:flex;"><span>      |
+</span></span><span style="display:flex;"><span>      v
+</span></span><span style="display:flex;"><span>is this a protected key?
+</span></span><span style="display:flex;"><span>      |
+</span></span><span style="display:flex;"><span>      v
+</span></span><span style="display:flex;"><span>is the requesting executable trusted?
+</span></span><span style="display:flex;"><span>      |
+</span></span><span style="display:flex;"><span>      +-- not Microsoft-signed -&gt; deny
+</span></span><span style="display:flex;"><span>      |
+</span></span><span style="display:flex;"><span>      `-- Microsoft-signed
+</span></span><span style="display:flex;"><span>              |
+</span></span><span style="display:flex;"><span>              `-- utility deny list -&gt; deny
+</span></span></code></pre></div><p>Everything that followed made the protected surface wider and made the definition of &ldquo;trusted&rdquo; much harder to fool.</p>
+<h2 id="the-complete-growth-curve">The complete growth curve</h2>
+<p>The driver grew almost sevenfold over three years:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Version</th>
+					<th>Approximate period</th>
+					<th style="text-align: right">Size</th>
+					<th style="text-align: right">Functions</th>
+					<th>Important visible addition</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>1.0.1</td>
+					<td>Aug 2023</td>
+					<td style="text-align: right">29 KB</td>
+					<td style="text-align: right">58</td>
+					<td>HTTP/HTTPS UserChoice protection</td>
+			</tr>
+			<tr>
+					<td>2.0.0</td>
+					<td>Dec 2023</td>
+					<td style="text-align: right">34 KB</td>
+					<td style="text-align: right">65</td>
+					<td>PDF, DeviceRegion, FeatureV2</td>
+			</tr>
+			<tr>
+					<td>2.1.0</td>
+					<td>2024</td>
+					<td style="text-align: right">45 KB</td>
+					<td style="text-align: right">74</td>
+					<td>Feeds, NandI, taskbar</td>
+			</tr>
+			<tr>
+					<td>2.2.0</td>
+					<td>Jun 2024</td>
+					<td style="text-align: right">41 KB</td>
+					<td style="text-align: right">74</td>
+					<td><code>cmd.exe</code> deny entry</td>
+			</tr>
+			<tr>
+					<td>3.0.0</td>
+					<td>Jul 2024</td>
+					<td style="text-align: right">86 KB</td>
+					<td style="text-align: right">143</td>
+					<td>Process/publisher defenses, Search, Taskband</td>
+			</tr>
+			<tr>
+					<td>3.1–3.2</td>
+					<td>late 2024</td>
+					<td style="text-align: right">86–96 KB</td>
+					<td style="text-align: right">146–156</td>
+					<td>Copilot experiments, more denied utilities</td>
+			</tr>
+			<tr>
+					<td>4.0.x</td>
+					<td>early 2025</td>
+					<td style="text-align: right">102–112 KB</td>
+					<td style="text-align: right">181</td>
+					<td>Backtrace-era process/module architecture</td>
+			</tr>
+			<tr>
+					<td>4.1.x</td>
+					<td>Mar–Apr 2025</td>
+					<td style="text-align: right">115–119 KB</td>
+					<td style="text-align: right">193</td>
+					<td>Unknown/OpenWith, Office, ACL operations</td>
+			</tr>
+			<tr>
+					<td>4.2.x</td>
+					<td>Apr 2025</td>
+					<td style="text-align: right">135 KB</td>
+					<td style="text-align: right">248</td>
+					<td>Dynamic rules and self-protection</td>
+			</tr>
+			<tr>
+					<td>4.3.0</td>
+					<td>Jun 2025</td>
+					<td style="text-align: right">157 KB</td>
+					<td style="text-align: right">295</td>
+					<td>StackTrace and renamed-file parsing</td>
+			</tr>
+			<tr>
+					<td>4.4.x</td>
+					<td>late 2025</td>
+					<td style="text-align: right">164–174 KB</td>
+					<td style="text-align: right">312–316</td>
+					<td>CrossDeviceResume</td>
+			</tr>
+			<tr>
+					<td>4.5.0</td>
+					<td>Oct 2025</td>
+					<td style="text-align: right">168 KB</td>
+					<td style="text-align: right">333</td>
+					<td>GamingConfiguration</td>
+			</tr>
+			<tr>
+					<td>4.6.0</td>
+					<td>Feb 2026</td>
+					<td style="text-align: right">176 KB</td>
+					<td style="text-align: right">341</td>
+					<td>FeatureV3 and SHA-512</td>
+			</tr>
+			<tr>
+					<td>4.7.x</td>
+					<td>2026</td>
+					<td style="text-align: right">197 KB</td>
+					<td style="text-align: right">354–355</td>
+					<td>Complete 14-entry deny list</td>
+			</tr>
+	</tbody>
+</table>
+<p>Function counts come from the x64 exception directory. They are not a perfect source-level function count, but they are consistent enough to show the scale of each transition.</p>
+<p>Windows servicing branches do not form a perfectly linear history. The same logical version can appear as multiple binaries for 22H2, 24H2, 25H2, or 26H1, and release dates can cross. I therefore treated file version and policy contents as the primary ordering and used KB dates as supporting provenance.</p>
+<h2 id="version-2-no-longer-just-the-default-browser">Version 2: no longer just the default browser</h2>
+<p>Version 2.0 added the first major expansion:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.pdf\UserChoice
+</span></span><span style="display:flex;"><span>SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion
+</span></span><span style="display:flex;"><span>FeatureV2
+</span></span></code></pre></div><p>It also introduced <code>UserChoiceLatest</code> and <code>UserChoicePrevious</code> forms for HTTP, HTTPS, and PDF. <code>UserChoiceLatest</code> would not become operationally important until much later, when Windows enabled its new association-hash rotation design. Christoph eventually documented that migration in <a href="https://kolbi.cz/blog/2025/04/20/userchoicelatest-microsofts-new-protection-for-file-type-associations/">UserChoiceLatest – Microsoft&rsquo;s new protection for file type associations</a>.</p>
+<p>The code had been waiting in UCPD since 2023.</p>
+<p>The deny list also changed. Version 2 removed <code>svchost.exe</code> and added <code>powershell.exe</code> and <code>regedit.exe</code>. Version 2.1 added <code>wscript.exe</code> and <code>cscript.exe</code>; version 2.2 added <code>cmd.exe</code>.</p>
+<p>Version 2.1 was also where UCPD visibly escaped its name. It added registry rules for Windows UI features:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds
+</span></span><span style="display:flex;"><span>SOFTWARE\Microsoft\Windows\CurrentVersion\NandI
+</span></span><span style="display:flex;"><span>Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ShellFeedsTaskbarViewMode
+</span></span><span style="display:flex;"><span>IsFeedsAvailable
+</span></span><span style="display:flex;"><span>TaskbarDa
+</span></span></code></pre></div><p>At that point, &ldquo;User Choice Protection Driver&rdquo; was already becoming a misleading description. It was protecting choices, but they were no longer limited to file associations.</p>
+<h2 id="version-3-defending-trusted-processes-from-other-processes">Version 3: defending trusted processes from other processes</h2>
+<p>The jump from 2.2 to 3.0 is the first enormous one: 41 KB became 86 KB and 74 functions became 143.</p>
+<p>This is where the problem changed from &ldquo;who made this registry call?&rdquo; to &ldquo;can I trust what is running inside the process that made it?&rdquo;</p>
+<p>Version 3 added process and publisher vocabulary for Kingsoft, Qihoo/360, Edge, Explorer, and Opera. It classified selected processes and used object callbacks to prevent particular vendors from injecting into trusted Microsoft processes or driving the Settings UI through desktop journal playback.</p>
+<p>The driver also expanded its registry surface to Search and Taskband, while the deny list gained <code>InfDefaultInstall.exe</code> and <code>pwsh.exe</code>.</p>
+<p>Version 3.1 is an interesting reminder that this history is not monotonic. One 3.1 build contains the Copilot <code>BrandedKeyChoiceType</code> rule; another removes its path and value strings. Version 4.0 restores them. That looks like branch divergence or A/B feature experimentation rather than a feature being implemented once and permanently enabled.</p>
+<p>The manager confirms the feature-driven design. I recovered the original UCPDMgr input from my old Binary Ninja database, then downloaded its matching PDB from Microsoft&rsquo;s symbol server. Its feature traits include:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>UCPD
+</span></span><span style="display:flex;"><span>UCPDV2
+</span></span><span style="display:flex;"><span>UCPD_PRONG1
+</span></span><span style="display:flex;"><span>UCPD_PRONG2
+</span></span><span style="display:flex;"><span>UCPD_TASKBAR
+</span></span><span style="display:flex;"><span>UCPD_WSB
+</span></span><span style="display:flex;"><span>UCPD_ANTIUIA
+</span></span><span style="display:flex;"><span>UCPD_ANTIINJECTION
+</span></span><span style="display:flex;"><span>UCPD_NEWDENYLIST
+</span></span><span style="display:flex;"><span>UCPD_RENAME_ATTACK
+</span></span></code></pre></div><p>UCPDMgr did not invent the policies. It translated Windows Feature Staging decisions into the <code>FeatureV2</code> mask consumed by the driver.</p>
+<h2 id="version-41-a-general-registry-integrity-engine">Version 4.1: a general registry integrity engine</h2>
+<p>Version 4.0 broadened the publisher and regional policies, but 4.1 is the more important conceptual transition. It added:</p>
+<ul>
+<li>unknown-file/OpenWith handler repair</li>
+<li><code>.htm</code> and <code>.html</code> associations</li>
+<li>Word, Excel, and PowerPoint associations</li>
+<li><code>UserChoiceLatest\ProgId</code> rules</li>
+<li>registry security and ACL operations</li>
+<li>explicit delete and rename handling for the new families</li>
+</ul>
+<p>The Unknown handler is especially illustrative. Windows expects these keys to launch the real <code>OpenWith.exe</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>SOFTWARE\Classes\Unknown\shell
+</span></span><span style="display:flex;"><span>SOFTWARE\Classes\Unknown\shell\open\command
+</span></span><span style="display:flex;"><span>SOFTWARE\Classes\Unknown\shell\openas\command
+</span></span></code></pre></div><p>UCPD contains the expected command, DelegateExecute CLSID, and dedicated <code>UnknownModify</code>, <code>UnknownDelKey</code>, and <code>UnknownRenKey</code> paths. This is not about choosing a browser. It is registry integrity protection against replacing a trusted shell action with an attacker-controlled command.</p>
+<p>Version 4.1 also removed the remaining <code>UserChoicePrevious</code> strings. Windows kept <code>UserChoiceLatest</code>; the earlier fallback design apparently did not survive.</p>
+<h2 id="version-42-a-signed-policy-channel-appears">Version 4.2: a signed policy channel appears</h2>
+<p>Version 4.2 grew from 119 KB to 135 KB and added the machinery that led to my dynamic-rules article:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>\REGISTRY\MACHINE\SYSTEM\CurrentControlSet\Services\UCPD\DR
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Base64Decode
+</span></span><span style="display:flex;"><span>ParsePEFormat
+</span></span><span style="display:flex;"><span>CalculatePEHashInMem
+</span></span><span style="display:flex;"><span>CertificateVerify
+</span></span><span style="display:flex;"><span>DecryptData
+</span></span><span style="display:flex;"><span>DispatcherConfig
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>AntiInjection
+</span></span><span style="display:flex;"><span>AllowListV1
+</span></span><span style="display:flex;"><span>DenyListV1
+</span></span></code></pre></div><p>The registry value is a Base64-encoded, data-only PE. UCPD parses it, verifies its Microsoft signature, decrypts the <code>.rdata</code>, and dispatches nested TLV records into independent policy structures.</p>
+<p>This solved an operational problem for Microsoft. Before this mechanism, changing UCPD policy required a new driver and usually a reboot. A signed registry policy can change deny/allow, injection, UI Automation, or stack-trace rules independently.</p>
+<p>The same version also contains explicit paths for protecting the UCPD service and <code>DR</code> key themselves. A remotely updatable kernel policy is only useful if another administrator-level process cannot replace its input.</p>
+<h2 id="version-43-trust-the-original-file-and-the-entire-stack">Version 4.3: trust the original file and the entire stack</h2>
+<p>Version 4.3 added two names that summarize the next defenses:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>ParseOriginalFileName
+</span></span><span style="display:flex;"><span>StackTrace
+</span></span></code></pre></div><p>The original UCPD trust rule had a wonderfully simple weakness: copy a Microsoft binary under another name. Its signature remained valid, but it no longer matched the utility deny list. VMware even used this approach for its default-association tooling.</p>
+<p>The OriginalFilename check closes that gap by reading the PE version resource and comparing the program&rsquo;s real name rather than trusting its current path.</p>
+<p>The stack check addresses the other obvious route. Even if the registry write originates in <code>SystemSettings.exe</code>, UCPD can walk the stack, identify the loaded modules behind the call, and reject the operation when a blocked publisher appears in the chain.</p>
+<p>At this point, the trust decision looked more like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>registry operation
+</span></span><span style="display:flex;"><span>      |
+</span></span><span style="display:flex;"><span>      +-- protected path/value/operation?
+</span></span><span style="display:flex;"><span>      |
+</span></span><span style="display:flex;"><span>      +-- Microsoft-signed caller?
+</span></span><span style="display:flex;"><span>      |
+</span></span><span style="display:flex;"><span>      +-- denied utility by path or OriginalFilename?
+</span></span><span style="display:flex;"><span>      |
+</span></span><span style="display:flex;"><span>      +-- blocked process/publisher classification?
+</span></span><span style="display:flex;"><span>      |
+</span></span><span style="display:flex;"><span>      +-- suspicious module publisher in stack?
+</span></span><span style="display:flex;"><span>      |
+</span></span><span style="display:flex;"><span>      `-- allow or deny, then emit telemetry
+</span></span></code></pre></div><h2 id="version-44-crossdeviceresume">Version 4.4: CrossDeviceResume</h2>
+<p>Version 4.4 introduced a previously undocumented rule family named <code>CrossDeviceResume</code>. It protects five path/value pairs:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Path suffix</th>
+					<th>Value</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>CrossDeviceResume\ResumeIntent</code></td>
+					<td><code>AppIconPath</code></td>
+			</tr>
+			<tr>
+					<td>same</td>
+					<td><code>AppDisplayName</code></td>
+			</tr>
+			<tr>
+					<td>same</td>
+					<td><code>IsAppInstalled</code></td>
+			</tr>
+			<tr>
+					<td><code>CrossDeviceResume\Notification</code></td>
+					<td><code>Status</code></td>
+			</tr>
+			<tr>
+					<td><code>CrossDeviceResume\Configuration</code></td>
+					<td><code>OverlayIconPath</code></td>
+			</tr>
+	</tbody>
+</table>
+<p>In the later driver, this family is controlled by <code>FeatureV2</code> bit <code>0x08000000</code> and has a dedicated <code>CrossDeviceResume</code> ETW label.</p>
+<p>The names strongly suggest protection against spoofing a cross-device resume notification: which app it claims to represent, its icon, whether it is installed, and its notification state. I have not found public documentation for this internal registry schema, so that interpretation is an inference rather than a confirmed product contract.</p>
+<p>Version 4.4 also adds <code>regini.exe</code> to the hardcoded deny list and makes the dynamic loader&rsquo;s <code>CertificateVerify</code> stage explicit in its event vocabulary.</p>
+<h2 id="version-45-gamingconfiguration">Version 4.5: GamingConfiguration</h2>
+<p>Version 4.5 added another complete policy family:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Software\Microsoft\Windows\CurrentVersion\GamingConfiguration
+</span></span><span style="display:flex;"><span>    DefaultGamingApp
+</span></span><span style="display:flex;"><span>    DefaultToGamingExperience
+</span></span></code></pre></div><p>This is controlled by <code>FeatureV2</code> bit <code>0x40000000</code>. Unlike a coincidental registry string, it has dedicated paths for every important operation:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>SetGameConfig
+</span></span><span style="display:flex;"><span>DelGameConfig
+</span></span><span style="display:flex;"><span>RenameGameConfig
+</span></span><span style="display:flex;"><span>DeleteGameConfigValue
+</span></span><span style="display:flex;"><span>GameConfig
+</span></span></code></pre></div><p>Microsoft&rsquo;s current <a href="https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-gaming-configuration">Gaming Configuration documentation</a> describes an OEM-configurable full-screen gaming experience, including the gaming-home app launched at startup. The public setting names differ, but <code>DefaultGamingApp</code> and <code>DefaultToGamingExperience</code> line up closely with that design.</p>
+<p>The security motivation is sensible: a third-party program should not silently install itself as a shell-like gaming launcher or force the device to start in that experience.</p>
+<h2 id="version-46-featurev3-and-the-broken-cipher">Version 4.6: FeatureV3 and the broken cipher</h2>
+<p>Version 4.6 adds three particularly revealing strings:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>FeatureV3
+</span></span><span style="display:flex;"><span>SHA512
+</span></span><span style="display:flex;"><span>Unknown publisher
+</span></span></code></pre></div><p><code>FeatureV2</code> is a 32-bit <code>REG_DWORD</code>, and by this point Microsoft had assigned nearly every bit. <code>FeatureV3</code> is a separate 64-bit <code>REG_QWORD</code>. The 4.7 manager&rsquo;s public PDB identifies its writer exactly:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#a6e22e">SetFeatureV3Status</span>(<span style="color:#66d9ef">__int64</span> mask)
+</span></span></code></pre></div><p>It currently maps seven Windows feature IDs into bits 0 through 6. The feature traits have only numeric names, so the PDB tells us their IDs but not their product descriptions. The driver consumes those bits in its rule database and in several distinct enforcement paths.</p>
+<p>This also dates the dynamic-rule crypto bug more precisely.</p>
+<p>The captured DR policy was encrypted using the old MD5-derived CS64 algorithm. Version 4.6&rsquo;s consumer uses SHA-512 to derive its state. The policy consequently decrypts to garbage. The loader existed in 4.2, while the incompatible SHA-512 change appears in 4.6.</p>
+<p>That does not prove the entire mechanism can never work. It proves that the captured producer and this consumer disagree. Microsoft could correct the policy producer without changing UCPD again.</p>
+<h2 id="version-47-the-dynamic-deny-list-becomes-the-baseline">Version 4.7: the dynamic deny list becomes the baseline</h2>
+<p>The DR sample contained 14 denied Microsoft utilities:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>dllhost.exe          reg.exe             rundll32.exe
+</span></span><span style="display:flex;"><span>powershell.exe       regedit.exe         wscript.exe
+</span></span><span style="display:flex;"><span>cscript.exe          cmd.exe             InfDefaultInstall.exe
+</span></span><span style="display:flex;"><span>pwsh.exe             wmiprvse.exe        regini.exe
+</span></span><span style="display:flex;"><span>bssafe.exe           mshta.exe
+</span></span></code></pre></div><p>In 4.6, the last two existed only in the captured dynamic policy. Version 4.7 adds <code>bssafe.exe</code> and <code>mshta.exe</code> to the driver&rsquo;s hardcoded strings, so the static and dynamic lists finally become identical.</p>
+<p>Version 4.7 also adds generic matching vocabulary:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>*\UserChoice
+</span></span><span style="display:flex;"><span>*\ProgId
+</span></span><span style="display:flex;"><span>*\UserChoiceLatest
+</span></span><span style="display:flex;"><span>\ProgId
+</span></span></code></pre></div><p>The explicit paths are still present, but these patterns suggest Microsoft was consolidating parts of the association matching logic rather than continuing to special-case every suffix.</p>
+<h2 id="what-changed-conceptually">What changed, conceptually?</h2>
+<p>Looking across all versions, UCPD evolved through four different jobs:</p>
+<ol>
+<li><strong>Association filter</strong> — protect HTTP and HTTPS UserChoice from simple registry writes.</li>
+<li><strong>Shell-setting filter</strong> — protect PDF, DeviceRegion, Feeds, taskbar, Search, Copilot, and Office associations.</li>
+<li><strong>Process integrity system</strong> — track processes, publishers, loaded modules, injection rights, UI Automation, original filenames, and call stacks.</li>
+<li><strong>Updatable policy engine</strong> — accept Microsoft-signed rule blobs and protect its own configuration.</li>
+</ol>
+<p>The name stayed the same while the product changed underneath it.</p>
+<p>The pattern of additions also looks much less arbitrary when placed on a timeline. Many changes are direct answers to a bypass:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Bypass or concern</th>
+					<th>UCPD response</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Use a Microsoft utility to write the key</td>
+					<td>Utility deny list</td>
+			</tr>
+			<tr>
+					<td>Use another utility not yet listed</td>
+					<td>Expanded and dynamic deny lists</td>
+			</tr>
+			<tr>
+					<td>Copy a signed utility under another name</td>
+					<td>OriginalFilename verification</td>
+			</tr>
+			<tr>
+					<td>Inject into Edge or Explorer</td>
+					<td>Process/thread handle-right filtering</td>
+			</tr>
+			<tr>
+					<td>Automate the Settings UI</td>
+					<td>Desktop/UIA restrictions</td>
+			</tr>
+			<tr>
+					<td>Inject a module into SystemSettings</td>
+					<td>Stack/module publisher inspection</td>
+			</tr>
+			<tr>
+					<td>Delete instead of setting a protected value</td>
+					<td>Delete-value enforcement</td>
+			</tr>
+			<tr>
+					<td>Reset the key ACL</td>
+					<td>SetSecurityKey enforcement</td>
+			</tr>
+			<tr>
+					<td>Rename a protected key</td>
+					<td>Rename enforcement</td>
+			</tr>
+			<tr>
+					<td>Disable features through UCPD&rsquo;s own registry</td>
+					<td>Self-protection</td>
+			</tr>
+			<tr>
+					<td>Require policy changes without a reboot</td>
+					<td>Signed dynamic-rule PE</td>
+			</tr>
+	</tbody>
+</table>
+<p>It is an arms race preserved in version history.</p>
+<h2 id="how-i-built-the-corpus">How I built the corpus</h2>
+<p>I queried Winbindex for every indexed x64 <code>UCPD.sys</code>, then downloaded the available PE reconstruction from Microsoft&rsquo;s symbol server. For each entry I recorded:</p>
+<ul>
+<li>indexed original SHA-256</li>
+<li>downloaded-file SHA-256</li>
+<li>file version and size</li>
+<li>Windows branch, KB, build, and release metadata</li>
+<li>PE sections and imports</li>
+<li>exception-directory function count</li>
+<li>ASCII and UTF-16 strings</li>
+<li>CodeView/PDB identity</li>
+<li>additions and removals relative to the adjacent version</li>
+</ul>
+<p>Microsoft no longer serves the corresponding UCPD PDBs for most of this corpus, so this comparison did not depend on symbols. I grouped equivalent branch builds, ordered the remaining versions, and compared their strings, imports, and PE metadata. For important additions, I followed the string references into the machine code to confirm that they created real rules rather than being unused text.</p>
+<p>There is an important provenance detail here. The Microsoft symbol server sometimes reconstructs the executable without its original Authenticode certificate overlay. Consequently, the downloaded file can differ from the original indexed SHA-256 and may report <code>NotSigned</code> even though it came from Microsoft&rsquo;s symbol infrastructure.</p>
+<p>I kept the two hashes separate and did not treat every reconstruction as independently signature-valid. Several original binaries recovered from my older <code>.bndb</code> files still retain their exact signatures, as does the current locally installed pair.</p>
+<p>I also gave Codex access to the Binary Ninja databases from my earlier UCPD research, covering snapshots from March 2024 through June 2026. Symbols for <code>UCPD.sys</code> were missing for most versions, but Microsoft still served matching PDBs for the corresponding <code>UCPDMgr.exe</code> files. Those manager symbols exposed feature traits and helper names that offered another view into the changes, while the driver comparison itself remained symbol-free.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Following one binary over time tells a different story from analyzing one version deeply.</p>
+<p>UCPD began as a small, narrowly focused registry filter at least as early as August 2023. Each generation responded to another way software could influence a supposedly trusted registry operation. By 2026 it had become a region- and feature-dependent kernel policy engine that watches registry operations, process creation, loaded images, object handles, UI Automation, publishers, original filenames, and stacks—and can consume signed policy from the registry.</p>
+<p>The most interesting additions are not even about the default browser anymore. Cross-device resume prompts and the default gaming experience are now part of the same protection framework.</p>
+<p>I suspect <code>FeatureV3</code> is a good indication of what happens next. <code>FeatureV2</code> ran out of room, but Microsoft is clearly not finished adding rules.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://binary.ninja/2026/08/04/ucpd-dynamic-rules.html">The Binary Hiding in Your Registry: Cracking Windows UCPD&rsquo;s Dynamic Rules</a></li>
+<li><a href="https://binary.ninja/2025/03/25/default-browser-upcd.html">Inside Windows&rsquo; Default Browser Protection</a></li>
+<li><a href="https://kolbi.cz/blog/2025/07/15/ucpd-sys-userchoice-protection-driver-part-2/">UCPD.sys – UserChoice Protection Driver Part 2</a></li>
+<li><a href="https://kolbi.cz/blog/2024/04/03/userchoice-protection-driver-ucpd-sys/">UserChoice Protection Driver – UCPD.sys</a></li>
+<li><a href="https://kolbi.cz/blog/2025/04/20/userchoicelatest-microsofts-new-protection-for-file-type-associations/">UserChoiceLatest – Microsoft&rsquo;s new protection for file type associations</a></li>
+<li><a href="https://kolbi.cz/blog/2026/07/23/kb5121767-enables-additional-ucpd-sys-features-on-windows-11-enterprise/">KB5121767 Enables Additional UCPD.sys Features on Windows 11 Enterprise</a></li>
+<li><a href="https://hitco.at/blog/windows-userchoice-protection-driver-ucpd/">Windows UserChoice Protection Driver UCPD</a></li>
+<li><a href="https://github.com/xusheng6/ucpd_analysis">UCPD analysis databases and tooling</a></li>
+<li><a href="https://winbindex.m417z.com/">Winbindex</a></li>
+</ul>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://xusheng.dev/categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        2587 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-08-22 20:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h"></span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+            <span class="button previous">
+              <a href="https://xusheng.dev/posts/reversing/teams_external_recording_detector/main/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Microsoft Teams Can Detect Recording Apps and Notify Other Participants</span>
+              </a>
+            </span>
+          
+
+          
+            <span class="button next">
+              <a href="https://xusheng.dev/posts/reversing/mspaint_invisible_watermark/main/">
+                <span class="button__text">Microsoft Paint and Photos Embed Server-Issued GUIDs as Invisible Watermarks in Locally-Generated Images</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2026</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
+            <span><a href="https://xusheng.dev/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.d76f43f920539c8ab3978e5b652202147a633a4ae085f3559a98449e7fda6fe5c9179516e0cbd3a3422ce557c5e24ee6bbfd9a3c08627a6eafc136fae7f03ff8.js" integrity="sha512-129D&#43;SBTnIqzl45bZSICFHpjOkrghfNVmphEnn/ab&#43;XJF5UW4MvTo0Is5VfF4k7mu/2aPAhiem6vwTb65/A/&#43;A=="></script>
+
+
+
+    </body>
+</html>
