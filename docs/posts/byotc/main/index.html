@@ -37,7 +37,7 @@
 	<meta itemprop="description" content="A trusted user-mode client can become the path through which an attacker reaches a privileged Windows driver.">
 	<meta itemprop="datePublished" content="2026-09-03T00:00:00-04:00">
 	<meta itemprop="dateModified" content="2026-09-03T00:00:00-04:00">
-	<meta itemprop="wordCount" content="2666">
+	<meta itemprop="wordCount" content="2660">
 	<meta itemprop="image" content="https://xusheng.dev/posts/byotc/social-preview.jpg">
 	<meta itemprop="keywords" content="Windows,Drivers,BYOVD,Reverse Engineering">
 
@@ -339,7 +339,7 @@ validation of the client process can still leave a gap.</p>
 <p>That solution is impressive, but it is also complicated and product-specific. I would not expect every affected software to reproduce it correctly, especially products that currently rely on a simple caller check. For software that cannot run its client as PPL, a broadly reusable answer is still missing. In that sense, I increasingly see BYOTC as a platform problem for Microsoft: Windows needs a supported way for a driver to grant sensitive capabilities to a user-mode principal whose runtime integrity the operating system can preserve.</p>
 <p>Microsoft is already working on an adjacent problem. The <a href="https://blogs.windows.com/windowsexperience/2025/11/18/preparing-for-whats-next-windows-security-and-resiliency-innovations-help-organizations-mitigate-risks-recover-faster-and-prepare-for-the-era-of-ai/">Windows Endpoint Security Platform</a> is intended to move more antivirus enforcement from third-party kernel drivers into user mode. Reducing kernel code is valuable: a bug in user mode is less likely to crash or corrupt the operating system. But moving an operation out of a vendor driver does not, by itself, answer the BYOTC question. If a privileged service still authenticates a client process that an attacker can modify, the attacker may inject into that trusted client and make the same privileged request from there.</p>
 <p>macOS offers a useful contrast. Its security model binds entitlements to a process&rsquo;s code signature, while the Hardened Runtime enables library validation by default. Apple documents that <a href="https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.disable-library-validation">library validation rejects external code</a> unless it is signed by Apple or by the same team as the main executable. This is not identical to PPL, and it does not make injection impossible, but it makes loading unsigned code into a trusted client substantially harder. Windows does not currently give ordinary third-party applications an equally simple equivalent for this use case.</p>
-<p>For antivirus and EDR developers, BYOTC should be treated as an emerging attack surface. Defensively blocking known-abusable drivers can remove obvious building blocks. If your own driver exposes legitimate but dangerous operations, test more than whether the caller&rsquo;s executable is signed: determine whether an attacker can take control of the trusted client or exploit a trust transition. If you are working on this problem, developing an affected product, or believe you have a more general solution, I would be glad to compare notes. See my <a href="/contact/">Contact page</a>; email is preferred, and Discord is also available.</p>
+<p>For antivirus and EDR developers, BYOTC should be treated as an emerging attack surface. Defensively blocking known-abusable drivers can remove obvious building blocks. If your own driver exposes legitimate but dangerous operations, test more than whether the caller&rsquo;s executable is signed: determine whether an attacker can take control of the trusted client or exploit a trust transition. If you are working on this problem, developing an affected product, or believe you have a more general solution, please feel free to <a href="/contact/">Contact me</a> &ndash; I would be happy to chat.</p>
 <p>BYOTC also deserves a large-scale study across the Windows driver ecosystem. Related research on vulnerable and abused drivers includes:</p>
 <ul>
 <li><a href="https://eclypsium.com/blog/screwed-drivers-signed-sealed-delivered/"><em>Screwed Drivers—Signed, Sealed, Delivered</em></a></li>
@@ -388,7 +388,7 @@ validation of the client process can still leave a gap.</p>
           <line x1="16" y1="17" x2="8" y2="17"></line>
           <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
-        2666 Words
+        2660 Words
       </p>
 
       <p>
