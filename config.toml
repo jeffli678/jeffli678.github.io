@@ -48,6 +48,10 @@ ignoreErrors = ["error-remote-getjson"]
     name = "linkedin"
     url  = "https://www.linkedin.com/in/xusheng-li-8819b7329/"
 
+  [[params.social]]
+    name = "discord"
+    url  = "https://discord.com/users/xusheng"
+
 [taxonomies]
     category = "blog"
     tag      = "tags"
@@ -79,3 +83,8 @@ ignoreErrors = ["error-remote-getjson"]
     identifier = "cv"
     name       = "CV"
     url        = "/cv.pdf"
+
+  [[menu.main]]
+    identifier = "contact"
+    name       = "Contact"
+    url        = "/contact/"

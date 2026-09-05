@@ -190,6 +190,31 @@ Game anti-cheat provides a useful comparison. Kernel anti-cheat drivers also try
 
 Anti-cheat and general-purpose utilities have different compatibility constraints, but the structural problem is the same. The never-ending contest between anti-cheat developers and cheat authors shows that runtime integrity is not a single check that can be perfected. A live process can be influenced through its memory, threads, loaded modules, handles, creation history, and even its view of the operating system. BYOTC brings this lesson to driver review: a recognized process is not a static identity, but a security-sensitive object whose integrity must be established and maintained over time.
 
+## How should BYOTC be fixed?
+
+The strongest pattern I have found so far is to anchor trust in [Protected Process Light (PPL)](https://learn.microsoft.com/en-us/windows/win32/services/protecting-anti-malware-services-). Ideally, the trusted client itself runs as PPL. A less direct design, like System Informer's fix, roots the client's creation chain in a PPL process and combines that origin with extensive runtime protections. In both designs, Windows—not the vendor's driver alone—protects the root of trust from an ordinary administrator.
+
+That is much harder to deploy than it sounds. Windows has a supported route for protected antimalware services, but it is not a general-purpose “make this process PPL” switch. It requires an ELAM driver and strict certification and code-signing arrangements. A protected antimalware service can also launch a protected child, but this remains a specialized service model. It is a poor fit for an on-demand system utility such as System Informer, which instead used the already-protected `services.exe` as the root of its launch sequence.
+
+That solution is impressive, but it is also complicated and product-specific. I would not expect every affected software to reproduce it correctly, especially products that currently rely on a simple caller check. For software that cannot run its client as PPL, a broadly reusable answer is still missing. In that sense, I increasingly see BYOTC as a platform problem for Microsoft: Windows needs a supported way for a driver to grant sensitive capabilities to a user-mode principal whose runtime integrity the operating system can preserve.
+
+Microsoft is already working on an adjacent problem. The [Windows Endpoint Security Platform](https://blogs.windows.com/windowsexperience/2025/11/18/preparing-for-whats-next-windows-security-and-resiliency-innovations-help-organizations-mitigate-risks-recover-faster-and-prepare-for-the-era-of-ai/) is intended to move more antivirus enforcement from third-party kernel drivers into user mode. Reducing kernel code is valuable: a bug in user mode is less likely to crash or corrupt the operating system. But moving an operation out of a vendor driver does not, by itself, answer the BYOTC question. If a privileged service still authenticates a client process that an attacker can modify, the attacker may inject into that trusted client and make the same privileged request from there.
+
+macOS offers a useful contrast. Its security model binds entitlements to a process's code signature, while the Hardened Runtime enables library validation by default. Apple documents that [library validation rejects external code](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.disable-library-validation) unless it is signed by Apple or by the same team as the main executable. This is not identical to PPL, and it does not make injection impossible, but it makes loading unsigned code into a trusted client substantially harder. Windows does not currently give ordinary third-party applications an equally simple equivalent for this use case.
+
+For antivirus and EDR developers, BYOTC should be treated as an emerging attack surface. Defensively blocking known-abusable drivers can remove obvious building blocks. If your own driver exposes legitimate but dangerous operations, test more than whether the caller's executable is signed: determine whether an attacker can take control of the trusted client or exploit a trust transition. If you are working on this problem, developing an affected product, or believe you have a more general solution, I would be glad to compare notes. See my [Contact page](/contact/); email is preferred, and Discord is also available.
+
+BYOTC also deserves a large-scale study across the Windows driver ecosystem. Related research on vulnerable and abused drivers includes:
+
+- [*Screwed Drivers—Signed, Sealed, Delivered*](https://eclypsium.com/blog/screwed-drivers-signed-sealed-delivered/)
+- [*Breaking Boundaries: Investigating Vulnerable Drivers and Mitigating Risks*](https://research.checkpoint.com/2024/breaking-boundaries-investigating-vulnerable-drivers-and-mitigating-risks/)
+- [*Exploring vulnerable Windows drivers*](https://blog.talosintelligence.com/exploring-vulnerable-windows-drivers/)
+- [*POPKORN: Popping Windows Kernel Drivers At Scale*](https://doi.org/10.1145/3564625.3564631)
+- [*Finding vulnerable drivers with hooking and reading result verification*](https://link.springer.com/article/10.1186/s42400-025-00434-w)
+- [*Unveiling BYOVD Threats: Malware's Use and Abuse of Kernel Drivers*](https://www.ndss-symposium.org/ndss-paper/unveiling-byovd-threats-malwares-use-and-abuse-of-kernel-drivers/)
+
+A similar corpus-scale study of trusted user-mode clients would help determine how widespread BYOTC is across the Windows driver ecosystem: how many drivers authorize privileged operations this way, and how many of those trust boundaries can be bypassed.
+
 ## Conclusion
 
 BYOTC targets the trusted user-mode client of a privileged driver. Malwarebytes showed the direct version—injecting into a signed client—while System Informer showed how a process-creation trust chain could be hijacked. Both cases demonstrate how hard it is to preserve a process's integrity at runtime.
