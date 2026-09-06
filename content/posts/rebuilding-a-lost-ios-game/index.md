@@ -24,7 +24,7 @@ I started by asking [Claude](https://claude.ai/) to rewrite it from screenshots.
 
 In March 2026, I gave Claude screenshots of the original game and asked it to recreate it. The rules are simple: drag a piece onto the board, and when a line is full, the blocks on that line disappear. On the hexagonal board, lines can run in three directions.
 
-I asked Claude to reproduce the shapes and colors in the images. I used [Flutter](https://flutter.dev/) so I could run it on both the iPad and my Mac, and I called the remake [Hexris](https://github.com/xusheng6/hexris). The source code is available in that GitHub repository. After a few rounds of fixing dragging and adjusting the piece sizes, it was playable.
+I asked Claude to reproduce the shapes and colors in the images. I used [Flutter](https://flutter.dev/) so I could run it on both the iPad and my Mac, and I called the remake [Hexris](https://github.com/xusheng6/hexris). After a few rounds of fixing dragging and adjusting the piece sizes, it was playable.
 
 {{< image src="/posts/rebuilding-a-lost-ios-game/hexris-game.png" alt="The first Hexris remake running in hex mode" style="display: block; max-height: 600px; max-width: 100%; width: auto; height: auto; margin: 1.5rem auto;" >}}
 
