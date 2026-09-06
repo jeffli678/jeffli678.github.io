@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Flutter on Xusheng Li</title>
+		<link>https://xusheng.dev/tags/flutter/</link>
+		<description>Recent content in Flutter on Xusheng Li</description>
+		<generator>Hugo</generator>
+		<language>en-us</language>
+		
+		
+		
+			<copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+		
+		
+			<lastBuildDate>Sun, 06 Sep 2026 00:00:00 -0400</lastBuildDate>
+		
+			<atom:link href="https://xusheng.dev/tags/flutter/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Rebuilding a Lost iOS Game: From Screenshots to Reverse Engineering to AI</title>
+				<link>https://xusheng.dev/posts/rebuilding-a-lost-ios-game/</link>
+				<pubDate>Sun, 06 Sep 2026 00:00:00 -0400</pubDate>
+				<guid>https://xusheng.dev/posts/rebuilding-a-lost-ios-game/</guid>
+				<description>&lt;p&gt;My wife used to play an iOS puzzle game called &lt;em&gt;Block Crush Blitz&lt;/em&gt;. When we wanted to install it on a new iPad in march 2026, we found that it was no longer available in the App Store. She liked the game, and it did not look too complicated to recreate. So I decided to give it a try. Happy wife, happy life.&lt;/p&gt;&#xA;&lt;p&gt;I started by asking Claude to rewrite it from screenshots. That got us a working game quite quickly, but some of the pieces were different from the original. To figure out which pieces should actually appear, I eventually had to download the old app, buy an iPhone, jailbreak it, and reverse engineer the executable. Then I got distracted by another idea: how well could an AI play this game?&lt;/p&gt;</description>
+			</item>
+	</channel>
+</rss>

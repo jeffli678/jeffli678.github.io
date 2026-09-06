@@ -3,10 +3,28 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://xusheng.dev/</loc>
-    <lastmod>2026-09-04T00:00:00+00:00</lastmod>
+    <lastmod>2026-09-06T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/tags/flutter/</loc>
+    <lastmod>2026-09-06T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/tags/game-ai/</loc>
+    <lastmod>2026-09-06T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/tags/ios/</loc>
+    <lastmod>2026-09-06T00:00:00-04:00</lastmod>
   </url><url>
     <loc>https://xusheng.dev/posts/</loc>
-    <lastmod>2026-09-04T00:00:00+00:00</lastmod>
+    <lastmod>2026-09-06T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/posts/rebuilding-a-lost-ios-game/</loc>
+    <lastmod>2026-09-06T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/tags/reverse-engineering/</loc>
+    <lastmod>2026-09-06T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://xusheng.dev/tags/</loc>
+    <lastmod>2026-09-06T00:00:00-04:00</lastmod>
   </url><url>
     <loc>https://xusheng.dev/posts/reversing/windows_age_api_dob/main/</loc>
     <lastmod>2026-09-04T00:00:00+00:00</lastmod>
@@ -18,12 +36,6 @@
     <lastmod>2026-09-03T00:00:00-04:00</lastmod>
   </url><url>
     <loc>https://xusheng.dev/tags/drivers/</loc>
-    <lastmod>2026-09-03T00:00:00-04:00</lastmod>
-  </url><url>
-    <loc>https://xusheng.dev/tags/reverse-engineering/</loc>
-    <lastmod>2026-09-03T00:00:00-04:00</lastmod>
-  </url><url>
-    <loc>https://xusheng.dev/tags/</loc>
     <lastmod>2026-09-03T00:00:00-04:00</lastmod>
   </url><url>
     <loc>https://xusheng.dev/tags/windows/</loc>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="How I recovered a delisted iOS puzzle game, reconstructed its exact mechanics, and benchmarked several agents that learned to play it." />
+<meta name="keywords" content="Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35, iOS, reverse engineering, game AI, Flutter" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://xusheng.dev/posts/rebuilding-a-lost-ios-game/" />
+
+
+    <title>
+        
+            Rebuilding a Lost iOS Game: From Screenshots to Reverse Engineering to AI :: Xusheng Li 
+        
+    </title>
+
+
+
+
+    
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+
+	<meta itemprop="name" content="Rebuilding a Lost iOS Game: From Screenshots to Reverse Engineering to AI">
+	<meta itemprop="description" content="How I recovered a delisted iOS puzzle game, reconstructed its exact mechanics, and benchmarked several agents that learned to play it.">
+	<meta itemprop="datePublished" content="2026-09-06T00:00:00-04:00">
+	<meta itemprop="dateModified" content="2026-09-06T00:00:00-04:00">
+	<meta itemprop="wordCount" content="1418">
+	<meta itemprop="image" content="https://xusheng.dev/posts/rebuilding-a-lost-ios-game/hexris-piece-catalog.png">
+	<meta itemprop="keywords" content="IOS,Reverse Engineering,Game AI,Flutter">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://xusheng.dev/posts/rebuilding-a-lost-ios-game/hexris-piece-catalog.png">
+	<meta name="twitter:title" content="Rebuilding a Lost iOS Game: From Screenshots to Reverse Engineering to AI">
+	<meta name="twitter:description" content="How I recovered a delisted iOS puzzle game, reconstructed its exact mechanics, and benchmarked several agents that learned to play it.">
+
+
+
+    <meta property="og:url" content="https://xusheng.dev/posts/rebuilding-a-lost-ios-game/">
+	<meta property="og:site_name" content="Xusheng Li">
+	<meta property="og:title" content="Rebuilding a Lost iOS Game: From Screenshots to Reverse Engineering to AI">
+	<meta property="og:description" content="How I recovered a delisted iOS puzzle game, reconstructed its exact mechanics, and benchmarked several agents that learned to play it.">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-09-06T00:00:00-04:00">
+		<meta property="article:modified_time" content="2026-09-06T00:00:00-04:00">
+		<meta property="article:tag" content="IOS">
+		<meta property="article:tag" content="Reverse Engineering">
+		<meta property="article:tag" content="Game AI">
+		<meta property="article:tag" content="Flutter">
+		<meta property="og:image" content="https://xusheng.dev/posts/rebuilding-a-lost-ios-game/hexris-piece-catalog.png">
+
+
+
+
+    <meta property="article:section" content="Reverse Engineering" />
+
+
+
+    <meta property="article:published_time" content="2026-09-06 00:00:00 -0400 EDT" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">Xusheng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li><li><a href="/contact/">Contact</a></li><li><a href="/cv.pdf">CV</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        7 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://xusheng.dev/posts/rebuilding-a-lost-ios-game/">Rebuilding a Lost iOS Game: From Screenshots to Reverse Engineering to AI</a>
+      </h1>
+
+      
+        <div class="post-excerpt">How I recovered a delisted iOS puzzle game, reconstructed its exact mechanics, and benchmarked several agents that learned to play it.</div>
+      
+
+      
+
+      <div class="post-content">
+        <p>My wife used to play an iOS puzzle game called <em>Block Crush Blitz</em>. When we wanted to install it on a new iPad in march 2026, we found that it was no longer available in the App Store. She liked the game, and it did not look too complicated to recreate. So I decided to give it a try. Happy wife, happy life.</p>
+<p>I started by asking Claude to rewrite it from screenshots. That got us a working game quite quickly, but some of the pieces were different from the original. To figure out which pieces should actually appear, I eventually had to download the old app, buy an iPhone, jailbreak it, and reverse engineer the executable. Then I got distracted by another idea: how well could an AI play this game?</p>
+<h2 id="the-first-attempt-rebuild-what-i-could-see">The first attempt: rebuild what I could see</h2>
+<p>In March 2026, I gave Claude screenshots of the original game and asked it to recreate it. The rules are simple: drag a piece onto the board, and when a line is full, the blocks on that line disappear. On the hexagonal board, lines can run in three directions.</p>
+<p>I asked Claude to reproduce the shapes and colors in the images. I used Flutter so I could run it on both the iPad and my Mac, and I called the remake <strong>Hexris</strong>. After a few rounds of fixing dragging and adjusting the piece sizes, it was playable.</p>
+
+    <img src="/posts/rebuilding-a-lost-ios-game/hexris-game.png"  alt="The first Hexris remake running in hex mode"  class="left"  style="display: block; max-height: 600px; max-width: 100%; width: auto; height: auto; margin: 1.5rem auto;"  />
+
+
+<p>However, after playing it for a while, we noticed that some pieces did not seem to belong. The remake generated shapes that we did not remember seeing in the original, and some were quite difficult to place.</p>
+<p>I tried removing the shapes that seemed wrong. This improved the game, but I was still relying on memory. I did not know whether I had removed the right pieces, or whether the remaining ones appeared with the right frequencies.</p>
+<p>At that point I wanted to find the original app and look at its code. There had to be a piece generator somewhere in it.</p>
+<h2 id="recovering-a-delisted-ipa">Recovering a delisted IPA</h2>
+<p>Getting a copy was harder than I expected. The app was no longer listed in either the Chinese or US App Store. I also thought I might have saved a copy on my Mac, but could not find one.</p>
+<p>Fortunately, my wife&rsquo;s Apple ID had acquired it in 2016. Although the listing was gone, Apple still had a copy available to that account. An archived store page helped us identify the App Store ID, <code>1052414239</code>, and bundle ID, <code>com.balabafire.1010hex</code>.</p>
+<p>I used <code>ipatool-py</code> to download it from Apple. The downloader needed some fixes because Apple&rsquo;s authentication endpoints had changed, but eventually it worked. I got version 1.7, an IPA of about 11 MB.</p>
+<p>Of course, an IPA downloaded from the App Store is still encrypted with FairPlay. Both the ARMv7 and ARM64 slices had <code>cryptid 1</code>. I could inspect the resources and some unencrypted data, but the code I needed was in the encrypted region.</p>
+<h2 id="why-a-virtual-iphone-was-not-enough">Why a virtual iPhone was not enough</h2>
+<p>I did not have a jailbroken device, so I first looked into using Corellium. I hoped I could sign into the account on a virtual iPhone, launch the app, and dump the decrypted code there.</p>
+<p>That did not work out. Corellium requires an already-decrypted IPA for this use; its virtual devices cannot run the encrypted App Store copy through the normal Apple services. I had the wrong half of the solution.</p>
+<p>I bought an iPhone 8 Plus and jailbroke it with <strong>palera1n</strong>. Getting the phone into DFU mode took many attempts. I watched videos, retried the button sequence, and kept seeing the Apple logo. After replacing the USB cable, I finally got it working. I had spent quite a bit of time blaming my button timing.</p>
+<p>I then signed into the account that had acquired the app and installed the encrypted copy. It launched! This worked because the authorization to use the purchased app was tied to the Apple ID, rather than limited to the device on which it was originally downloaded. I could use that account on the newly bought iPhone to run the encrypted copy, even though the app was no longer listed in the store.</p>
+<p>With the app running, I was able to dump its decrypted executable and obtain a decrypted IPA for analysis.</p>
+<p>This was a nice discovery on its own. An app disappearing from the store does not necessarily mean its binary is lost. In this case, a previous purchase let me download it, and a compatible physical device let me run it. It still depends on Apple serving the app and on the old app working on the available iOS version. A purchase record alone cannot guarantee either of those things.</p>
+<h2 id="reverse-engineering-the-game">Reverse engineering the game</h2>
+<p>The game uses Cocos2d-x and native C++. Before decryption, we had already checked the resources for shape definitions. There were UI scenes and sprite atlases, but no gameplay scripts or per-piece images. The game draws pieces by repeating a single hexagonal sprite. The actual shapes were defined in the executable.</p>
+<p>With the decrypted ARM64 code open in Binary Ninja, we could finally follow the catalog construction and random selection routines. The answer to my original question was quite specific: hex mode has <strong>22 possible pieces</strong>, consisting of a one-cell dot and 21 four-cell shapes. Each entry is selected uniformly, with a probability of <code>1/22</code>, or about 4.545%.</p>
+<p>There were also two masks elsewhere in the configuration that looked like pieces, but they were not added to the active catalog. Simply collecting every shape-like constant would have given us the wrong answer. We needed to follow how the generator used them.</p>
+<p><img src="/posts/rebuilding-a-lost-ios-game/hexris-piece-catalog.png" alt="The 22 recovered hex pieces"></p>
+<p>We also checked the surrounding rules. The board has 61 cells, with nine across the middle. Full lines clear along three axes. A used tray slot is replaced immediately, and the game ends when none of the three available pieces can fit. The level calculation does not change the active hex piece distribution in version 1.7; all 22 entries are already available at level one.</p>
+<p>Scoring was another difference from the first remake. Ordinary placement gives no points. When a move clears lines, it awards:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>distinct cells removed + lineCount × (10 + 5 × (lineCount - 1))
+</span></span></code></pre></div><p>Intersections count only once among removed cells. The line bonuses are therefore 10, 30, 60, and 100 points for one, two, three, and four simultaneous lines.</p>
+<p>The square mode turned out to use a different generator. It selects one of nine shape families using integer weights totaling 20, then selects an orientation uniformly within that family. For example, the dot and 3×3 square each occur 5% of the time, while the 2×2 square occurs 15%. Hex mode is simpler: all 22 active catalog entries are equally likely.</p>
+<p>I asked AI to add the recovered rules to Hexris as an optional Classic mode, keeping Undo for convenience. The previous version remains the default, so we can play either one.</p>
+<h2 id="then-i-wondered-can-an-ai-play-it">Then I wondered: can an AI play it?</h2>
+<p>After getting the rules working, I suddenly wanted to see how well an AI could play. I asked the coding agent to try a few approaches using a simulator of the recovered hex rules.</p>
+<p>We compared random moves, a greedy player that evaluates one move at a time, a trained version of that evaluator, and two search methods that look ahead at possible future pieces. Each played the same 20 seeded games, with a limit of 1,000 moves per game:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Agent</th>
+					<th style="text-align: right">Mean score</th>
+					<th style="text-align: right">Median score</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Random</td>
+					<td style="text-align: right">49.75</td>
+					<td style="text-align: right">18.5</td>
+			</tr>
+			<tr>
+					<td>Greedy</td>
+					<td style="text-align: right">1,055.30</td>
+					<td style="text-align: right">899.5</td>
+			</tr>
+			<tr>
+					<td>Learned linear</td>
+					<td style="text-align: right">1,061.95</td>
+					<td style="text-align: right">661.0</td>
+			</tr>
+			<tr>
+					<td>Sampled expectimax</td>
+					<td style="text-align: right"><strong>3,721.55</strong></td>
+					<td style="text-align: right">2,537.0</td>
+			</tr>
+			<tr>
+					<td>Stochastic rollout</td>
+					<td style="text-align: right">3,256.90</td>
+					<td style="text-align: right"><strong>2,777.0</strong></td>
+			</tr>
+	</tbody>
+</table>
+<p>Looking ahead helped much more than tuning the evaluator. Expectimax had the highest average score, with its best game reaching 10,346. Rollout had a slightly better median, but took more than twice as long.</p>
+<p>I also tried a small neural network. Combined with search, it averaged 2,532 points in a separate test, versus 5,074 for the handwritten evaluator on the same seeds. So the neural version did not improve things this time.</p>
+<p>My wife&rsquo;s best was around <strong>6,000 points</strong>. This was not a controlled comparison, but it was fun to see some of the agents&rsquo; games exceed that score.</p>
+<p>I originally expected to spend a little time getting Claude to draw a board and some pieces. I certainly did not expect to buy an old iPhone to find out which pieces belonged in it. But now I think it is totally worth the time and effort!</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://xusheng.dev/tags/ios/">iOS</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/reverse-engineering/">reverse engineering</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/game-ai/">game AI</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/flutter/">Flutter</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://xusheng.dev/categories/reverse-engineering/">Reverse Engineering</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        1418 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-09-06 00:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h"></span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+
+          
+            <span class="button next">
+              <a href="https://xusheng.dev/posts/reversing/windows_age_api_dob/main/">
+                <span class="button__text">Windows Age APIs Can Expose Your Date of Birth to Apps</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2026</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
+            <span><a href="https://xusheng.dev/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.d76f43f920539c8ab3978e5b652202147a633a4ae085f3559a98449e7fda6fe5c9179516e0cbd3a3422ce557c5e24ee6bbfd9a3c08627a6eafc136fae7f03ff8.js" integrity="sha512-129D&#43;SBTnIqzl45bZSICFHpjOkrghfNVmphEnn/ab&#43;XJF5UW4MvTo0Is5VfF4k7mu/2aPAhiem6vwTb65/A/&#43;A=="></script>
+
+
+
+    </body>
+</html>
