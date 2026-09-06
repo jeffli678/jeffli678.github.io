@@ -18,13 +18,13 @@ tags:
 
 My wife used to play an iOS puzzle game called *Block Crush Blitz*. When we wanted to install it on a new iPad in march 2026, we found that it was no longer available in the App Store. She liked the game, and it did not look too complicated to recreate. So I decided to give it a try. Happy wife, happy life.
 
-I started by asking Claude to rewrite it from screenshots. That got us a working game quite quickly, but some of the pieces were different from the original. To figure out which pieces should actually appear, I eventually had to download the old app, buy an iPhone, jailbreak it, and reverse engineer the executable. Then I got distracted by another idea: how well could an AI play this game?
+I started by asking [Claude](https://claude.ai/) to rewrite it from screenshots. That got us a working game quite quickly, but some of the pieces were different from the original. To figure out which pieces should actually appear, I eventually had to download the old app, buy an iPhone, jailbreak it, and reverse engineer the executable. Then I got distracted by another idea: how well could an AI play this game?
 
 ## The first attempt: rebuild what I could see
 
 In March 2026, I gave Claude screenshots of the original game and asked it to recreate it. The rules are simple: drag a piece onto the board, and when a line is full, the blocks on that line disappear. On the hexagonal board, lines can run in three directions.
 
-I asked Claude to reproduce the shapes and colors in the images. I used Flutter so I could run it on both the iPad and my Mac, and I called the remake **Hexris**. After a few rounds of fixing dragging and adjusting the piece sizes, it was playable.
+I asked Claude to reproduce the shapes and colors in the images. I used [Flutter](https://flutter.dev/) so I could run it on both the iPad and my Mac, and I called the remake [Hexris](https://github.com/xusheng6/hexris). The source code is available in that GitHub repository. After a few rounds of fixing dragging and adjusting the piece sizes, it was playable.
 
 {{< image src="/posts/rebuilding-a-lost-ios-game/hexris-game.png" alt="The first Hexris remake running in hex mode" style="display: block; max-height: 600px; max-width: 100%; width: auto; height: auto; margin: 1.5rem auto;" >}}
 
@@ -40,29 +40,29 @@ Getting a copy was harder than I expected. The app was no longer listed in eithe
 
 Fortunately, my wife's Apple ID had acquired it in 2016. Although the listing was gone, Apple still had a copy available to that account. An archived store page helped us identify the App Store ID, `1052414239`, and bundle ID, `com.balabafire.1010hex`.
 
-I used `ipatool-py` to download it from Apple. The downloader needed some fixes because Apple's authentication endpoints had changed, but eventually it worked. I got version 1.7, an IPA of about 11 MB.
+I used [ipatool-py](https://github.com/yuhao7370/ipatool-py) to download it from Apple. The downloader needed some fixes because Apple's authentication endpoints had changed, but eventually it worked. I got version 1.7, an IPA of about 11 MB.
 
 Of course, an IPA downloaded from the App Store is still encrypted with FairPlay. Both the ARMv7 and ARM64 slices had `cryptid 1`. I could inspect the resources and some unencrypted data, but the code I needed was in the encrypted region.
 
 ## Why a virtual iPhone was not enough
 
-I did not have a jailbroken device, so I first looked into using Corellium. I hoped I could sign into the account on a virtual iPhone, launch the app, and dump the decrypted code there.
+I did not have a jailbroken device, so I first looked into using [Corellium](https://www.corellium.com/). I hoped I could sign into the account on a virtual iPhone, launch the app, and dump the decrypted code there.
 
 That did not work out. Corellium requires an already-decrypted IPA for this use; its virtual devices cannot run the encrypted App Store copy through the normal Apple services. I had the wrong half of the solution.
 
-I bought an iPhone 8 Plus and jailbroke it with **palera1n**. Getting the phone into DFU mode took many attempts. I watched videos, retried the button sequence, and kept seeing the Apple logo. After replacing the USB cable, I finally got it working. I had spent quite a bit of time blaming my button timing.
+I bought an iPhone 8 Plus and jailbroke it with [palera1n](https://github.com/palera1n/palera1n). Getting the phone into DFU mode took many attempts. I watched videos, retried the button sequence, and kept seeing the Apple logo. After replacing the USB cable, I finally got it working. I had spent quite a bit of time blaming my button timing.
 
-I then signed into the account that had acquired the app and installed the encrypted copy. It launched! This worked because the authorization to use the purchased app was tied to the Apple ID, rather than limited to the device on which it was originally downloaded. I could use that account on the newly bought iPhone to run the encrypted copy, even though the app was no longer listed in the store.
+I then signed into the account that had acquired the app and installed the encrypted copy using `appinst`, with [AppSync Unified](https://github.com/akemin-dayo/AppSync) on the phone. It launched! This worked because the authorization to use the purchased app was tied to the Apple ID, rather than limited to the device on which it was originally downloaded. I could use that account on the newly bought iPhone to run the encrypted copy, even though the app was no longer listed in the store.
 
-With the app running, I was able to dump its decrypted executable and obtain a decrypted IPA for analysis.
+For the dump, I used [ipadecrypt](https://github.com/londek/ipadecrypt), which handled the device-side helper and produced a decrypted IPA for analysis. It used [OpenSSH](https://www.openssh.com/) to communicate with the phone, with the USB connection forwarded through `iproxy` from [libusbmuxd](https://github.com/libimobiledevice/libusbmuxd).
 
 This was a nice discovery on its own. An app disappearing from the store does not necessarily mean its binary is lost. In this case, a previous purchase let me download it, and a compatible physical device let me run it. It still depends on Apple serving the app and on the old app working on the available iOS version. A purchase record alone cannot guarantee either of those things.
 
 ## Reverse engineering the game
 
-The game uses Cocos2d-x and native C++. Before decryption, we had already checked the resources for shape definitions. There were UI scenes and sprite atlases, but no gameplay scripts or per-piece images. The game draws pieces by repeating a single hexagonal sprite. The actual shapes were defined in the executable.
+The game uses [Cocos2d-x](https://github.com/cocos2d/cocos2d-x) and native C++. Before decryption, we had already checked the resources for shape definitions. There were UI scenes and sprite atlases, but no gameplay scripts or per-piece images. The game draws pieces by repeating a single hexagonal sprite. The actual shapes were defined in the executable.
 
-With the decrypted ARM64 code open in Binary Ninja, we could finally follow the catalog construction and random selection routines. The answer to my original question was quite specific: hex mode has **22 possible pieces**, consisting of a one-cell dot and 21 four-cell shapes. Each entry is selected uniformly, with a probability of `1/22`, or about 4.545%.
+With the decrypted ARM64 code open in [Binary Ninja](https://binary.ninja/), we could finally follow the catalog construction and random selection routines. The answer to my original question was quite specific: hex mode has **22 possible pieces**, consisting of a one-cell dot and 21 four-cell shapes. Each entry is selected uniformly, with a probability of `1/22`, or about 4.545%.
 
 There were also two masks elsewhere in the configuration that looked like pieces, but they were not added to the active catalog. Simply collecting every shape-like constant would have given us the wrong answer. We needed to follow how the generator used them.
 
