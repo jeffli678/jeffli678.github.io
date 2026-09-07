@@ -1,0 +1,4 @@
+<video controls preload="metadata" playsinline style="display: block; width: 100%; height: auto; margin: 1.5rem 0 0.5rem;"{{ with .Get "poster" }} poster="{{ . }}"{{ end }} aria-label="{{ .Get "label" }}">
+  <source src="{{ .Get "src" }}" type="video/mp4">
+  Your browser does not support embedded video. <a href="{{ .Get "src" }}">Download the video</a> instead.
+</video>

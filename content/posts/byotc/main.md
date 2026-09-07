@@ -61,6 +61,10 @@ attacker (administrator)
         └────────────────> mbamchameleon.sys ──> ZwTerminateProcess
 ```
 
+{{< video src="/posts/byotc/malwarebytes-poc.mp4" poster="/posts/byotc/malwarebytes-poc-poster.jpg" label="Malwarebytes Chameleon proof of concept" >}}
+
+*The proof of concept loads `mbamchameleon.sys`, injects into the signed Malwarebytes client, and uses the trusted process to terminate Microsoft Defender.*
+
 This case is the simplest form of BYOTC:
 
 1. Bring the signed driver.

@@ -187,7 +187,13 @@
 </span></span><span style="display:flex;"><span>        │                        └── IOCTL 0x222024: terminate MsMpEng.exe
 </span></span><span style="display:flex;"><span>        │
 </span></span><span style="display:flex;"><span>        └────────────────&gt; mbamchameleon.sys ──&gt; ZwTerminateProcess
-</span></span></code></pre></div><p>This case is the simplest form of BYOTC:</p>
+</span></span></code></pre></div><video controls preload="metadata" playsinline style="display: block; width: 100%; height: auto; margin: 1.5rem 0 0.5rem;" poster="/posts/byotc/malwarebytes-poc-poster.jpg" aria-label="Malwarebytes Chameleon proof of concept">
+  <source src="/posts/byotc/malwarebytes-poc.mp4" type="video/mp4">
+  Your browser does not support embedded video. <a href="/posts/byotc/malwarebytes-poc.mp4">Download the video</a> instead.
+</video>
+
+<p><em>The proof of concept loads <code>mbamchameleon.sys</code>, injects into the signed Malwarebytes client, and uses the trusted process to terminate Microsoft Defender.</em></p>
+<p>This case is the simplest form of BYOTC:</p>
 <ol>
 <li>Bring the signed driver.</li>
 <li>Bring its signed user-mode client.</li>
