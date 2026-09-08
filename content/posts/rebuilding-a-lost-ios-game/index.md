@@ -100,6 +100,10 @@ Looking ahead helped much more than tuning the evaluator. Expectimax had the hig
 
 I also tried a small neural network. Combined with search, it averaged 2,532 points in a separate test, versus 5,074 for the handwritten evaluator on the same seeds. So the neural version did not improve things this time.
 
+Here is one complete expectimax game. It is a representative run rather than the longest one: 2,309 points over 235 moves. The three available pieces are shown below the board, and the gold outline marks the piece that was just played.
+
+{{< video src="/posts/rebuilding-a-lost-ios-game/ai-play-expectimax.mp4" poster="/posts/rebuilding-a-lost-ios-game/ai-play-expectimax-poster.png" label="An expectimax agent playing Hexris" >}}
+
 My wife's best was around **6,000 points**. This was not a controlled comparison, but it was fun to see some of the agents' games exceed that score.
 
 I originally expected to spend a little time getting Claude to draw a board and some pieces. I certainly did not expect to buy an old iPhone to find out which pieces belonged in it. But now I think it is totally worth the time and effort!

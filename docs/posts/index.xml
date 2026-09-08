@@ -92,6 +92,12 @@
 </table>
 <p>Looking ahead helped much more than tuning the evaluator. Expectimax had the highest average score, with its best game reaching 10,346. Rollout had a slightly better median, but took more than twice as long.</p>
 <p>I also tried a small neural network. Combined with search, it averaged 2,532 points in a separate test, versus 5,074 for the handwritten evaluator on the same seeds. So the neural version did not improve things this time.</p>
+<p>Here is one complete expectimax game. It is a representative run rather than the longest one: 2,309 points over 235 moves. The three available pieces are shown below the board, and the gold outline marks the piece that was just played.</p>
+<video controls preload="metadata" playsinline style="display: block; width: 100%; height: auto; margin: 1.5rem 0 0.5rem;" poster="/posts/rebuilding-a-lost-ios-game/ai-play-expectimax-poster.png" aria-label="An expectimax agent playing Hexris">
+  <source src="/posts/rebuilding-a-lost-ios-game/ai-play-expectimax.mp4" type="video/mp4">
+  Your browser does not support embedded video. <a href="/posts/rebuilding-a-lost-ios-game/ai-play-expectimax.mp4">Download the video</a> instead.
+</video>
+
 <p>My wife&rsquo;s best was around <strong>6,000 points</strong>. This was not a controlled comparison, but it was fun to see some of the agents&rsquo; games exceed that score.</p>
 <p>I originally expected to spend a little time getting Claude to draw a board and some pieces. I certainly did not expect to buy an old iPhone to find out which pieces belonged in it. But now I think it is totally worth the time and effort!</p>
 ]]></content>
