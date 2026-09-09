@@ -12,9 +12,44 @@
 			<copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
 		
 		
-			<lastBuildDate>Sun, 06 Sep 2026 00:00:00 -0400</lastBuildDate>
+			<lastBuildDate>Tue, 08 Sep 2026 00:00:00 -0400</lastBuildDate>
 		
 			<atom:link href="https://xusheng.dev/tags/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>DOS</title>
+				<link>https://xusheng.dev/tags/dos/</link>
+				<pubDate>Tue, 08 Sep 2026 00:00:00 -0400</pubDate>
+				<guid>https://xusheng.dev/tags/dos/</guid>
+				<description></description>
+			</item>
+			<item>
+				<title>Game AI</title>
+				<link>https://xusheng.dev/tags/game-ai/</link>
+				<pubDate>Tue, 08 Sep 2026 00:00:00 -0400</pubDate>
+				<guid>https://xusheng.dev/tags/game-ai/</guid>
+				<description></description>
+			</item>
+			<item>
+				<title>Reverse Engineering</title>
+				<link>https://xusheng.dev/tags/reverse-engineering/</link>
+				<pubDate>Tue, 08 Sep 2026 00:00:00 -0400</pubDate>
+				<guid>https://xusheng.dev/tags/reverse-engineering/</guid>
+				<description></description>
+			</item>
+			<item>
+				<title>Software Preservation</title>
+				<link>https://xusheng.dev/tags/software-preservation/</link>
+				<pubDate>Tue, 08 Sep 2026 00:00:00 -0400</pubDate>
+				<guid>https://xusheng.dev/tags/software-preservation/</guid>
+				<description></description>
+			</item>
+			<item>
+				<title>Xiangqi</title>
+				<link>https://xusheng.dev/tags/xiangqi/</link>
+				<pubDate>Tue, 08 Sep 2026 00:00:00 -0400</pubDate>
+				<guid>https://xusheng.dev/tags/xiangqi/</guid>
+				<description></description>
+			</item>
 			<item>
 				<title>Flutter</title>
 				<link>https://xusheng.dev/tags/flutter/</link>
@@ -23,24 +58,10 @@
 				<description></description>
 			</item>
 			<item>
-				<title>Game AI</title>
-				<link>https://xusheng.dev/tags/game-ai/</link>
-				<pubDate>Sun, 06 Sep 2026 00:00:00 -0400</pubDate>
-				<guid>https://xusheng.dev/tags/game-ai/</guid>
-				<description></description>
-			</item>
-			<item>
 				<title>IOS</title>
 				<link>https://xusheng.dev/tags/ios/</link>
 				<pubDate>Sun, 06 Sep 2026 00:00:00 -0400</pubDate>
 				<guid>https://xusheng.dev/tags/ios/</guid>
-				<description></description>
-			</item>
-			<item>
-				<title>Reverse Engineering</title>
-				<link>https://xusheng.dev/tags/reverse-engineering/</link>
-				<pubDate>Sun, 06 Sep 2026 00:00:00 -0400</pubDate>
-				<guid>https://xusheng.dev/tags/reverse-engineering/</guid>
 				<description></description>
 			</item>
 			<item>

@@ -6,8 +6,75 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Sun, 06 Sep 2026 00:00:00 -0400</lastBuildDate>
+        <lastBuildDate>Tue, 08 Sep 2026 00:00:00 -0400</lastBuildDate>
         <atom:link href="https://xusheng.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Bringing Chinese Chess Master III: Jiangzu Back to Life</title>
+            <link>https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine/</link>
+            <pubDate>Tue, 08 Sep 2026 00:00:00 -0400</pubDate>
+            <guid>https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine/</guid>
+            <description>&lt;p&gt;&lt;a href=&#34;https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine-zh/&#34;&gt;简体中文版&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Chinese Chess Master III: Jiangzu&lt;/em&gt; (象棋大師 III／將族) was a popular DOS Xiangqi game. Its developer’s &lt;a href=&#34;https://games.sina.com.cn/zhuanqu/guangpu/intro.shtml&#34;&gt;historical company profile&lt;/a&gt; claims 200,000 copies sold. I played a number of games against it when I was yong and won most of them. I’m an &lt;a href=&#34;https://xusheng.dev/posts/grandmaster/&#34;&gt;international Xiangqi grandmaster&lt;/a&gt;, so that wasn’t particularly surprising, but I still found it a worthwhile opponent.&lt;/p&gt;
+&lt;p&gt;My father is also a Xiangqi fan and used to play this game when he was younger. I found his disk and played it a little myself. It came out in &lt;strong&gt;1992&lt;/strong&gt;, the same year I was born.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p><a href="/posts/rebuilding-a-dos-xiangqi-engine-zh/">简体中文版</a></p>
+<p><em>Chinese Chess Master III: Jiangzu</em> (象棋大師 III／將族) was a popular DOS Xiangqi game. Its developer’s <a href="https://games.sina.com.cn/zhuanqu/guangpu/intro.shtml">historical company profile</a> claims 200,000 copies sold. I played a number of games against it when I was yong and won most of them. I’m an <a href="https://xusheng.dev/posts/grandmaster/">international Xiangqi grandmaster</a>, so that wasn’t particularly surprising, but I still found it a worthwhile opponent.</p>
+<p>My father is also a Xiangqi fan and used to play this game when he was younger. I found his disk and played it a little myself. It came out in <strong>1992</strong>, the same year I was born.</p>
+<figure><img src="/posts/rebuilding-a-dos-xiangqi-engine/jiangzu-title.png"
+			alt="The original 將族 title screen, with gold calligraphy and a red seal, running in DOSBox-X"><figcaption>
+			<p>The original 將族 title screen. Game screenshots captured in <a href="https://dosbox-x.com/">DOSBox-X</a>; original artwork belongs to its respective owners.</p>
+		</figcaption>
+</figure>
+
+<p>I liked the interface, especially the opponent-selection screen. It includes characters from the Chinese novel <em>Journey to the West</em> (西遊記), each with a portrait and a short description.</p>
+<figure><img src="/posts/rebuilding-a-dos-xiangqi-engine/opponent-selection.png"
+			alt="An open-book opponent-selection screen showing Spoon Sa, his portrait, biography, and strength rating"><figcaption>
+			<p>The opponent-selection screen, with Spoon Sa selected.</p>
+		</figcaption>
+</figure>
+
+<p>Eventually I wanted to do more than run it in DOS. Could I preserve the engine and play against it in a modern GUI?</p>
+<p><strong>TL;DR:</strong> With Codex’s help, I rewrote the engine in C, added UCI/UCCI support, and checked it against the original on <strong>408,708 test cases</strong>. <a href="https://github.com/xusheng6/cch-cms1">The code is on GitHub</a>.</p>
+<h2 id="a-little-background">A little background</h2>
+<p>The game was developed by <strong>Yu Hsi-Shun (虞希舜)</strong> and <strong>T-Time Technology (光譜資訊)</strong>. It grew out of Yu’s earlier Xiangqi programming work and became a commercial DOS game with graphics, named opponents, and a challenge-based progression. <a href="https://read.99csw.com/book/579/18112.html">This historical account</a> describes how the 1992 release built on the earlier program.</p>
+<p>Its 36 opponents look like different personalities, but underneath they share the same engine. Seven use a fixed two-ply search—roughly a move and a reply, with extra tactical searching. The others get different game clocks, which determine how much thinking time the engine can spend. Bogey gets one minute, Hand eight, and Skeleton 47: whole-game allowances, not time per move.</p>
+<p>So the characters mostly change the search budget, not the engine’s understanding of Xiangqi. Some even share identical settings.</p>
+<h2 id="rebuilding-the-engine">Rebuilding the engine</h2>
+<p>I used Codex to investigate the game and write a portable C version. We used <a href="https://binary.ninja/">Binary Ninja</a> and disassembly to inspect the DOS code, then <a href="https://dosbox-x.com/">DOSBox-X</a> to run the game and capture its initialized memory.</p>
+<figure><img src="/posts/rebuilding-a-dos-xiangqi-engine/game-board.png"
+			alt="The original Xiangqi board with Spoon Sa’s portrait above the human player’s portrait on the left"><figcaption>
+			<p>Playing against Spoon Sa in the original DOS game—the board and portraits I wanted to remember, even though the port itself is just the engine.</p>
+		</figcaption>
+</figure>
+
+<p>The engine lives in <code>CMS1.EXE</code>, a module loaded by the main game, <code>CCH.EXE</code>. It is a classical engine: it searches moves and replies using alpha-beta search, then evaluates positions with hand-written rules and tables.</p>
+<p>Getting a working rewrite was only part of the job. It soon agreed with the original on many positions, but there were still plenty of disagreements. I wanted more than an engine that played reasonably well. I wanted this particular engine’s decisions.</p>
+<p>That meant recovering the small details too: exact evaluation constants, move order, repetition handling, and special cases in the search.</p>
+<p>The rewrite comes to about <a href="https://github.com/xusheng6/cch-cms1/tree/main/port"><strong>3,400 lines of C code</strong></a>.</p>
+<h2 id="building-a-feedback-loop">Building a feedback loop</h2>
+<p>Rather than keep asking Codex to “make it more accurate,” I pushed for a repeatable test loop.</p>
+<p>We built a harness using <a href="https://www.unicorn-engine.org/">Unicorn</a> to run the original 16-bit engine code without clicking through the DOS interface. Then we could:</p>
+<ol>
+<li>Generate a large batch of positions from legal move histories.</li>
+<li>Run the original and the rewrite at the same search depth, with opening books disabled.</li>
+<li>Compare their chosen moves and scores.</li>
+<li>Investigate disagreements, fix the rewrite, and repeat with fresh positions.</li>
+</ol>
+<p>This is how I think about <strong>harness engineering</strong> here: give the coding agent a way to run its work, measure the result, and get concrete feedback. The original program was our reference, so we did not have to trust that a plausible-looking translation was correct.</p>
+<p>Some differences were tiny. In one case, both engines chose the same move, but one scored it 157 and the other 156. We traced that to the order in which they searched escape moves during a cannon check. Fixing the ordering resolved the discrepancy.</p>
+<p>As the tests got faster, I kept asking for larger batches. When one batch matched, we generated another.</p>
+<p><img src="/posts/rebuilding-a-dos-xiangqi-engine/progress.svg" alt="The test corpus grows to 408,708 cases across development checkpoints"></p>
+<p>The chart shows the growing test corpus, not an accuracy percentage. The final rewrite matched the original’s move and score on <strong>408,708 cases</strong>, mostly at depths 2–4, with a smaller set of deeper searches. The last three fresh shallow batches had 20,000 cases each and found no differences.</p>
+<p>That does not mean the algorithm is a perfect rewrite. Since <a href="https://arxiv.org/abs/2507.07480">program equivalence is undecidable in general</a>, the testing convergence gives me enough confidence to call the rewrite successful.</p>
+<h2 id="how-strong-is-it">How strong is it?</h2>
+<p>I also wanted a rough strength estimate. Full-strength <a href="https://github.com/official-pikafish/Pikafish">Pikafish</a> would be far too strong, so we used a version with calibrated strength controls: <code>UCI_LimitStrength</code> enables reduced-strength play, and <code>UCI_Elo</code> sets the target rating.</p>
+<p>Against Pikafish set to 1400, CCH won 13 games and lost 11. That gives a rough estimate of <strong>1,429 on Pikafish’s engine-rating scale</strong>. It is a small sample with wide uncertainty, not an official human Elo. These matches also preceded the final fidelity fixes.</p>
+<p>We tested ElephantEye, another open-source Xiangqi engine. It is much weaker than full-strength Pikafish, but still comfortably stronger than CCH: it beat our experimental larger-cache CCH variant 8–0. The <a href="https://github.com/xusheng6/cch-cms1/blob/main/VALIDATION.md#strength-is-a-different-question">validation notes</a> explain the limitations of these comparisons.</p>
+<p>None of that takes away from what I like about the game. I wanted to bring back an opponent my father and I had played, not turn it into a modern champion.</p>
+<p>The port now runs natively, speaks UCI and UCCI, and works in my Xiangqi GUI, Pikaboard. The <a href="https://github.com/xusheng6/cch-cms1">repository</a> includes the engine and smoke tests, but not the original game binaries, opening book, or artwork. Recovered numeric tables are included; <a href="https://github.com/xusheng6/cch-cms1/blob/main/NOTICE.md">NOTICE</a> explains their provenance and the license scope.</p>
+<p>An engine born in the same year as me gets to keep playing.</p>
+]]></content>
+        </item>
         
         <item>
             <title>Rebuilding a Lost iOS Game: From Screenshots to Reverse Engineering to AI</title>

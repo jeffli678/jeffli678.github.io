@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="A family connection to an old DOS game led me to rebuild its engine with Codex—and test it against the original on more than 400,000 positions." />
+<meta name="keywords" content="Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35, Xiangqi, DOS, software preservation, reverse engineering, game AI" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine/" />
+
+
+    <title>
+        
+            Bringing Chinese Chess Master III: Jiangzu Back to Life :: Xusheng Li 
+        
+    </title>
+
+
+
+
+    
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+
+	<meta itemprop="name" content="Bringing Chinese Chess Master III: Jiangzu Back to Life">
+	<meta itemprop="description" content="A family connection to an old DOS game led me to rebuild its engine with Codex—and test it against the original on more than 400,000 positions.">
+	<meta itemprop="datePublished" content="2026-09-08T00:00:00-04:00">
+	<meta itemprop="dateModified" content="2026-09-08T00:00:00-04:00">
+	<meta itemprop="wordCount" content="977">
+	<meta itemprop="image" content="https://xusheng.dev/">
+	<meta itemprop="keywords" content="Xiangqi,DOS,Software Preservation,Reverse Engineering,Game AI">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://xusheng.dev/">
+	<meta name="twitter:title" content="Bringing Chinese Chess Master III: Jiangzu Back to Life">
+	<meta name="twitter:description" content="A family connection to an old DOS game led me to rebuild its engine with Codex—and test it against the original on more than 400,000 positions.">
+
+
+
+    <meta property="og:url" content="https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine/">
+	<meta property="og:site_name" content="Xusheng Li">
+	<meta property="og:title" content="Bringing Chinese Chess Master III: Jiangzu Back to Life">
+	<meta property="og:description" content="A family connection to an old DOS game led me to rebuild its engine with Codex—and test it against the original on more than 400,000 positions.">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-09-08T00:00:00-04:00">
+		<meta property="article:modified_time" content="2026-09-08T00:00:00-04:00">
+		<meta property="article:tag" content="Xiangqi">
+		<meta property="article:tag" content="DOS">
+		<meta property="article:tag" content="Software Preservation">
+		<meta property="article:tag" content="Reverse Engineering">
+		<meta property="article:tag" content="Game AI">
+		<meta property="og:image" content="https://xusheng.dev/">
+
+
+
+
+    <meta property="article:section" content="Reverse Engineering" />
+
+
+
+    <meta property="article:published_time" content="2026-09-08 00:00:00 -0400 EDT" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">Xusheng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li><li><a href="/contact/">Contact</a></li><li><a href="/cv.pdf">CV</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        5 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine/">Bringing Chinese Chess Master III: Jiangzu Back to Life</a>
+      </h1>
+
+      
+        <div class="post-excerpt">A family connection to an old DOS game led me to rebuild its engine with Codex—and test it against the original on more than 400,000 positions.</div>
+      
+
+      
+
+      <div class="post-content">
+        <p><a href="/posts/rebuilding-a-dos-xiangqi-engine-zh/">简体中文版</a></p>
+<p><em>Chinese Chess Master III: Jiangzu</em> (象棋大師 III／將族) was a popular DOS Xiangqi game. Its developer’s <a href="https://games.sina.com.cn/zhuanqu/guangpu/intro.shtml">historical company profile</a> claims 200,000 copies sold. I played a number of games against it when I was yong and won most of them. I’m an <a href="https://xusheng.dev/posts/grandmaster/">international Xiangqi grandmaster</a>, so that wasn’t particularly surprising, but I still found it a worthwhile opponent.</p>
+<p>My father is also a Xiangqi fan and used to play this game when he was younger. I found his disk and played it a little myself. It came out in <strong>1992</strong>, the same year I was born.</p>
+<figure><img src="/posts/rebuilding-a-dos-xiangqi-engine/jiangzu-title.png"
+			alt="The original 將族 title screen, with gold calligraphy and a red seal, running in DOSBox-X"><figcaption>
+			<p>The original 將族 title screen. Game screenshots captured in <a href="https://dosbox-x.com/">DOSBox-X</a>; original artwork belongs to its respective owners.</p>
+		</figcaption>
+</figure>
+
+<p>I liked the interface, especially the opponent-selection screen. It includes characters from the Chinese novel <em>Journey to the West</em> (西遊記), each with a portrait and a short description.</p>
+<figure><img src="/posts/rebuilding-a-dos-xiangqi-engine/opponent-selection.png"
+			alt="An open-book opponent-selection screen showing Spoon Sa, his portrait, biography, and strength rating"><figcaption>
+			<p>The opponent-selection screen, with Spoon Sa selected.</p>
+		</figcaption>
+</figure>
+
+<p>Eventually I wanted to do more than run it in DOS. Could I preserve the engine and play against it in a modern GUI?</p>
+<p><strong>TL;DR:</strong> With Codex’s help, I rewrote the engine in C, added UCI/UCCI support, and checked it against the original on <strong>408,708 test cases</strong>. <a href="https://github.com/xusheng6/cch-cms1">The code is on GitHub</a>.</p>
+<h2 id="a-little-background">A little background</h2>
+<p>The game was developed by <strong>Yu Hsi-Shun (虞希舜)</strong> and <strong>T-Time Technology (光譜資訊)</strong>. It grew out of Yu’s earlier Xiangqi programming work and became a commercial DOS game with graphics, named opponents, and a challenge-based progression. <a href="https://read.99csw.com/book/579/18112.html">This historical account</a> describes how the 1992 release built on the earlier program.</p>
+<p>Its 36 opponents look like different personalities, but underneath they share the same engine. Seven use a fixed two-ply search—roughly a move and a reply, with extra tactical searching. The others get different game clocks, which determine how much thinking time the engine can spend. Bogey gets one minute, Hand eight, and Skeleton 47: whole-game allowances, not time per move.</p>
+<p>So the characters mostly change the search budget, not the engine’s understanding of Xiangqi. Some even share identical settings.</p>
+<h2 id="rebuilding-the-engine">Rebuilding the engine</h2>
+<p>I used Codex to investigate the game and write a portable C version. We used <a href="https://binary.ninja/">Binary Ninja</a> and disassembly to inspect the DOS code, then <a href="https://dosbox-x.com/">DOSBox-X</a> to run the game and capture its initialized memory.</p>
+<figure><img src="/posts/rebuilding-a-dos-xiangqi-engine/game-board.png"
+			alt="The original Xiangqi board with Spoon Sa’s portrait above the human player’s portrait on the left"><figcaption>
+			<p>Playing against Spoon Sa in the original DOS game—the board and portraits I wanted to remember, even though the port itself is just the engine.</p>
+		</figcaption>
+</figure>
+
+<p>The engine lives in <code>CMS1.EXE</code>, a module loaded by the main game, <code>CCH.EXE</code>. It is a classical engine: it searches moves and replies using alpha-beta search, then evaluates positions with hand-written rules and tables.</p>
+<p>Getting a working rewrite was only part of the job. It soon agreed with the original on many positions, but there were still plenty of disagreements. I wanted more than an engine that played reasonably well. I wanted this particular engine’s decisions.</p>
+<p>That meant recovering the small details too: exact evaluation constants, move order, repetition handling, and special cases in the search.</p>
+<p>The rewrite comes to about <a href="https://github.com/xusheng6/cch-cms1/tree/main/port"><strong>3,400 lines of C code</strong></a>.</p>
+<h2 id="building-a-feedback-loop">Building a feedback loop</h2>
+<p>Rather than keep asking Codex to “make it more accurate,” I pushed for a repeatable test loop.</p>
+<p>We built a harness using <a href="https://www.unicorn-engine.org/">Unicorn</a> to run the original 16-bit engine code without clicking through the DOS interface. Then we could:</p>
+<ol>
+<li>Generate a large batch of positions from legal move histories.</li>
+<li>Run the original and the rewrite at the same search depth, with opening books disabled.</li>
+<li>Compare their chosen moves and scores.</li>
+<li>Investigate disagreements, fix the rewrite, and repeat with fresh positions.</li>
+</ol>
+<p>This is how I think about <strong>harness engineering</strong> here: give the coding agent a way to run its work, measure the result, and get concrete feedback. The original program was our reference, so we did not have to trust that a plausible-looking translation was correct.</p>
+<p>Some differences were tiny. In one case, both engines chose the same move, but one scored it 157 and the other 156. We traced that to the order in which they searched escape moves during a cannon check. Fixing the ordering resolved the discrepancy.</p>
+<p>As the tests got faster, I kept asking for larger batches. When one batch matched, we generated another.</p>
+<p><img src="/posts/rebuilding-a-dos-xiangqi-engine/progress.svg" alt="The test corpus grows to 408,708 cases across development checkpoints"></p>
+<p>The chart shows the growing test corpus, not an accuracy percentage. The final rewrite matched the original’s move and score on <strong>408,708 cases</strong>, mostly at depths 2–4, with a smaller set of deeper searches. The last three fresh shallow batches had 20,000 cases each and found no differences.</p>
+<p>That does not mean the algorithm is a perfect rewrite. Since <a href="https://arxiv.org/abs/2507.07480">program equivalence is undecidable in general</a>, the testing convergence gives me enough confidence to call the rewrite successful.</p>
+<h2 id="how-strong-is-it">How strong is it?</h2>
+<p>I also wanted a rough strength estimate. Full-strength <a href="https://github.com/official-pikafish/Pikafish">Pikafish</a> would be far too strong, so we used a version with calibrated strength controls: <code>UCI_LimitStrength</code> enables reduced-strength play, and <code>UCI_Elo</code> sets the target rating.</p>
+<p>Against Pikafish set to 1400, CCH won 13 games and lost 11. That gives a rough estimate of <strong>1,429 on Pikafish’s engine-rating scale</strong>. It is a small sample with wide uncertainty, not an official human Elo. These matches also preceded the final fidelity fixes.</p>
+<p>We tested ElephantEye, another open-source Xiangqi engine. It is much weaker than full-strength Pikafish, but still comfortably stronger than CCH: it beat our experimental larger-cache CCH variant 8–0. The <a href="https://github.com/xusheng6/cch-cms1/blob/main/VALIDATION.md#strength-is-a-different-question">validation notes</a> explain the limitations of these comparisons.</p>
+<p>None of that takes away from what I like about the game. I wanted to bring back an opponent my father and I had played, not turn it into a modern champion.</p>
+<p>The port now runs natively, speaks UCI and UCCI, and works in my Xiangqi GUI, Pikaboard. The <a href="https://github.com/xusheng6/cch-cms1">repository</a> includes the engine and smoke tests, but not the original game binaries, opening book, or artwork. Recovered numeric tables are included; <a href="https://github.com/xusheng6/cch-cms1/blob/main/NOTICE.md">NOTICE</a> explains their provenance and the license scope.</p>
+<p>An engine born in the same year as me gets to keep playing.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://xusheng.dev/tags/xiangqi/">Xiangqi</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/dos/">DOS</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/software-preservation/">software preservation</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/reverse-engineering/">reverse engineering</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/game-ai/">game AI</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://xusheng.dev/categories/reverse-engineering/">Reverse Engineering</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        977 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-09-08 00:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h"></span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+
+          
+            <span class="button next">
+              <a href="https://xusheng.dev/posts/rebuilding-a-lost-ios-game/">
+                <span class="button__text">Rebuilding a Lost iOS Game: From Screenshots to Reverse Engineering to AI</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2026</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
+            <span><a href="https://xusheng.dev/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.d76f43f920539c8ab3978e5b652202147a633a4ae085f3559a98449e7fda6fe5c9179516e0cbd3a3422ce557c5e24ee6bbfd9a3c08627a6eafc136fae7f03ff8.js" integrity="sha512-129D&#43;SBTnIqzl45bZSICFHpjOkrghfNVmphEnn/ab&#43;XJF5UW4MvTo0Is5VfF4k7mu/2aPAhiem6vwTb65/A/&#43;A=="></script>
+
+
+
+    </body>
+</html>

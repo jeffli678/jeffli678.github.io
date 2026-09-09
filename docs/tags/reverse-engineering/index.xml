@@ -12,9 +12,16 @@
 			<copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
 		
 		
-			<lastBuildDate>Sun, 06 Sep 2026 00:00:00 -0400</lastBuildDate>
+			<lastBuildDate>Tue, 08 Sep 2026 00:00:00 -0400</lastBuildDate>
 		
 			<atom:link href="https://xusheng.dev/tags/reverse-engineering/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Bringing Chinese Chess Master III: Jiangzu Back to Life</title>
+				<link>https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine/</link>
+				<pubDate>Tue, 08 Sep 2026 00:00:00 -0400</pubDate>
+				<guid>https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine/</guid>
+				<description>&lt;p&gt;&lt;a href=&#34;https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine-zh/&#34;&gt;简体中文版&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;em&gt;Chinese Chess Master III: Jiangzu&lt;/em&gt; (象棋大師 III／將族) was a popular DOS Xiangqi game. Its developer’s &lt;a href=&#34;https://games.sina.com.cn/zhuanqu/guangpu/intro.shtml&#34;&gt;historical company profile&lt;/a&gt; claims 200,000 copies sold. I played a number of games against it when I was yong and won most of them. I’m an &lt;a href=&#34;https://xusheng.dev/posts/grandmaster/&#34;&gt;international Xiangqi grandmaster&lt;/a&gt;, so that wasn’t particularly surprising, but I still found it a worthwhile opponent.&lt;/p&gt;&#xA;&lt;p&gt;My father is also a Xiangqi fan and used to play this game when he was younger. I found his disk and played it a little myself. It came out in &lt;strong&gt;1992&lt;/strong&gt;, the same year I was born.&lt;/p&gt;</description>
+			</item>
 			<item>
 				<title>Rebuilding a Lost iOS Game: From Screenshots to Reverse Engineering to AI</title>
 				<link>https://xusheng.dev/posts/rebuilding-a-lost-ios-game/</link>

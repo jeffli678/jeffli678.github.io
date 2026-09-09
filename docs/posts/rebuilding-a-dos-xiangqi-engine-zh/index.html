@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="用 Codex 将一款 1992 年的 DOS 象棋引擎重写为 C，并与原版逐一比较了四十多万个测试局面。" />
+<meta name="keywords" content="Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35, Xiangqi, DOS, software preservation, reverse engineering, game AI" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine-zh/" />
+
+
+    <title>
+        
+            让《象棋大师 III：将族》重新运行起来 :: Xusheng Li 
+        
+    </title>
+
+
+
+
+    
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+
+	<meta itemprop="name" content="让《象棋大师 III：将族》重新运行起来">
+	<meta itemprop="description" content="用 Codex 将一款 1992 年的 DOS 象棋引擎重写为 C，并与原版逐一比较了四十多万个测试局面。">
+	<meta itemprop="datePublished" content="2026-09-08T00:00:00-04:00">
+	<meta itemprop="dateModified" content="2026-09-08T00:00:00-04:00">
+	<meta itemprop="wordCount" content="141">
+	<meta itemprop="image" content="https://xusheng.dev/">
+	<meta itemprop="keywords" content="Xiangqi,DOS,Software Preservation,Reverse Engineering,Game AI">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://xusheng.dev/">
+	<meta name="twitter:title" content="让《象棋大师 III：将族》重新运行起来">
+	<meta name="twitter:description" content="用 Codex 将一款 1992 年的 DOS 象棋引擎重写为 C，并与原版逐一比较了四十多万个测试局面。">
+
+
+
+    <meta property="og:url" content="https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine-zh/">
+	<meta property="og:site_name" content="Xusheng Li">
+	<meta property="og:title" content="让《象棋大师 III：将族》重新运行起来">
+	<meta property="og:description" content="用 Codex 将一款 1992 年的 DOS 象棋引擎重写为 C，并与原版逐一比较了四十多万个测试局面。">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-09-08T00:00:00-04:00">
+		<meta property="article:modified_time" content="2026-09-08T00:00:00-04:00">
+		<meta property="article:tag" content="Xiangqi">
+		<meta property="article:tag" content="DOS">
+		<meta property="article:tag" content="Software Preservation">
+		<meta property="article:tag" content="Reverse Engineering">
+		<meta property="article:tag" content="Game AI">
+		<meta property="og:image" content="https://xusheng.dev/">
+
+
+
+
+    <meta property="article:section" content="Reverse Engineering" />
+
+
+
+    <meta property="article:published_time" content="2026-09-08 00:00:00 -0400 EDT" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">Xusheng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li><li><a href="/contact/">Contact</a></li><li><a href="/cv.pdf">CV</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        One minute
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine-zh/">让《象棋大师 III：将族》重新运行起来</a>
+      </h1>
+
+      
+        <div class="post-excerpt">用 Codex 将一款 1992 年的 DOS 象棋引擎重写为 C，并与原版逐一比较了四十多万个测试局面。</div>
+      
+
+      
+
+      <div class="post-content">
+        <p><a href="/posts/rebuilding-a-dos-xiangqi-engine/">English version</a></p>
+<p>《象棋大师 III：将族》是一款曾经很受欢迎的 DOS 象棋游戏。开发公司的<a href="https://games.sina.com.cn/zhuanqu/guangpu/intro.shtml">历史介绍</a>称，它累计卖出了 20 万套。我年轻时和它下过不少棋，大部分都赢了。我是一名<a href="https://xusheng.dev/posts/grandmaster/">象棋国际特级大师</a>，赢它倒不算意外，但我仍觉得它是个值得一战的对手。</p>
+<p>我父亲也喜欢象棋，年轻时玩过这款游戏。后来我发现了他的游戏盘，也拿来玩了一阵。它发行于 <strong>1992 年</strong>，正好是我出生的那一年。</p>
+<figure><img src="/posts/rebuilding-a-dos-xiangqi-engine/jiangzu-title.png"
+			alt="DOSBox-X 中的《将族》标题画面：金色书法和红色印章"><figcaption>
+			<p>《将族》的标题画面。截图来自 <a href="https://dosbox-x.com/">DOSBox-X</a>，原游戏美术的权利归其各自权利人所有。</p>
+		</figcaption>
+</figure>
+
+<p>我很喜欢它的界面，尤其是选择对手的页面。里面有《西游记》中的人物，每个角色都有头像和一段介绍。</p>
+<figure><img src="/posts/rebuilding-a-dos-xiangqi-engine/opponent-selection.png"
+			alt="翻开的书本式选人界面，展示 Spoon Sa 的头像、简介和棋力等级"><figcaption>
+			<p>选择对手的界面，当前选中的是英文版中的 Spoon Sa。</p>
+		</figcaption>
+</figure>
+
+<p>后来，我不想每次都启动 DOS 才能和它下棋。能不能把引擎重写出来，放到现代象棋界面里运行？</p>
+<p><strong>太长不看：</strong> 在 Codex 的帮助下，我用 C 重写了这款引擎，加入 UCI/UCCI 支持，并用 <strong>408,708 个测试用例</strong>与原版进行比较。<a href="https://github.com/xusheng6/cch-cms1">代码在 GitHub 上</a>。</p>
+<h2 id="游戏的来历">游戏的来历</h2>
+<p>这款游戏由<strong>虞希舜</strong>和<strong>光谱资讯</strong>开发。它源于虞希舜早期编写的象棋程序，后来加入图形界面、不同角色和挑战赛制，成为商业 DOS 游戏。<a href="https://read.99csw.com/book/579/18112.html">这篇历史回顾</a>介绍了 1992 年的《将族》如何从此前的程序发展而来。</p>
+<p>游戏里的 36 个对手看起来各有个性，实际用的却是同一个引擎。其中七个采用固定的两层搜索，大致相当于走一步、看对方应一步，遇到吃子等战术情况还会继续搜索。其余对手使用不同的对局时限，引擎据此分配思考时间。例如，Bogey 是 1 分钟，Hand 是 8 分钟，Skeleton 是 47 分钟。这些都是整局时限，不是每步可以想那么久。</p>
+<p>所以，角色主要改变的是搜索预算，而不是引擎对棋局的理解。有些角色的实际设置甚至完全一样。</p>
+<h2 id="重写引擎">重写引擎</h2>
+<p>我让 Codex 分析游戏并编写可移植的 C 版本。我们用 <a href="https://binary.ninja/">Binary Ninja</a> 和反汇编分析 DOS 代码，再通过 <a href="https://dosbox-x.com/">DOSBox-X</a> 运行游戏，保存初始化后的内存。</p>
+<figure><img src="/posts/rebuilding-a-dos-xiangqi-engine/game-board.png"
+			alt="原版象棋对局界面，左侧上下分别是 Spoon Sa 和玩家的头像"><figcaption>
+			<p>与 Spoon Sa 对弈的原版界面。重写项目只包含引擎，没有重做这套图形界面。</p>
+		</figcaption>
+</figure>
+
+<p>引擎位于 <code>CMS1.EXE</code>，由游戏主程序 <code>CCH.EXE</code> 加载。它采用传统的象棋引擎设计：用 alpha-beta 搜索分析着法和应对，再用人工编写的规则与数值表评估局面。</p>
+<p>让重写版能下棋，只完成了一部分工作。它很快就在许多局面上与原版一致，但仍有不少不一致的情况。我想要的不只是一个下得还可以的引擎，而是尽量还原这个引擎本来的选择。</p>
+<p>这就需要恢复那些细节：准确的评估常量、着法顺序、重复局面的处理，以及搜索中的特殊分支。</p>
+<p>重写版大约有 <a href="https://github.com/xusheng6/cch-cms1/tree/main/port"><strong>3,400 行 C 代码</strong></a>。</p>
+<h2 id="建立反馈循环">建立反馈循环</h2>
+<p>与其反复告诉 Codex“再准确一点”，我更希望有一套能不断重复的测试流程。</p>
+<p>我们用 <a href="https://www.unicorn-engine.org/">Unicorn</a> 搭建了测试工具，直接执行原版的 16 位引擎代码，不再需要操作 DOS 图形界面。这样就可以：</p>
+<ol>
+<li>从合法的走子历史生成一大批局面。</li>
+<li>关闭开局库，让原版和重写版以相同深度搜索。</li>
+<li>比较它们选择的着法和给出的分数。</li>
+<li>分析差异、修复重写版，再生成新局面重复测试。</li>
+</ol>
+<p>我理解的 <strong>harness engineering</strong>，在这里就是给编程智能体配上一套能运行代码、衡量结果并提供明确反馈的工具。原程序就是参照，不必仅凭一段翻译出来的代码“看着没问题”来判断它是否正确。</p>
+<p>有些差异非常小。比如一次，两边选择了同一步棋，但原版给 157 分，重写版给 156 分。最后发现，原因是在应对炮将军时，搜索解将着法的顺序不同。修正顺序后，这个差异就消失了。</p>
+<p>测试越来越快，我也不断要求扩大样本。一批全部匹配，就再生成一批。</p>
+<p><img src="/posts/rebuilding-a-dos-xiangqi-engine/progress.svg" alt="测试用例数量随开发检查点增长，最终达到 408,708"></p>
+<p>图中展示的是测试集的增长，不是准确率。最终，重写版在 <strong>408,708 个用例</strong>上给出了与原版相同的着法和分数。大部分测试深度为 2–4 层，另有一小批更深的搜索。最后三批新生成的浅层测试各有 20,000 个用例，都没有发现差异。</p>
+<p>这不代表重写版在所有局面下都与原版一致。<a href="https://arxiv.org/abs/2507.07480">程序等价性在一般情况下是不可判定的</a>；对这个项目来说，持续测试后不再发现差异，已经让我有足够信心认为重写成功了。</p>
+<h2 id="棋力如何">棋力如何？</h2>
+<p>我也想大致测一下它的棋力。全力运行的 <a href="https://github.com/official-pikafish/Pikafish">Pikafish（皮卡鱼）</a> 太强，所以我们使用了带有棋力校准功能的版本：<code>UCI_LimitStrength</code> 开启降棋力模式，<code>UCI_Elo</code> 设置目标等级分。</p>
+<p>对阵设为 1400 的皮卡鱼，CCH 取得了 13 胜、11 负。据此估算，它在<strong>皮卡鱼的引擎等级分标尺上约为 1,429 分</strong>。样本不大，误差范围也很宽，不能当作正式的人类棋手等级分。这些比赛也发生在最后一轮还原修正之前。</p>
+<p>我们还测试了另一个开源象棋引擎 ElephantEye（象眼）。它远弱于全力运行的皮卡鱼，但仍明显强于 CCH：对阵我们扩大缓存后的实验版 CCH，它取得了 8–0 的成绩。<a href="https://github.com/xusheng6/cch-cms1/blob/main/VALIDATION.md#strength-is-a-different-question">验证说明</a>中记录了这些比较的局限。</p>
+<p>这并不影响我对这款游戏的感情。我想找回的是父亲和我都下过棋的老对手，而不是把它变成今天的冠军。</p>
+<p>现在，重写版可以原生运行，支持 UCI 和 UCCI，也能接入我的象棋界面 Pikaboard。<a href="https://github.com/xusheng6/cch-cms1">代码仓库</a>包含引擎和基本测试，不包含原游戏程序、开局库或美术资源，但保留了从原版恢复的数值表。相关来源和许可范围见 <a href="https://github.com/xusheng6/cch-cms1/blob/main/NOTICE.md">NOTICE</a>。</p>
+<p>这个和我同年出生的引擎，还可以继续下棋。</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://xusheng.dev/tags/xiangqi/">Xiangqi</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/dos/">DOS</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/software-preservation/">software preservation</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/reverse-engineering/">reverse engineering</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/game-ai/">game AI</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://xusheng.dev/categories/reverse-engineering/">Reverse Engineering</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        141 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-09-08 00:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2026</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
+            <span><a href="https://xusheng.dev/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.d76f43f920539c8ab3978e5b652202147a633a4ae085f3559a98449e7fda6fe5c9179516e0cbd3a3422ce557c5e24ee6bbfd9a3c08627a6eafc136fae7f03ff8.js" integrity="sha512-129D&#43;SBTnIqzl45bZSICFHpjOkrghfNVmphEnn/ab&#43;XJF5UW4MvTo0Is5VfF4k7mu/2aPAhiem6vwTb65/A/&#43;A=="></script>
+
+
+
+    </body>
+</html>
