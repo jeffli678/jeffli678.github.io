@@ -6,8 +6,174 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Tue, 08 Sep 2026 00:00:00 -0400</lastBuildDate>
+        <lastBuildDate>Wed, 16 Sep 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://xusheng.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Detecting Insecure Software Updates at Scale with LLM Agents</title>
+            <link>https://xusheng.dev/posts/reversing/detecting_insecure_software_updates_at_scale/main/</link>
+            <pubDate>Wed, 16 Sep 2026 00:00:00 +0000</pubDate>
+            <guid>https://xusheng.dev/posts/reversing/detecting_insecure_software_updates_at_scale/main/</guid>
+            <description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;I used a hierarchy of low-cost source-reading agents, stronger review agents, and manual verification to trace how &lt;strong&gt;3,006 open-source projects&lt;/strong&gt; handle software updates.&lt;/li&gt;
+&lt;li&gt;I found &lt;strong&gt;624 with an updater&lt;/strong&gt; that could download and then install, load, or execute code: 134 used a pinned signing key, 109 enforced a publisher identity, 332 relied only on HTTPS, and &lt;strong&gt;49 used broken transport security&lt;/strong&gt;. The other 2,382 had no updater or were notification-only.&lt;/li&gt;
+&lt;li&gt;In those &lt;strong&gt;49 projects&lt;/strong&gt;, a man-in-the-middle attacker could replace update payloads and achieve remote code execution on users&amp;rsquo; machines.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Browse the &lt;a href=&#34;https://xusheng6.github.io/update-security-study/&#34;&gt;dataset&lt;/a&gt; or inspect and correct it in the &lt;a href=&#34;https://github.com/xusheng6/update-security-study&#34;&gt;public repository&lt;/a&gt;.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<h2 id="tldr">TL;DR</h2>
+<ul>
+<li>I used a hierarchy of low-cost source-reading agents, stronger review agents, and manual verification to trace how <strong>3,006 open-source projects</strong> handle software updates.</li>
+<li>I found <strong>624 with an updater</strong> that could download and then install, load, or execute code: 134 used a pinned signing key, 109 enforced a publisher identity, 332 relied only on HTTPS, and <strong>49 used broken transport security</strong>. The other 2,382 had no updater or were notification-only.</li>
+<li>In those <strong>49 projects</strong>, a man-in-the-middle attacker could replace update payloads and achieve remote code execution on users&rsquo; machines.</li>
+</ul>
+<p>Browse the <a href="https://xusheng6.github.io/update-security-study/">dataset</a> or inspect and correct it in the <a href="https://github.com/xusheng6/update-security-study">public repository</a>.</p>
+<h2 id="why-update-security-matters">Why update security matters</h2>
+<p>An updater downloads code and places it inside a trusted application. It may launch an installer, replace an executable, load a plugin, or flash firmware. That makes it a natural supply-chain target.</p>
+<p><a href="https://www.cisa.gov/news-events/alerts/2020/12/13/active-exploitation-solarwinds-software">SolarWinds</a> distributed malicious code through trusted Orion updates. In 2023, attackers compromised the <a href="https://cloud.google.com/blog/topics/threat-intelligence/3cx-software-supply-chain-compromise">3CX</a> build environment after first compromising another software package. In 2025, attackers compromised infrastructure used by <a href="https://notepad-plus-plus.org/news/hijacked-incident-info-update/">Notepad++</a> and selectively redirected update requests toward malicious payloads.</p>
+<p>These incidents had different root causes, but they illustrate the same boundary: <strong>an application should not execute a downloaded file merely because it came from its usual server</strong>.</p>
+<p>HTTPS stops ordinary network interception when correctly validated. It does not help when the server, CDN account, storage bucket, or deployment credentials are compromised. Independent payload signatures can prevent that narrower—but important—class of attack.</p>
+<h2 id="what-i-scanned">What I scanned</h2>
+<p>For each project, I asked:</p>
+<ol>
+<li>Does it update itself or install executable content?</li>
+<li>If so, what authenticates the content before it runs?</li>
+</ol>
+<p>The agents followed the entire path:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>check version
+</span></span><span style="display:flex;"><span>  -&gt; obtain manifest
+</span></span><span style="display:flex;"><span>  -&gt; choose payload URL
+</span></span><span style="display:flex;"><span>  -&gt; download payload
+</span></span><span style="display:flex;"><span>  -&gt; verify or skip verification
+</span></span><span style="display:flex;"><span>  -&gt; install / execute / load / flash
+</span></span></code></pre></div><p>A <code>verifySignature()</code> function is not evidence by itself. It must check the relevant payload, use a trustworthy key, and stop installation on failure. Likewise, a SHA-256 value downloaded beside the payload from the same server is not independent authentication.</p>
+<h2 id="the-four-tiers">The four tiers</h2>
+<p>I used tiers because update security depends on the threat model. Tier C validates HTTPS and is not immediately vulnerable to an ordinary network attacker. But a high-security user may reject it because a compromised server or CDN can replace both the package and its hash.</p>
+<p>I also recorded the underlying facts—transport settings, signatures, trusted keys or publishers, and source locations—rather than only a verdict. Each tier summarizes the trust model of one update path, not the security of an entire project.</p>
+<h3 id="a--application-pinned-signing-key">A — application-pinned signing key</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>package, signature <span style="color:#f92672">=</span> download_update()
+</span></span><span style="display:flex;"><span>trusted_key <span style="color:#f92672">=</span> key_embedded_in_application
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> verify(trusted_key, package, signature):
+</span></span><span style="display:flex;"><span>    install(package)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    reject()
+</span></span></code></pre></div><p>Compromising the website, CDN, DNS path, or repository is insufficient without an accepted signing key. Sparkle’s EdDSA support is one example: the public key is embedded in the application while the private key should remain separate from the update server.</p>
+<h3 id="b--expected-operating-system-publisher">B — expected operating-system publisher</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>package <span style="color:#f92672">=</span> download_update()
+</span></span><span style="display:flex;"><span>signature <span style="color:#f92672">=</span> os_code_signature(package)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> signature<span style="color:#f92672">.</span>valid <span style="color:#f92672">and</span> signature<span style="color:#f92672">.</span>publisher <span style="color:#f92672">==</span> EXPECTED_PUBLISHER:
+</span></span><span style="display:flex;"><span>    install(package)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    reject()
+</span></span></code></pre></div><p>The updater enforces the expected Authenticode or platform-signing identity. Merely checking that <em>someone</em> signed the file is not enough.</p>
+<h3 id="c--validated-https-only">C — validated HTTPS only</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>manifest <span style="color:#f92672">=</span> https_get(server, verify_certificate<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>package <span style="color:#f92672">=</span> https_get(manifest<span style="color:#f92672">.</span>url, verify_certificate<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> sha256(package) <span style="color:#f92672">==</span> manifest<span style="color:#f92672">.</span>sha256:
+</span></span><span style="display:flex;"><span>    install(package)
+</span></span></code></pre></div><p>This blocks ordinary man-in-the-middle attacks. It does not survive compromise of the authorized distribution path because the attacker can replace both the package and its server-supplied hash.</p>
+<h3 id="d--broken-transport-no-independent-signature">D — broken transport, no independent signature</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>client<span style="color:#f92672">.</span>verify_peer <span style="color:#f92672">=</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>client<span style="color:#f92672">.</span>verify_hostname <span style="color:#f92672">=</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>manifest <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;https://updates.example/manifest.json&#34;</span>)
+</span></span><span style="display:flex;"><span>package <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span>get(manifest<span style="color:#f92672">.</span>url)
+</span></span><span style="display:flex;"><span>install(package)
+</span></span></code></pre></div><p>The older version is even simpler: download an executable over HTTP and run it. Either design may allow an on-path attacker to substitute code.</p>
+<p>Some projects used HTTPS but disabled certificate validation. Static analysis cannot tell us why. CA-bundle deployment problems, old certificate stores, and forgotten debugging workarounds are plausible explanations—not established causes.</p>
+<p>I used <strong>N</strong> when no in-app updater was found or the application only opened a download page. N does not mean every external package manager or manual installation route is secure.</p>
+<h2 id="results">Results</h2>
+<table>
+	<thead>
+			<tr>
+					<th>Label</th>
+					<th style="text-align: right">Entries</th>
+					<th style="text-align: right">All entries</th>
+					<th style="text-align: right">A–D only</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>A</strong> — pinned payload key</td>
+					<td style="text-align: right">134</td>
+					<td style="text-align: right">4.5%</td>
+					<td style="text-align: right">21.5%</td>
+			</tr>
+			<tr>
+					<td><strong>B</strong> — expected publisher</td>
+					<td style="text-align: right">109</td>
+					<td style="text-align: right">3.6%</td>
+					<td style="text-align: right">17.5%</td>
+			</tr>
+			<tr>
+					<td><strong>C</strong> — validated HTTPS only</td>
+					<td style="text-align: right">332</td>
+					<td style="text-align: right">11.0%</td>
+					<td style="text-align: right">53.2%</td>
+			</tr>
+			<tr>
+					<td><strong>D</strong> — broken transport</td>
+					<td style="text-align: right">49</td>
+					<td style="text-align: right">1.6%</td>
+					<td style="text-align: right">7.9%</td>
+			</tr>
+			<tr>
+					<td><strong>N</strong> — none or notification-only</td>
+					<td style="text-align: right">2,382</td>
+					<td style="text-align: right">79.2%</td>
+					<td style="text-align: right">—</td>
+			</tr>
+			<tr>
+					<td><strong>Total</strong></td>
+					<td style="text-align: right"><strong>3,006</strong></td>
+					<td style="text-align: right"><strong>100%</strong></td>
+					<td style="text-align: right">—</td>
+			</tr>
+	</tbody>
+</table>
+<p>The dataset contained <strong>624 entries (20.8%)</strong> with such an updater and <strong>2,382 (79.2%)</strong> with no updater or only update notifications. Among the 624 updater entries, Tier C was the largest group.</p>
+<p>These are <strong>dataset entries</strong>, not 3,006 verified unique applications. The corpus contains duplicate projects, platform-specific implementations, and separate application, plugin, firmware, and content channels. It was collected for breadth rather than statistical sampling. The percentages describe this dataset—not all open-source software.</p>
+<h2 id="the-agent-architecture">The agent architecture</h2>
+<p>I performed the core research from <strong>August 3–23, 2026</strong>. Claude Opus 4.8 was the strongest model I used in that Claude Code workflow, but using it to read every repository would quickly exhaust the five-hour and weekly limits. I worked with an Opus 4.8 coordinator, while many Claude Sonnet 5 agents handled the broad source review. Opus 4.8 review agents consolidated the reports and rechecked suspected Tier-D findings.</p>
+<p><img src="/posts/reversing/detecting_insecure_software_updates_at_scale/agent-architecture-v3.png" alt="The researcher works with an Opus 4.8 coordinator, Opus reviewers, and Sonnet 5 source-reading agents. Reviewers send Tier A, B, and C results directly to the dataset, while suspected Tier-D findings receive manual review before entering it."></p>
+<p>The bulk agents cloned source with shallow history, searched for updater code, and recorded the revision, platform, behavior, transport, verification, trust root, and <code>file:line</code> evidence. They were read-only: no builds, dependency installation, or execution of repository code.</p>
+<p>The final expansion from 2,008 to 3,006 entries took about <strong>15 hours</strong> and approximately <strong>8.5 million subagent tokens</strong>. Small, lower-cost contexts handled the repetitive reading; higher-cost reasoning was reserved for consolidation, disagreement, and findings with security impact.</p>
+<p>The initial pass produced <strong>73 Tier-D candidates</strong>. Suspected vulnerabilities entered a feedback loop: stronger agents re-read the source and tried to disprove them. That pass retained 51 as D, moved six to C, moved fourteen to N, and refuted two. Later corrections produced the published historical count of 49.</p>
+<p>This is why the hierarchy matters. Sonnet provided coverage; the adversarial Opus pass raised the bar before I called something broken. I then read all 49 final Tier-D findings myself before disclosure.</p>
+<h2 id="responsible-disclosure">Responsible disclosure</h2>
+<p>I tried to contact maintainers before publishing actionable Tier-D findings. The disclosure ledger records:</p>
+<ul>
+<li><strong>9</strong> GitHub Private Vulnerability Reports</li>
+<li><strong>16</strong> coordinated-disclosure emails</li>
+<li><strong>25</strong> projects contacted in total</li>
+</ul>
+<p>I could not find a usable private contact channel for the remaining 24 Tier-D projects. Of the 25 projects I contacted, two responded positively: <a href="https://github.com/FOGProject/fogproject">FOG Project</a> and <a href="https://github.com/SuiteCRM/SuiteCRM">SuiteCRM</a>. Both fixed the reported issues.</p>
+<p>Writing 25 fully bespoke reports is difficult to scale. My compromise was to write the important opening myself—what I found, why I was contacting the project, and what I wanted the maintainer to do—then attach AI-assisted technical detail with the relevant code path and suggested remediation. That is not ideal, and some maintainers understandably disliked receiving AI-generated material. But silently publishing the findings, or sending no notification at all, would have been worse. The better lesson is that automation must reduce clerical work without replacing evidence review, respectful communication, or accountability for the report.</p>
+<p>Some maintainers also challenged the threat model. Two recurring objections were that an attacker would need a fraudulent certificate for GitHub, or that an on-path attacker was unrealistic. Those objections do not apply when the updater itself disables certificate or hostname validation: the attacker can present an arbitrary certificate and does not need to break public-key cryptography or compromise a certificate authority.</p>
+<p>An active on-path position is a real prerequisite for many Tier-D findings, and it should be stated rather than exaggerated. Possible positions include a hostile network, compromised router, malicious proxy, or redirected traffic. Server or CDN compromise is a stronger and different position—the main concern for Tier C—but repeated supply-chain incidents show that distribution infrastructure cannot be assumed infallible.</p>
+<h2 id="where-i-want-the-ecosystem-to-move">Where I want the ecosystem to move</h2>
+<p>Tier D is the immediate problem: plaintext HTTP, disabled certificate checks, or ignored TLS errors should be fixed.</p>
+<p>Tier C is the larger supply-chain concern. TLS may work perfectly while a compromised server returns a malicious manifest and matching payload. The Notepad++ incident shows why distribution infrastructure should not be the only trust root.</p>
+<p>The practical direction is straightforward:</p>
+<ul>
+<li><strong>Tier D → C:</strong> require HTTPS, certificate validation, and hostname validation</li>
+<li><strong>Tier C → A/B:</strong> authenticate the payload independently of the download server</li>
+<li>Fail closed on missing, invalid, or unexpected signatures</li>
+<li>Keep signing keys separate from public distribution infrastructure</li>
+<li>Test corrupted, unsigned, wrongly signed, and rolled-back updates</li>
+</ul>
+<p>Projects do not need to invent this themselves. <a href="https://theupdateframework.io/">The Update Framework</a> provides role separation, threshold signatures, rotation, and defenses against rollback and freeze attacks. <a href="https://sparkle-project.org/">Sparkle</a> supports EdDSA-signed macOS updates with a public key embedded in the application and can also require signed feeds.</p>
+<p>The data remains public and correctable:</p>
+<ul>
+<li><a href="https://xusheng6.github.io/update-security-study/">Search all 3,006 analyses</a></li>
+<li><a href="https://github.com/xusheng6/update-security-study">Review the evidence</a></li>
+<li><a href="https://github.com/xusheng6/update-security-study/issues/new">Propose a correction</a></li>
+</ul>
+]]></content>
+        </item>
         
         <item>
             <title>Bringing Chinese Chess Master III: Jiangzu Back to Life</title>

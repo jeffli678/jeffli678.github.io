@@ -12,9 +12,16 @@
 			<copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
 		
 		
-			<lastBuildDate>Tue, 08 Sep 2026 00:00:00 -0400</lastBuildDate>
+			<lastBuildDate>Wed, 16 Sep 2026 00:00:00 +0000</lastBuildDate>
 		
 			<atom:link href="https://xusheng.dev/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Detecting Insecure Software Updates at Scale with LLM Agents</title>
+				<link>https://xusheng.dev/posts/reversing/detecting_insecure_software_updates_at_scale/main/</link>
+				<pubDate>Wed, 16 Sep 2026 00:00:00 +0000</pubDate>
+				<guid>https://xusheng.dev/posts/reversing/detecting_insecure_software_updates_at_scale/main/</guid>
+				<description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;I used a hierarchy of low-cost source-reading agents, stronger review agents, and manual verification to trace how &lt;strong&gt;3,006 open-source projects&lt;/strong&gt; handle software updates.&lt;/li&gt;&#xA;&lt;li&gt;I found &lt;strong&gt;624 with an updater&lt;/strong&gt; that could download and then install, load, or execute code: 134 used a pinned signing key, 109 enforced a publisher identity, 332 relied only on HTTPS, and &lt;strong&gt;49 used broken transport security&lt;/strong&gt;. The other 2,382 had no updater or were notification-only.&lt;/li&gt;&#xA;&lt;li&gt;In those &lt;strong&gt;49 projects&lt;/strong&gt;, a man-in-the-middle attacker could replace update payloads and achieve remote code execution on users&amp;rsquo; machines.&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Browse the &lt;a href=&#34;https://xusheng6.github.io/update-security-study/&#34;&gt;dataset&lt;/a&gt; or inspect and correct it in the &lt;a href=&#34;https://github.com/xusheng6/update-security-study&#34;&gt;public repository&lt;/a&gt;.&lt;/p&gt;</description>
+			</item>
 			<item>
 				<title>Bringing Chinese Chess Master III: Jiangzu Back to Life</title>
 				<link>https://xusheng.dev/posts/rebuilding-a-dos-xiangqi-engine/</link>
