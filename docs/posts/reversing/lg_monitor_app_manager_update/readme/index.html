@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="LG replaced its automatically installed Monitor App with an automatically executed consent dialog that offers to install the same app." />
+<meta name="keywords" content="Xusheng Li, Binary Ninja, reverse engineering, debugger, Time-Travel Debugging, TTD, security research, Vector 35, dotnet, eazfuscator, adware, windows-update" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://xusheng.dev/posts/reversing/lg_monitor_app_manager_update/readme/" />
+
+
+    <title>
+        
+            LG updated its adware :: Xusheng Li 
+        
+    </title>
+
+
+
+
+    
+
+
+
+<link rel="stylesheet" href="/main.de188b3201233c251f4fd6306dbd2cb41e408fb8846c09781b2925de7df5025c.css">
+
+
+
+
+
+
+
+	<meta itemprop="name" content="LG updated its adware">
+	<meta itemprop="description" content="LG replaced its automatically installed Monitor App with an automatically executed consent dialog that offers to install the same app.">
+	<meta itemprop="datePublished" content="2026-09-19T00:00:00+00:00">
+	<meta itemprop="dateModified" content="2026-09-19T00:00:00+00:00">
+	<meta itemprop="wordCount" content="694">
+	<meta itemprop="image" content="https://xusheng.dev/posts/reversing/lg_monitor_app_manager_update/imgs/consent-dialog.png">
+	<meta itemprop="keywords" content="Dotnet,Eazfuscator,Adware,Windows-Update">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://xusheng.dev/posts/reversing/lg_monitor_app_manager_update/imgs/consent-dialog.png">
+	<meta name="twitter:title" content="LG updated its adware">
+	<meta name="twitter:description" content="LG replaced its automatically installed Monitor App with an automatically executed consent dialog that offers to install the same app.">
+
+
+
+    <meta property="og:url" content="https://xusheng.dev/posts/reversing/lg_monitor_app_manager_update/readme/">
+	<meta property="og:site_name" content="Xusheng Li">
+	<meta property="og:title" content="LG updated its adware">
+	<meta property="og:description" content="LG replaced its automatically installed Monitor App with an automatically executed consent dialog that offers to install the same app.">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-09-19T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-09-19T00:00:00+00:00">
+		<meta property="article:tag" content="Dotnet">
+		<meta property="article:tag" content="Eazfuscator">
+		<meta property="article:tag" content="Adware">
+		<meta property="article:tag" content="Windows-Update">
+		<meta property="og:image" content="https://xusheng.dev/posts/reversing/lg_monitor_app_manager_update/imgs/consent-dialog.png">
+
+
+
+
+    <meta property="article:section" content="Reversing" />
+
+
+
+    <meta property="article:published_time" content="2026-09-19 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">Xusheng</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="/posts">Blog</a></li><li><a href="/contact/">Contact</a></li><li><a href="/cv.pdf">CV</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        4 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://xusheng.dev/posts/reversing/lg_monitor_app_manager_update/readme/">LG updated its adware</a>
+      </h1>
+
+      
+        <div class="post-excerpt">LG replaced its automatically installed Monitor App with an automatically executed consent dialog that offers to install the same app.</div>
+      
+
+      
+
+      <div class="post-content">
+        <p>LG has been under fire for what its devices do after people buy them. <a href="https://www.youtube.com/watch?v=Q9uefFYe6bM">Gamers Nexus found</a> that some LG monitors caused Windows to install an LG app that promoted more software, including McAfee. More recently, its investigation <a href="https://www.youtube.com/watch?v=6IFVTcM28KA">216,000,000 Spy TVs: The LG Smart TV Problem</a> examined LG&rsquo;s Automatic Content Recognition and other privacy concerns. Different products, same question: <strong>who decides what a device does after it enters your home?</strong></p>
+<p>I <a href="/posts/reversing/lg_monitor_app_manager/readme/">previously reversed LG&rsquo;s Monitor App Installer</a> and the driver that installed it. Today, Windows Update offered a new version of that SoftwareComponent. Given the recent criticism, I wanted to know what LG had changed.</p>
+<p><img src="../imgs/windows-update.png" alt="LG Electronics SoftwareComponent update"></p>
+<p><code>LG Electronics Inc. SoftwareComponent Driver Update (2.0.2026.810)</code></p>
+<h2 id="inside-the-update">Inside the update</h2>
+<p>I exported version <code>2.0.2026.810</code> from the Driver Store. It contains three files:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>LGMonitorAppSoftwareComponent.cat       11.2 KB
+</span></span><span style="display:flex;"><span>lgmonitorappsoftwarecomponent.inf        1.2 KB
+</span></span><span style="display:flex;"><span>LGMonitorInstallManager.exe              2.2 MB
+</span></span></code></pre></div><p>Before the update, the old INF used a Store-app link:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#66d9ef">[LG_Monitor_Control_Install]</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareType</span><span style="color:#f92672">=</span><span style="color:#e6db74">2</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareID</span><span style="color:#f92672">=</span><span style="color:#e6db74">pfn://LGElectronics.LGMonitorApp_cfnzzhwkr8z5w</span>
+</span></span></code></pre></div><p><code>SoftwareType=2</code> tells Windows to install that Store package. This is how the old app arrived without a prompt.</p>
+<p>The new INF removes that section and replaces it with this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#66d9ef">[LGMonitor_Install.Software]</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">AddSoftware</span><span style="color:#f92672">=</span><span style="color:#e6db74">LGMonitorInstallManager,,LG_Monitor_InstallManager_Install</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">[LG_Monitor_InstallManager_Install]</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareType</span>      <span style="color:#f92672">=</span> <span style="color:#e6db74">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareBinary</span>    <span style="color:#f92672">=</span> <span style="color:#e6db74">%13%\LGMonitorInstallManager.exe</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareArguments</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">/driverflow,/campaign:1,/delay:60,&lt;&lt;DeviceInstanceID&gt;&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareVersion</span>   <span style="color:#f92672">=</span> <span style="color:#e6db74">1.1.0.0</span>
+</span></span></code></pre></div><p><code>SoftwareType=1</code> instead tells Windows to run a bundled Win32 executable. <code>%13%</code> is the Driver Store. Device Setup Manager event 165 recorded the exact launch:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>&#34;C:\Windows\System32\DriverStore\FileRepository\
+</span></span><span style="display:flex;"><span>lgmonitorappsoftwarecomponent.inf_amd64_46db1b4b0dcddd74\
+</span></span><span style="display:flex;"><span>LGMonitorInstallManager.exe&#34;
+</span></span><span style="display:flex;"><span> /driverflow
+</span></span><span style="display:flex;"><span> /campaign:1
+</span></span><span style="display:flex;"><span> /delay:60
+</span></span><span style="display:flex;"><span> SWD\DRIVERENUM\{3846ad8c-dd27-433d-ab89-453654cd542a}#LGMonitorApp&amp;6&amp;4c65595&amp;0
+</span></span></code></pre></div><p>The old driver automatically installed a Store app. The new driver automatically runs an EXE.</p>
+<h2 id="what-the-new-program-does">What the new program does</h2>
+<p><code>LGMonitorInstallManager.exe</code> is a .NET Framework WinForms application, version <code>2.0.2026.805</code>. It is obfuscated with <strong>Eazfuscator.NET</strong>: names are scrambled, strings encrypted, and anti-disassembly and anti-tamper protections enabled. That is an odd amount of protection for a consent dialog whose purpose is supposedly transparency.</p>
+<p>I used <a href="https://github.com/holly-hacker/EazFixer">EazFixer</a> to recover its strings, removed <code>SuppressIldasmAttribute</code> from an analysis copy, and disassembled the IL.</p>
+<p>Windows launches <code>/driverflow</code> elevated during device installation. It exits if:</p>
+<ol>
+<li>an older LG SoftwareComponent package with the previous <code>pfn://</code> auto-install directive is still present;</li>
+<li>the user has already given a final answer for the current campaign.</li>
+</ol>
+<p>Otherwise it:</p>
+<ol>
+<li>copies itself from the Driver Store to <code>C:\Program Files\LG Electronics\LGMonitorInstallManager</code>;</li>
+<li>creates a machine-wide <code>Run</code> entry so the question survives future logins;</li>
+<li>creates an Add/Remove Programs entry named <strong>LG Monitor Software Notice</strong>;</li>
+<li>creates <code>state.ini</code> under <code>C:\ProgramData\LG Electronics\LGMonitorInstallManager</code>;</li>
+<li>starts a second copy in the active user&rsquo;s session with <code>/install /campaign:1 /delay:60</code>;</li>
+<li>creates a cleanup task that eventually removes the copied EXE, Run entry, uninstall entry, state, and task.</li>
+</ol>
+<p>The user-session process waits <strong>60 seconds</strong>, checks again, and displays this:</p>
+<p><img src="../imgs/consent-dialog.png" alt="LG Monitor App Installer consent dialog"></p>
+<h2 id="when-the-prompt-appears-and-what-install-does">When the prompt appears and what Install does</h2>
+<p>The prompt is suppressed if the old LG driver is still present, the Store app is already installed, the user has already answered the current campaign, or another copy is running. This is why it initially did not appear on my PC: the old, outranked driver package was still in the Driver Store.</p>
+<p>Clicking <strong>Install</strong> removes the temporary Run entry and starts this hidden child process:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>%LOCALAPPDATA%\Microsoft\WindowsApps\winget.exe install \
+</span></span><span style="display:flex;"><span>  --id 9PM9N6F47JB8 \
+</span></span><span style="display:flex;"><span>  --source msstore \
+</span></span><span style="display:flex;"><span>  --accept-package-agreements \
+</span></span><span style="display:flex;"><span>  --accept-source-agreements \
+</span></span><span style="display:flex;"><span>  --silent
+</span></span></code></pre></div><p>Store product <code>9PM9N6F47JB8</code> resolves to:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Package: LGElectronics.LGMonitorApp
+</span></span><span style="display:flex;"><span>PFN:     LGElectronics.LGMonitorApp_cfnzzhwkr8z5w
+</span></span><span style="display:flex;"><span>Version: 1.2606.1601.0
+</span></span><span style="display:flex;"><span>Arch:    x86
+</span></span></code></pre></div><p>That is the <strong>same app the previous driver installed directly</strong>. LG has simply inserted a consent dialog before it.</p>
+<h2 id="code-and-consent">Code and consent</h2>
+<p>LG seems to misunderstand the consent problem. Its earlier defense emphasized that McAfee was optional. Strictly speaking, that was true: the Monitor App installed itself silently, then asked about the next thing.</p>
+<p>The new design moves that question one step earlier:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Old:
+</span></span><span style="display:flex;"><span>driver -&gt; automatically install LG Monitor App -&gt; ask about more software
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>New:
+</span></span><span style="display:flex;"><span>driver -&gt; automatically execute LG consent app -&gt; ask to install LG Monitor App
+</span></span></code></pre></div><p>This is an improvement: the full Store app is no longer installed before consent. But connecting a monitor still lets LG run an elevated program that copies itself into Program Files, creates persistence, and asks a marketing question. The question is more polite; the code that asks it still ran without asking.</p>
+<p>A monitor should not need to run a two-megabyte obfuscated .NET program to ask whether I want another program. LG can simply link to its software and let me choose to get it.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://xusheng.dev/tags/dotnet/">dotnet</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/eazfuscator/">eazfuscator</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/adware/">adware</a></span>
+        <span class="tag"><a href="https://xusheng.dev/tags/windows-update/">windows-update</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://xusheng.dev/categories/reversing/">Reversing</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        694 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-09-18 20:00
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+      <div class="pagination">
+        <div class="pagination__title">
+          <span class="pagination__title-h"></span>
+          <hr />
+        </div>
+
+        <div class="pagination__buttons">
+          
+
+          
+            <span class="button next">
+              <a href="https://xusheng.dev/posts/reversing/detecting_insecure_software_updates_at_scale/main/">
+                <span class="button__text">Detecting Insecure Software Updates at Scale with LLM Agents</span>
+                <span class="button__icon">→</span>
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2026</span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
+            <span><a href="https://xusheng.dev/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+          </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="/bundle.min.d76f43f920539c8ab3978e5b652202147a633a4ae085f3559a98449e7fda6fe5c9179516e0cbd3a3422ce557c5e24ee6bbfd9a3c08627a6eafc136fae7f03ff8.js" integrity="sha512-129D&#43;SBTnIqzl45bZSICFHpjOkrghfNVmphEnn/ab&#43;XJF5UW4MvTo0Is5VfF4k7mu/2aPAhiem6vwTb65/A/&#43;A=="></script>
+
+
+
+    </body>
+</html>

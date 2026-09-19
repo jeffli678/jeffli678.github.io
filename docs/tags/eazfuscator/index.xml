@@ -12,9 +12,16 @@
 			<copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
 		
 		
-			<lastBuildDate>Sat, 18 Jul 2026 00:00:00 +0000</lastBuildDate>
+			<lastBuildDate>Sat, 19 Sep 2026 00:00:00 +0000</lastBuildDate>
 		
 			<atom:link href="https://xusheng.dev/tags/eazfuscator/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>LG updated its adware</title>
+				<link>https://xusheng.dev/posts/reversing/lg_monitor_app_manager_update/readme/</link>
+				<pubDate>Sat, 19 Sep 2026 00:00:00 +0000</pubDate>
+				<guid>https://xusheng.dev/posts/reversing/lg_monitor_app_manager_update/readme/</guid>
+				<description>&lt;p&gt;LG has been under fire for what its devices do after people buy them. &lt;a href=&#34;https://www.youtube.com/watch?v=Q9uefFYe6bM&#34;&gt;Gamers Nexus found&lt;/a&gt; that some LG monitors caused Windows to install an LG app that promoted more software, including McAfee. More recently, its investigation &lt;a href=&#34;https://www.youtube.com/watch?v=6IFVTcM28KA&#34;&gt;216,000,000 Spy TVs: The LG Smart TV Problem&lt;/a&gt; examined LG&amp;rsquo;s Automatic Content Recognition and other privacy concerns. Different products, same question: &lt;strong&gt;who decides what a device does after it enters your home?&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;I &lt;a href=&#34;https://xusheng.dev/posts/reversing/lg_monitor_app_manager/readme/&#34;&gt;previously reversed LG&amp;rsquo;s Monitor App Installer&lt;/a&gt; and the driver that installed it. Today, Windows Update offered a new version of that SoftwareComponent. Given the recent criticism, I wanted to know what LG had changed.&lt;/p&gt;</description>
+			</item>
 			<item>
 				<title>What is LG Monitor App Manager actually doing?</title>
 				<link>https://xusheng.dev/posts/reversing/lg_monitor_app_manager/readme/</link>

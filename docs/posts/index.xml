@@ -6,8 +6,94 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Wed, 16 Sep 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Sat, 19 Sep 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://xusheng.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>LG updated its adware</title>
+            <link>https://xusheng.dev/posts/reversing/lg_monitor_app_manager_update/readme/</link>
+            <pubDate>Sat, 19 Sep 2026 00:00:00 +0000</pubDate>
+            <guid>https://xusheng.dev/posts/reversing/lg_monitor_app_manager_update/readme/</guid>
+            <description>&lt;p&gt;LG has been under fire for what its devices do after people buy them. &lt;a href=&#34;https://www.youtube.com/watch?v=Q9uefFYe6bM&#34;&gt;Gamers Nexus found&lt;/a&gt; that some LG monitors caused Windows to install an LG app that promoted more software, including McAfee. More recently, its investigation &lt;a href=&#34;https://www.youtube.com/watch?v=6IFVTcM28KA&#34;&gt;216,000,000 Spy TVs: The LG Smart TV Problem&lt;/a&gt; examined LG&amp;rsquo;s Automatic Content Recognition and other privacy concerns. Different products, same question: &lt;strong&gt;who decides what a device does after it enters your home?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;I &lt;a href=&#34;https://xusheng.dev/posts/reversing/lg_monitor_app_manager/readme/&#34;&gt;previously reversed LG&amp;rsquo;s Monitor App Installer&lt;/a&gt; and the driver that installed it. Today, Windows Update offered a new version of that SoftwareComponent. Given the recent criticism, I wanted to know what LG had changed.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>LG has been under fire for what its devices do after people buy them. <a href="https://www.youtube.com/watch?v=Q9uefFYe6bM">Gamers Nexus found</a> that some LG monitors caused Windows to install an LG app that promoted more software, including McAfee. More recently, its investigation <a href="https://www.youtube.com/watch?v=6IFVTcM28KA">216,000,000 Spy TVs: The LG Smart TV Problem</a> examined LG&rsquo;s Automatic Content Recognition and other privacy concerns. Different products, same question: <strong>who decides what a device does after it enters your home?</strong></p>
+<p>I <a href="/posts/reversing/lg_monitor_app_manager/readme/">previously reversed LG&rsquo;s Monitor App Installer</a> and the driver that installed it. Today, Windows Update offered a new version of that SoftwareComponent. Given the recent criticism, I wanted to know what LG had changed.</p>
+<p><img src="../imgs/windows-update.png" alt="LG Electronics SoftwareComponent update"></p>
+<p><code>LG Electronics Inc. SoftwareComponent Driver Update (2.0.2026.810)</code></p>
+<h2 id="inside-the-update">Inside the update</h2>
+<p>I exported version <code>2.0.2026.810</code> from the Driver Store. It contains three files:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>LGMonitorAppSoftwareComponent.cat       11.2 KB
+</span></span><span style="display:flex;"><span>lgmonitorappsoftwarecomponent.inf        1.2 KB
+</span></span><span style="display:flex;"><span>LGMonitorInstallManager.exe              2.2 MB
+</span></span></code></pre></div><p>Before the update, the old INF used a Store-app link:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#66d9ef">[LG_Monitor_Control_Install]</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareType</span><span style="color:#f92672">=</span><span style="color:#e6db74">2</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareID</span><span style="color:#f92672">=</span><span style="color:#e6db74">pfn://LGElectronics.LGMonitorApp_cfnzzhwkr8z5w</span>
+</span></span></code></pre></div><p><code>SoftwareType=2</code> tells Windows to install that Store package. This is how the old app arrived without a prompt.</p>
+<p>The new INF removes that section and replaces it with this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#66d9ef">[LGMonitor_Install.Software]</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">AddSoftware</span><span style="color:#f92672">=</span><span style="color:#e6db74">LGMonitorInstallManager,,LG_Monitor_InstallManager_Install</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">[LG_Monitor_InstallManager_Install]</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareType</span>      <span style="color:#f92672">=</span> <span style="color:#e6db74">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareBinary</span>    <span style="color:#f92672">=</span> <span style="color:#e6db74">%13%\LGMonitorInstallManager.exe</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareArguments</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">/driverflow,/campaign:1,/delay:60,&lt;&lt;DeviceInstanceID&gt;&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">SoftwareVersion</span>   <span style="color:#f92672">=</span> <span style="color:#e6db74">1.1.0.0</span>
+</span></span></code></pre></div><p><code>SoftwareType=1</code> instead tells Windows to run a bundled Win32 executable. <code>%13%</code> is the Driver Store. Device Setup Manager event 165 recorded the exact launch:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>&#34;C:\Windows\System32\DriverStore\FileRepository\
+</span></span><span style="display:flex;"><span>lgmonitorappsoftwarecomponent.inf_amd64_46db1b4b0dcddd74\
+</span></span><span style="display:flex;"><span>LGMonitorInstallManager.exe&#34;
+</span></span><span style="display:flex;"><span> /driverflow
+</span></span><span style="display:flex;"><span> /campaign:1
+</span></span><span style="display:flex;"><span> /delay:60
+</span></span><span style="display:flex;"><span> SWD\DRIVERENUM\{3846ad8c-dd27-433d-ab89-453654cd542a}#LGMonitorApp&amp;6&amp;4c65595&amp;0
+</span></span></code></pre></div><p>The old driver automatically installed a Store app. The new driver automatically runs an EXE.</p>
+<h2 id="what-the-new-program-does">What the new program does</h2>
+<p><code>LGMonitorInstallManager.exe</code> is a .NET Framework WinForms application, version <code>2.0.2026.805</code>. It is obfuscated with <strong>Eazfuscator.NET</strong>: names are scrambled, strings encrypted, and anti-disassembly and anti-tamper protections enabled. That is an odd amount of protection for a consent dialog whose purpose is supposedly transparency.</p>
+<p>I used <a href="https://github.com/holly-hacker/EazFixer">EazFixer</a> to recover its strings, removed <code>SuppressIldasmAttribute</code> from an analysis copy, and disassembled the IL.</p>
+<p>Windows launches <code>/driverflow</code> elevated during device installation. It exits if:</p>
+<ol>
+<li>an older LG SoftwareComponent package with the previous <code>pfn://</code> auto-install directive is still present;</li>
+<li>the user has already given a final answer for the current campaign.</li>
+</ol>
+<p>Otherwise it:</p>
+<ol>
+<li>copies itself from the Driver Store to <code>C:\Program Files\LG Electronics\LGMonitorInstallManager</code>;</li>
+<li>creates a machine-wide <code>Run</code> entry so the question survives future logins;</li>
+<li>creates an Add/Remove Programs entry named <strong>LG Monitor Software Notice</strong>;</li>
+<li>creates <code>state.ini</code> under <code>C:\ProgramData\LG Electronics\LGMonitorInstallManager</code>;</li>
+<li>starts a second copy in the active user&rsquo;s session with <code>/install /campaign:1 /delay:60</code>;</li>
+<li>creates a cleanup task that eventually removes the copied EXE, Run entry, uninstall entry, state, and task.</li>
+</ol>
+<p>The user-session process waits <strong>60 seconds</strong>, checks again, and displays this:</p>
+<p><img src="../imgs/consent-dialog.png" alt="LG Monitor App Installer consent dialog"></p>
+<h2 id="when-the-prompt-appears-and-what-install-does">When the prompt appears and what Install does</h2>
+<p>The prompt is suppressed if the old LG driver is still present, the Store app is already installed, the user has already answered the current campaign, or another copy is running. This is why it initially did not appear on my PC: the old, outranked driver package was still in the Driver Store.</p>
+<p>Clicking <strong>Install</strong> removes the temporary Run entry and starts this hidden child process:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>%LOCALAPPDATA%\Microsoft\WindowsApps\winget.exe install \
+</span></span><span style="display:flex;"><span>  --id 9PM9N6F47JB8 \
+</span></span><span style="display:flex;"><span>  --source msstore \
+</span></span><span style="display:flex;"><span>  --accept-package-agreements \
+</span></span><span style="display:flex;"><span>  --accept-source-agreements \
+</span></span><span style="display:flex;"><span>  --silent
+</span></span></code></pre></div><p>Store product <code>9PM9N6F47JB8</code> resolves to:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Package: LGElectronics.LGMonitorApp
+</span></span><span style="display:flex;"><span>PFN:     LGElectronics.LGMonitorApp_cfnzzhwkr8z5w
+</span></span><span style="display:flex;"><span>Version: 1.2606.1601.0
+</span></span><span style="display:flex;"><span>Arch:    x86
+</span></span></code></pre></div><p>That is the <strong>same app the previous driver installed directly</strong>. LG has simply inserted a consent dialog before it.</p>
+<h2 id="code-and-consent">Code and consent</h2>
+<p>LG seems to misunderstand the consent problem. Its earlier defense emphasized that McAfee was optional. Strictly speaking, that was true: the Monitor App installed itself silently, then asked about the next thing.</p>
+<p>The new design moves that question one step earlier:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Old:
+</span></span><span style="display:flex;"><span>driver -&gt; automatically install LG Monitor App -&gt; ask about more software
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>New:
+</span></span><span style="display:flex;"><span>driver -&gt; automatically execute LG consent app -&gt; ask to install LG Monitor App
+</span></span></code></pre></div><p>This is an improvement: the full Store app is no longer installed before consent. But connecting a monitor still lets LG run an elevated program that copies itself into Program Files, creates persistence, and asks a marketing question. The question is more polite; the code that asks it still ran without asking.</p>
+<p>A monitor should not need to run a two-megabyte obfuscated .NET program to ask whether I want another program. LG can simply link to its software and let me choose to get it.</p>
+]]></content>
+        </item>
         
         <item>
             <title>Detecting Insecure Software Updates at Scale with LLM Agents</title>
