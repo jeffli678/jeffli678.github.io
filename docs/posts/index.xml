@@ -19,7 +19,6 @@
             <content type="html"><![CDATA[<p>LG has been under fire for what its devices do after people buy them. <a href="https://www.youtube.com/watch?v=Q9uefFYe6bM">Gamers Nexus found</a> that some LG monitors caused Windows to install an LG app that promoted more software, including McAfee. More recently, its investigation <a href="https://www.youtube.com/watch?v=6IFVTcM28KA">216,000,000 Spy TVs: The LG Smart TV Problem</a> examined LG&rsquo;s Automatic Content Recognition and other privacy concerns. Different products, same question: <strong>who decides what a device does after it enters your home?</strong></p>
 <p>I <a href="/posts/reversing/lg_monitor_app_manager/readme/">previously reversed LG&rsquo;s Monitor App Installer</a> and the driver that installed it. Today, Windows Update offered a new version of that SoftwareComponent. Given the recent criticism, I wanted to know what LG had changed.</p>
 <p><img src="../imgs/windows-update.png" alt="LG Electronics SoftwareComponent update"></p>
-<p><code>LG Electronics Inc. SoftwareComponent Driver Update (2.0.2026.810)</code></p>
 <h2 id="inside-the-update">Inside the update</h2>
 <p>I exported version <code>2.0.2026.810</code> from the Driver Store. It contains three files:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>LGMonitorAppSoftwareComponent.cat       11.2 KB

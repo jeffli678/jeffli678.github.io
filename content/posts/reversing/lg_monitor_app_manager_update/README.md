@@ -21,8 +21,6 @@ I [previously reversed LG's Monitor App Installer](/posts/reversing/lg_monitor_a
 
 ![LG Electronics SoftwareComponent update](../imgs/windows-update.png)
 
-`LG Electronics Inc. SoftwareComponent Driver Update (2.0.2026.810)`
-
 ## Inside the update
 
 I exported version `2.0.2026.810` from the Driver Store. It contains three files:
