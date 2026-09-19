@@ -1,7 +1,7 @@
 ---
 layout: post
 status: publish
-title: "LG Updated Its Adware"
+title: 'LG Updated Its “Adware”'
 date: '2026-09-19'
 description: LG replaced its automatically installed Monitor App with an automatically executed consent dialog that offers to install the same app.
 images:
