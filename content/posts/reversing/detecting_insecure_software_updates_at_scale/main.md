@@ -24,9 +24,9 @@ An updater downloads code and places it inside a trusted application. It may lau
 
 [SolarWinds](https://www.cisa.gov/news-events/alerts/2020/12/13/active-exploitation-solarwinds-software) distributed malicious code through trusted Orion updates. In 2023, attackers compromised the [3CX](https://cloud.google.com/blog/topics/threat-intelligence/3cx-software-supply-chain-compromise) build environment after first compromising another software package. In 2025, attackers compromised infrastructure used by [Notepad++](https://notepad-plus-plus.org/news/hijacked-incident-info-update/) and selectively redirected update requests toward malicious payloads.
 
-These incidents had different root causes, but they illustrate the same boundary: **an application should not execute a downloaded file merely because it came from its usual server**.
+These incidents had different root causes, but they point to the same trust boundary: **an application should not execute a downloaded file merely because it came from its usual server**. Properly validated HTTPS blocks ordinary network interception, but it does not help when the server, CDN account, storage bucket, or deployment credentials are compromised. Independent payload signatures can protect against that narrower—but important—class of attack.
 
-HTTPS stops ordinary network interception when correctly validated. It does not help when the server, CDN account, storage bucket, or deployment credentials are compromised. Independent payload signatures can prevent that narrower—but important—class of attack.
+This problem is not new. A [2006 HotSec study](https://www.usenix.org/legacy/event/hotsec06/tech/full_papers/bellissimo/bellissimo.pdf) examined ten deployed update systems and found several vulnerable to weak man-in-the-middle attacks. Two decades later, [UpdSight](https://www.usenix.org/conference/usenixsecurity26/presentation/wan) tested 85 desktop applications and found 22 exploitable update vulnerabilities. Those studies performed deeper hands-on testing of smaller samples. My goal was different: use agent-assisted source review to scale the initial survey to 3,006 open-source projects, then manually review the 49 Tier-D findings.
 
 ## What I scanned
 
