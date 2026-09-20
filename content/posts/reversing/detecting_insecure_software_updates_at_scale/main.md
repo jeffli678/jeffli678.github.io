@@ -148,9 +148,7 @@ I tried to contact maintainers before publishing actionable Tier-D findings. The
 - **16** coordinated-disclosure emails
 - **25** projects contacted in total
 
-I could not find a usable private contact channel for the remaining 24 Tier-D projects. Of the 25 projects I contacted, two responded positively. [FOG Project](https://github.com/FOGProject/fogproject) [fixed its updater](https://github.com/FOGProject/fogproject/commit/a92d061e0790a40a6edf6ed80fc5852b9e0cef07) by moving it to GitHub and enforcing HTTPS end to end. [SuiteCRM](https://github.com/SuiteCRM/SuiteCRM) acknowledged the report and said it would fix the issue, but I could not find a public fixing commit as of September 20, 2026.
-
-Separately, [Cemu](https://github.com/cemu-project/Cemu) [fixed its updater](https://github.com/cemu-project/Cemu/commit/a1cd67ca111437db680fa3560a19a8a34d085926) with normal TLS verification, signed update metadata, and a SHA-256 payload check.
+I could not find a usable private contact channel for the remaining 24 Tier-D projects. Three projects responded positively: [FOG Project](https://github.com/FOGProject/fogproject), [SuiteCRM](https://github.com/SuiteCRM/SuiteCRM), and [Cemu](https://github.com/cemu-project/Cemu). FOG Project ([fix](https://github.com/FOGProject/fogproject/commit/a92d061e0790a40a6edf6ed80fc5852b9e0cef07)) and Cemu ([fix](https://github.com/cemu-project/Cemu/commit/a1cd67ca111437db680fa3560a19a8a34d085926)) fixed the reported issues; SuiteCRM's fix is on the way.
 
 Writing 25 fully bespoke reports is difficult to scale. My compromise was to write the important opening myself—what I found, why I was contacting the project, and what I wanted the maintainer to do—then attach AI-assisted technical detail with the relevant code path and suggested remediation. That is not ideal, and some maintainers understandably disliked receiving AI-generated material. But silently publishing the findings, or sending no notification at all, would have been worse. The better lesson is that automation must reduce clerical work without replacing evidence review, respectful communication, or accountability for the report.
 
