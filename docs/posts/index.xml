@@ -6,8 +6,128 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Sat, 19 Sep 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Mon, 16 Nov 2026 00:00:00 -0500</lastBuildDate>
         <atom:link href="https://xusheng.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Windows 11 Is Collecting Data on Which Coding Agents You Use</title>
+            <link>https://xusheng.dev/posts/windows-coding-agent-telemetry/</link>
+            <pubDate>Mon, 16 Nov 2026 00:00:00 -0500</pubDate>
+            <guid>https://xusheng.dev/posts/windows-coding-agent-telemetry/</guid>
+            <description>&lt;p&gt;I recently asked AI to help me look through the latest Windows binaries for undocumented features and functionality. Among the leads it turned up, one list immediately caught my attention: &lt;code&gt;codex.exe&lt;/code&gt;, &lt;code&gt;claude.exe&lt;/code&gt;, &lt;code&gt;copilot.exe&lt;/code&gt;, &lt;code&gt;cursor.exe&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Why would a Windows system DLL need a list of coding agents?&lt;/p&gt;
+&lt;p&gt;The names were in &lt;code&gt;MissionControlAggregator.dll&lt;/code&gt;. I asked the agent to follow the references and dig into what the DLL actually does. That led from a handful of string comparisons to a running Windows component that records which coding agents and developer tools have been used, saves that information locally, and reports it to Windows Diagnostics. And unless you have opted out of the &amp;ldquo;optional&amp;rdquo; diagnostic data (which is enabled by default), the data is uploaded to Microsoft.&lt;/p&gt;</description>
+            <content type="html"><![CDATA[<p>I recently asked AI to help me look through the latest Windows binaries for undocumented features and functionality. Among the leads it turned up, one list immediately caught my attention: <code>codex.exe</code>, <code>claude.exe</code>, <code>copilot.exe</code>, <code>cursor.exe</code>.</p>
+<p>Why would a Windows system DLL need a list of coding agents?</p>
+<p>The names were in <code>MissionControlAggregator.dll</code>. I asked the agent to follow the references and dig into what the DLL actually does. That led from a handful of string comparisons to a running Windows component that records which coding agents and developer tools have been used, saves that information locally, and reports it to Windows Diagnostics. And unless you have opted out of the &ldquo;optional&rdquo; diagnostic data (which is enabled by default), the data is uploaded to Microsoft.</p>
+<p>I <a href="https://x.com/CrackmesOne/status/2122147747390468384">shared the initial finding on X</a>. This post includes more details about the investigation behind it.</p>
+<h2 id="following-the-names">Following the names</h2>
+<p>Opening the DLL in <a href="https://binary.ninja/">Binary Ninja</a> made the first lead easy to see. These were explicit executable names embedded in a Windows component:</p>
+<p><img src="/posts/windows-coding-agent-telemetry/agent-names.jpeg" alt="Binary Ninja showing coding-agent executable names embedded in MissionControlAggregator.dll"></p>
+<p>Following the references showed that the names were used in comparisons. There are four CLI-agent slots checking <code>copilot.exe</code>, <code>claude.exe</code>, <code>codex.exe</code>, and <code>agy.exe</code>, with extensionless equivalents on the WSL route. Five desktop-agent slots check <code>github.exe</code>, <code>claude.exe</code>, <code>codex.exe</code>, <code>cursor.exe</code>, and <code>antigravity.exe</code>.</p>
+<p>Here is one of the comparisons against <code>codex.exe</code>:</p>
+<p><img src="/posts/windows-coding-agent-telemetry/codex-matcher.jpeg" alt="Binary Ninja showing an exact comparison with codex.exe inside a matcher"></p>
+<p>The compiler-generated C++ names are unwieldy, so I will call these functions <strong>executable-name matchers</strong>. For reference, one related matcher is <code>std::_Func_impl_no_alloc&lt;&lt;lambda_340dfe7e962ab225b6ac33bc664bd54f&gt;, bool, std::basic_string_view&lt;wchar_t, std::char_traits&lt;wchar_t&gt;&gt; const&amp;, Microsoft::Diagnostics::MissionControlAggregator::Utils::AppType&gt;::_Do_call</code>. The screenshot shows another lambda instantiation performing the same kind of name comparison.</p>
+<p>The feature guarding the new agent checks has a particularly direct name: <code>CLICodingAgentUsage</code>, feature ID <code>62580080</code>.</p>
+<p>And the list extends beyond AI agents. The same component checks for <code>node.exe</code>, <code>python.exe</code>, <code>dotnet.exe</code>, <code>gcc.exe</code>, <code>clang.exe</code>, <code>gdb.exe</code>, <code>javac.exe</code>, <code>devenv.exe</code>, and <code>code.exe</code>, among others. Those checks feed broader developer-tool categories.</p>
+<h2 id="where-does-the-dll-get-this-information">Where does the DLL get this information?</h2>
+<p>The next question was whether the component scans running processes itself. Following <code>Aggregator::OnLoad</code> revealed that it subscribes to existing Windows events instead.</p>
+<p>For Windows programs, it consumes <code>KernelProcess.AppStateChangeSummary</code> and <code>Win32kTraceLogging.AppInteractivitySummary</code>. These provide application identities that its handlers parse and pass to the matchers. For WSL, it consumes <code>Microsoft.Windows.Lxss.Manager.Exec</code> and <code>ExecCritical</code>, using the <code>imageName</code> field. A regular Windows <code>codex.exe</code> can therefore reach the CLI-agent checks through the app-state summary route; this is not limited to Linux programs running inside WSL.</p>
+<p>The relevant flow looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Aggregator::OnLoad
+</span></span><span style="display:flex;"><span>├─ WSL Exec / ExecCritical
+</span></span><span style="display:flex;"><span>│  └─ ProcessWslExecEvent → CLI agent matchers
+</span></span><span style="display:flex;"><span>├─ KernelProcess.AppStateChangeSummary
+</span></span><span style="display:flex;"><span>│  └─ ProcessAppStateChangeSummaryEvent → CLI agent matchers
+</span></span><span style="display:flex;"><span>└─ Win32kTraceLogging.AppInteractivitySummary
+</span></span><span style="display:flex;"><span>   └─ ProcessAppInteractivitySummaryEvent → desktop agent matchers
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Aggregator::OnRelativeTimerExpire
+</span></span><span style="display:flex;"><span>└─ MissionControlAggregatorLogging::ReportCohorts&lt;12,4,5&gt;
+</span></span><span style="display:flex;"><span>   └─ Segments.SubCohorts ETW report
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Aggregator::OnUnload / intermediate timer
+</span></span><span style="display:flex;"><span>└─ PersistentState::SaveToDisk
+</span></span></code></pre></div><p>A successful match sets a slot in the aggregator&rsquo;s state. Later, <code>ReportCohorts&lt;12,4,5&gt;</code> turns those slots into bitsets and emits a report named <code>Segments.SubCohorts</code>. The numbers correspond to twelve broader tool categories, four CLI agents, and five desktop agents.</p>
+<p><a href="https://learn.microsoft.com/en-us/windows/win32/etw/event-tracing-portal">ETW (Event Tracing for Windows)</a> is the mechanism carrying that report. In this case, it is a self-describing TraceLogging event. Rather than writing the executable names into every report, the component assigns each category a bit. A set Codex bit means the matching tool was observed during the reporting window.</p>
+<p>The source events also include runtime, time in focus, interaction counters, and resource usage. This component appears to discard those details and record only a bitmap of which agents were observed. The report&rsquo;s timestamps describe the collection window, not how long each agent was used.</p>
+<p>Although I found no prompt text or source code in this report, collecting which agents and developer tools someone uses already has significant privacy implications.</p>
+<h2 id="is-it-actually-running-on-a-normal-machine">Is it actually running on a normal machine?</h2>
+<p>Strings and code are a useful lead, but I wanted to see the component running. I checked my Parallels Windows 11 ARM64 VM, build <code>26200.9974</code>. Its <code>MissionControlAggregator.dll</code> was version <code>10.0.26100.9818</code>, and <code>CLICodingAgentUsage</code> was already enabled as a service experiment. I had not manually enabled the feature.</p>
+<p>DiagTrack, the <strong>Connected User Experiences and Telemetry</strong> service, was also already running with its startup type set to <code>Automatic</code>. It starts a separate <code>AggregatorHost.exe</code> process, and that process loads the DLL. The following administrative PowerShell commands show the service, its child process, and the loaded module:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>PS&gt; Get-Service DiagTrack | Format-Table Name,Status,StartType -AutoSize
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Name       Status StartType
+</span></span><span style="display:flex;"><span>----       ------ ---------
+</span></span><span style="display:flex;"><span>DiagTrack Running Automatic
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>PS&gt; Get-Process AggregatorHost | Format-Table ProcessName,Id -AutoSize
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ProcessName      Id
+</span></span><span style="display:flex;"><span>-----------      --
+</span></span><span style="display:flex;"><span>AggregatorHost <span style="color:#ae81ff">1500</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>PS&gt; Get-CimInstance Win32_Service -Filter <span style="color:#e6db74">&#34;Name=&#39;DiagTrack&#39;&#34;</span> |
+</span></span><span style="display:flex;"><span>       Format-List Name,State,StartMode,ProcessId
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Name      <span style="color:#960050;background-color:#1e0010">:</span> DiagTrack
+</span></span><span style="display:flex;"><span>State     <span style="color:#960050;background-color:#1e0010">:</span> Running
+</span></span><span style="display:flex;"><span>StartMode <span style="color:#960050;background-color:#1e0010">:</span> Auto
+</span></span><span style="display:flex;"><span>ProcessId <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#ae81ff">10148</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>PS&gt; Get-CimInstance Win32_Process -Filter <span style="color:#e6db74">&#34;Name=&#39;AggregatorHost.exe&#39;&#34;</span> |
+</span></span><span style="display:flex;"><span>       Format-List ProcessId,ParentProcessId
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ProcessId       <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#ae81ff">1500</span>
+</span></span><span style="display:flex;"><span>ParentProcessId <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#ae81ff">10148</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>PS&gt; tasklist /m MissionControlAggregator.dll
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Image Name                     PID Modules
+</span></span><span style="display:flex;"><span>========================= ======== ============================================
+</span></span><span style="display:flex;"><span>AggregatorHost.exe            <span style="color:#ae81ff">1500</span> MissionControlAggregator.dll
+</span></span></code></pre></div><p>The process IDs connect the pieces: DiagTrack runs in process <code>10148</code>, which is the parent of <code>AggregatorHost.exe</code>, process <code>1500</code>; the module listing places <code>MissionControlAggregator.dll</code> inside that child.</p>
+<p>The public ISO&rsquo;s baseline VM had the coding-agent feature disabled by image default, so the evidence does not support saying that it is active on every Windows installation. On my ARM64 VM, however, the relevant feature and service were active before the test.</p>
+<h2 id="testing-it-in-practice">Testing it in practice</h2>
+<p>To test the finding in practice, I copied <code>cmd.exe</code> to a file named <code>codex.exe</code> and ran it in the interactive Windows session. The name alone was enough for the component to recognize it as Codex.</p>
+<p>I captured an <code>AppStateChangeSummary</code> for the running process from the <code>KernelProcess</code> provider (<code>{2839ff94-8f12-4e1b-82e3-af7af77a450f}</code>), with <code>LaunchCount=1</code> and <code>TerminateCount=0</code>. The aggregator&rsquo;s saved state contained the value <code>2</code> in CLI slot 2, the Codex slot. A separate run without an additional ETW trace also set that slot, confirming that detection worked through Windows&rsquo; existing diagnostic collection.</p>
+<p>That state is persisted in:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>C:\ProgramData\Microsoft\Diagnosis\AggregatorStorage\MissionControlAggregator$
+</span></span></code></pre></div><p>The report normally follows a roughly daily boundary. To capture it immediately, I temporarily moved the saved reporting-window start 25 hours into the past and restarted DiagTrack with a trace listening for the aggregator. The resulting <code>Segments.SubCohorts</code> event contained:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Provider: Microsoft.Windows.MissionControlAggregator
+</span></span><span style="display:flex;"><span>Time:     2026-11-16T12:34:29.125116Z
+</span></span><span style="display:flex;"><span>Version:  0.1.5
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>CliAgentSubCohorts:     4
+</span></span><span style="display:flex;"><span>DesktopAgentSubCohorts: 0
+</span></span><span style="display:flex;"><span>FlushedFromSave:       true
+</span></span></code></pre></div><p>The value <code>4</code> is <code>1 &lt;&lt; 2</code>: the Codex CLI bit. The name had made it through the input summary, the matcher, the persisted state, and the emitted report.</p>
+<h2 id="following-the-report-toward-microsoft">Following the report toward Microsoft</h2>
+<p>An ETW event by itself would not establish that anything leaves the machine. ETW is used for plenty of local diagnostics. The more revealing question was who was listening to this particular report.</p>
+<p>The VM already had a <code>Diagtrack-Listener</code> session subscribed to both ends of the path. These PowerShell queries showed its subscriptions:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>Get-EtwTraceProvider -SessionName Diagtrack-Listener `
+</span></span><span style="display:flex;"><span>  -Guid <span style="color:#e6db74">&#39;{2839ff94-8f12-4e1b-82e3-af7af77a450f}&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Get-EtwTraceProvider -SessionName Diagtrack-Listener `
+</span></span><span style="display:flex;"><span>  -Guid <span style="color:#e6db74">&#39;{00de11a2-ec06-58e5-1a2b-21bb21dbee4b}&#39;</span>
+</span></span></code></pre></div><p>The first subscription, for <code>KernelProcess</code>, had <code>MatchAnyKeyword=0x400000000002</code>, which includes the summary&rsquo;s <code>0x400000000000</code> keyword. The second, for <code>Microsoft.Windows.MissionControlAggregator</code>, had <code>MatchAnyKeyword=0xe00000000000</code>, which includes the report&rsquo;s <code>0x800000000000</code> keyword. Both had level <code>255</code>.</p>
+<p>The subscription showed where the report could go. To check whether Windows actually queued it for transmission, I inspected DiagTrack&rsquo;s <code>EventStore.db</code> and decompressed the JSON batches in its <code>AsimovEvents</code> table. This revealed an important condition: the agent-usage report is treated as <strong>optional diagnostic data</strong>.</p>
+<p><strong>When optional diagnostic data is allowed (which is enabled by default!), Windows queues the coding-agent usage report for upload to Microsoft.</strong> I verified this by finding the agent event itself in DiagTrack&rsquo;s upload queue:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Microsoft.Windows.MissionControlAggregator.Segments.SubCohorts&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;ext&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;privacy&#34;</span>: { <span style="color:#f92672">&#34;isRequired&#34;</span>: <span style="color:#66d9ef">false</span> }
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;data&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Version&#34;</span>: <span style="color:#e6db74">&#34;0.1.5&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;CliAgentSubCohorts&#34;</span>: [<span style="color:#ae81ff">4</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;DesktopAgentSubCohorts&#34;</span>: [<span style="color:#ae81ff">0</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;FlushedFromSave&#34;</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Note that the &ldquo;optional&rdquo; data is enabled by default during Windows installation. If you did not opt out of it during installation or disable optional diagnostic data later, it is still enabled and your coding agent usage data is being uploaded. You can decline optional diagnostics during setup or turn off <strong>Send optional diagnostic data</strong> later under <strong>Settings → Privacy &amp; security → Diagnostics &amp; feedback</strong>. Microsoft&rsquo;s <a href="https://support.microsoft.com/en-us/windows/privacy/diagnostics-feedback-and-privacy-in-windows">diagnostics and privacy guide</a> explains how to change it.</p>
+]]></content>
+        </item>
         
         <item>
             <title>LG Updated Its “Adware”</title>
@@ -235,7 +355,7 @@
 <li><strong>16</strong> coordinated-disclosure emails</li>
 <li><strong>25</strong> projects contacted in total</li>
 </ul>
-<p>I could not find a usable private contact channel for the remaining 24 Tier-D projects. Of the 25 projects I contacted, two responded positively: <a href="https://github.com/FOGProject/fogproject">FOG Project</a> and <a href="https://github.com/SuiteCRM/SuiteCRM">SuiteCRM</a>. Both fixed the reported issues.</p>
+<p>I could not find a usable private contact channel for the remaining 24 Tier-D projects. Three projects responded positively: <a href="https://github.com/FOGProject/fogproject">FOG Project</a>, <a href="https://github.com/SuiteCRM/SuiteCRM">SuiteCRM</a>, and <a href="https://github.com/cemu-project/Cemu">Cemu</a>. FOG Project (<a href="https://github.com/FOGProject/fogproject/commit/a92d061e0790a40a6edf6ed80fc5852b9e0cef07">fix</a>) and Cemu (<a href="https://github.com/cemu-project/Cemu/commit/a1cd67ca111437db680fa3560a19a8a34d085926">fix</a>) fixed the reported issues; SuiteCRM&rsquo;s fix is on the way.</p>
 <p>Writing 25 fully bespoke reports is difficult to scale. My compromise was to write the important opening myself—what I found, why I was contacting the project, and what I wanted the maintainer to do—then attach AI-assisted technical detail with the relevant code path and suggested remediation. That is not ideal, and some maintainers understandably disliked receiving AI-generated material. But silently publishing the findings, or sending no notification at all, would have been worse. The better lesson is that automation must reduce clerical work without replacing evidence review, respectful communication, or accountability for the report.</p>
 <p>Some maintainers also challenged the threat model. Two recurring objections were that an attacker would need a fraudulent certificate for GitHub, or that an on-path attacker was unrealistic. Those objections do not apply when the updater itself disables certificate or hostname validation: the attacker can present an arbitrary certificate and does not need to break public-key cryptography or compromise a certificate authority.</p>
 <p>An active on-path position is a real prerequisite for many Tier-D findings, and it should be stated rather than exaggerated. Possible positions include a hostile network, compromised router, malicious proxy, or redirected traffic. Server or CDN compromise is a stronger and different position—the main concern for Tier C—but repeated supply-chain incidents show that distribution infrastructure cannot be assumed infallible.</p>
