@@ -166,7 +166,7 @@ The first subscription, for `KernelProcess`, had `MatchAnyKeyword=0x400000000002
 
 The subscription showed where the report could go. To check whether Windows actually queued it for transmission, I inspected DiagTrack's `EventStore.db` and decompressed the JSON batches in its `AsimovEvents` table. This revealed an important condition: the agent-usage report is treated as **optional diagnostic data**.
 
-**When optional diagnostic data is allowed (which is enabled by default!), Windows queues the coding-agent usage report for upload to Microsoft.** I verified this by finding the agent event itself in DiagTrack's upload queue:
+**When optional diagnostic data is allowed (enabled by default in the US setup I tested), Windows queues the coding-agent usage report for upload to Microsoft.** I verified this by finding the agent event itself in DiagTrack's upload queue:
 
 ```json
 {
@@ -183,4 +183,8 @@ The subscription showed where the report could go. To check whether Windows actu
 }
 ```
 
-Note that the "optional" data is enabled by default during Windows installation. If you did not opt out of it during installation or disable optional diagnostic data later, it is still enabled and your coding agent usage data is being uploaded. You can decline optional diagnostics during setup or turn off **Send optional diagnostic data** later under **Settings → Privacy & security → Diagnostics & feedback**. Microsoft's [diagnostics and privacy guide](https://support.microsoft.com/en-us/windows/privacy/diagnostics-feedback-and-privacy-in-windows) explains how to change it.
+I checked this with a clean installation of Windows 11 Home ARM64 using the latest official ISO, with the region set to the United States. Before changing any privacy settings, the **Diagnostic data** toggle was already enabled and labeled **Include Optional**. After completing setup with those defaults, `AllowTelemetry` was `3`, confirming that optional diagnostic data was enabled.
+
+![Windows setup with United States region: Diagnostic data defaults to Include Optional](/posts/windows-coding-agent-telemetry/us-optional-diagnostics-default.png)
+
+Optional diagnostic data is therefore enabled by default, at least in the US setup I tested. If you did not opt out of it during installation or disable optional diagnostic data later, it is still enabled and your coding agent usage data is being uploaded. You can decline optional diagnostics during setup or turn off **Send optional diagnostic data** later under **Settings → Privacy & security → Diagnostics & feedback**. Microsoft's [diagnostics and privacy guide](https://support.microsoft.com/en-us/windows/privacy/diagnostics-feedback-and-privacy-in-windows) explains how to change it.
