@@ -2,7 +2,7 @@
 layout: post
 status: publish
 draft: false
-title: "Windows 11 Is Collecting Data on Which Coding Agents You Use"
+title: "Windows 11 Is Collecting Data on Which Coding Agents and Developer Tools You Use"
 date: '2026-11-16 00:00:00 -0500'
 description: Reverse engineering Windows 11's MissionControlAggregator reveals coding-agent and developer-tool usage bits in a diagnostic ETW report.
 images:
@@ -16,9 +16,9 @@ tags:
 - reverse engineering
 ---
 
-I recently asked AI to help me look through the latest Windows binaries for undocumented features and functionality. Among the leads it turned up, one list immediately caught my attention: `codex.exe`, `claude.exe`, `copilot.exe`, `cursor.exe`.
+I recently asked AI to help me look through the latest Windows binaries for undocumented features and functionality. Among the leads it turned up, one list immediately caught my attention: coding agents such as `codex.exe`, `claude.exe`, `copilot.exe`, and `cursor.exe`, alongside familiar developer tools such as `python.exe`, `dotnet.exe`, `gcc.exe`, and `code.exe`.
 
-Why would a Windows system DLL need a list of coding agents?
+Why would a Windows system DLL need a list of coding agents and developer tools?
 
 The names were in `MissionControlAggregator.dll`. I asked the agent to follow the references and dig into what the DLL actually does. That led from a handful of string comparisons to a running Windows component that records which coding agents and developer tools have been used, saves that information locally, and reports it to Windows Diagnostics. And unless you have opted out of the "optional" diagnostic data (which is enabled by default), the data is uploaded to Microsoft.
 
@@ -40,7 +40,7 @@ The compiler-generated C++ names are unwieldy, so I will call these functions **
 
 The feature guarding the new agent checks has a particularly direct name: `CLICodingAgentUsage`, feature ID `62580080`.
 
-And the list extends beyond AI agents. The same component checks for `node.exe`, `python.exe`, `dotnet.exe`, `gcc.exe`, `clang.exe`, `gdb.exe`, `javac.exe`, `devenv.exe`, and `code.exe`, among others. Those checks feed broader developer-tool categories.
+And the list extends beyond AI agents. The same component checks for `node.exe`, `python.exe`, `dotnet.exe`, `gcc.exe`, `clang.exe`, `gdb.exe`, `javac.exe`, `devenv.exe`, and `code.exe`, among others. Those checks feed broader developer-tool categories. Some of these checks also verify the publisher: the Node.js slot expects `Node.js Foundation`, Python expects `Python Software Foundation`, and the .NET and Visual Studio slots expect `Microsoft Corporation`. The compiler/debugger group containing GCC and Clang has no additional publisher check in this path.
 
 ## Where does the DLL get this information?
 
@@ -145,6 +145,8 @@ FlushedFromSave:       true
 ```
 
 The value `4` is `1 << 2`: the Codex CLI bit. The name had made it through the input summary, the matcher, the persisted state, and the emitted report.
+
+I also tested the developer-tool path separately, using a copy of `cmd.exe` named `gcc.exe`. It set developer-tool slot 3. With optional diagnostic data allowed, I found the resulting `Segments.SubCohorts` event in DiagTrack's upload queue with `SubCohorts: [8]` (`1 << 3`). This is the compiler/debugger category shared by GCC, Clang, and related tools, rather than a separate bit for each executable.
 
 ## Following the report toward Microsoft
 
