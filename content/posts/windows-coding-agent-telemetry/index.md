@@ -118,8 +118,6 @@ AggregatorHost.exe            1500 MissionControlAggregator.dll
 
 The process IDs connect the pieces: DiagTrack runs in process `10148`, which is the parent of `AggregatorHost.exe`, process `1500`; the module listing places `MissionControlAggregator.dll` inside that child.
 
-The public ISO's baseline VM had the coding-agent feature disabled by image default, so the evidence does not support saying that it is active on every Windows installation. On my ARM64 VM, however, the relevant feature and service were active before the test.
-
 ## Testing it in practice
 
 To test the finding in practice, I copied `cmd.exe` to a file named `codex.exe` and ran it in the interactive Windows session. The name alone was enough for the component to recognize it as Codex.
