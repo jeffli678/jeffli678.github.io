@@ -6,6 +6,7 @@ Selected independent reporting and discussion of my research. The [Research page
 
 ## [Windows coding-agent telemetry](/research/#windows-coding-agent-telemetry)
 
+- [Hackaday](https://hackaday.com/2026/11/17/coding-on-windows-redmond-may-already-know/)
 - [GIGAZINE](https://gigazine.net/gsc_news/en/20261117-windows-coding-agent-telemetry/)
 - [Dr. Web](https://www.drweb.de/windows-11-coding-agenten-diagnosedaten/)
 - [Kav News](https://news.kav.co.id/n/windows-tracks-coding-agents/)

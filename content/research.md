@@ -17,6 +17,7 @@ Windows records which coding agents and developer tools you run. I found the fea
 
 ### Selected coverage
 
+- [Hackaday](https://hackaday.com/2026/11/17/coding-on-windows-redmond-may-already-know/)
 - [GIGAZINE](https://gigazine.net/gsc_news/en/20261117-windows-coding-agent-telemetry/)
 - [Dr. Web](https://www.drweb.de/windows-11-coding-agenten-diagnosedaten/)
 - [Hacker News discussion](https://news.ycombinator.com/item?id=50524736)
