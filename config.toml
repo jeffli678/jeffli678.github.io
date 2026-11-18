@@ -80,6 +80,21 @@ ignoreErrors = ["error-remote-getjson"]
     url        = "/posts"
 
   [[menu.main]]
+    identifier = "research"
+    name       = "Research"
+    url        = "/research/"
+
+  [[menu.main]]
+    identifier = "cves"
+    name       = "CVEs"
+    url        = "/cves/"
+
+  [[menu.main]]
+    identifier = "media-coverage"
+    name       = "Media Coverage"
+    url        = "/media-coverage/"
+
+  [[menu.main]]
     identifier = "cv"
     name       = "CV"
     url        = "/cv.pdf"
