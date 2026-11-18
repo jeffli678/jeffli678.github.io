@@ -25,6 +25,9 @@
 {{ $options := (dict "targetPath" "main.css" "outputStyle" "compressed" "enableSourceMap" true) }}
 {{ $style := resources.Get "scss/main.scss" | css.Sass $options | resources.Fingerprint }}
 <link rel="stylesheet" href="{{ $style.RelPermalink }}">
+{{ if eq .RelPermalink "/research/" }}
+<link rel="stylesheet" href="/css/research.css">
+{{ end }}
 
 {{ range $val := $.Site.Params.customCSS }}
     {{ if gt (len $val) 0 }}
